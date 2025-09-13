@@ -1,11 +1,13 @@
+'use client';
+
 import Image, { ImageProps } from 'next/image';
 import styles from './JigsawPuzzle.module.css';
-import { ForwardedRef, forwardRef } from 'react';
 import { AspectRatio } from '../AspectRatio';
+import { puzzlePolygon } from './utils';
 
 interface JigsawPuzzleProps {
   image: ImageProps['src'];
-  sides: number[];
+  sides: [number, number, number, number]; // [top, right, bottom, left]
   // Для реального паззла - позиция этого кусочка в общей картинке
   imagePosition?: {
     x: number; // позиция по X в процентах от общего изображения
@@ -13,128 +15,6 @@ interface JigsawPuzzleProps {
     totalWidth: number; // общая ширина паззла в кусочках
     totalHeight: number; // общая высота паззла в кусочках
   };
-}
-
-// Функция для генерации clip-path на основе массива sides
-function generateClipPath(sides: number[]): string {
-  const [top, right, bottom, left] = sides;
-  
-  // Размеры выступов (в процентах от увеличенного контейнера)
-  const knobSize = 30; // размер выступа
-  const knobDepth = 20; // глубина выступа
-  
-  // Коэффициент для пересчета координат в увеличенном контейнере
-  // Контейнер увеличен на knobDepth*2, базовая область смещена на knobDepth
-  const scale = 100 / (100 + knobDepth * 2);
-  const offset = knobDepth / (100 + knobDepth * 2) * 100;
-  
-  // Пересчитываем координаты для увеличенного контейнера
-  const baseLeft = offset;
-  const baseRight = offset + 100 * scale;
-  const baseTop = offset;
-  const baseBottom = offset + 100 * scale;
-  const center = offset + 50 * scale;
-  const knobSizeScaled = knobSize * scale / 2;
-  const knobDepthScaled = knobDepth * scale;
-  
-  let path = 'polygon(';
-  const points: string[] = [];
-  
-  // Верхняя сторона
-  if (top === 0) {
-    // Плоская сторона
-    points.push(`${baseLeft}% ${baseTop}%`, `${baseRight}% ${baseTop}%`);
-  } else if (top === 1) {
-    // Выступ наружу
-    points.push(
-      `${baseLeft}% ${baseTop}%`,
-      `${center - knobSizeScaled}% ${baseTop}%`,
-      `${center - knobSizeScaled}% ${baseTop - knobDepthScaled}%`,
-      `${center + knobSizeScaled}% ${baseTop - knobDepthScaled}%`,
-      `${center + knobSizeScaled}% ${baseTop}%`,
-      `${baseRight}% ${baseTop}%`
-    );
-  } else {
-    // Выступ внутрь
-    points.push(
-      `${baseLeft}% ${baseTop}%`,
-      `${center - knobSizeScaled}% ${baseTop}%`,
-      `${center - knobSizeScaled}% ${baseTop + knobDepthScaled}%`,
-      `${center + knobSizeScaled}% ${baseTop + knobDepthScaled}%`,
-      `${center + knobSizeScaled}% ${baseTop}%`,
-      `${baseRight}% ${baseTop}%`
-    );
-  }
-  
-  // Правая сторона
-  if (right === 0) {
-    points.push(`${baseRight}% ${baseBottom}%`);
-  } else if (right === 1) {
-    // Выступ наружу
-    points.push(
-      `${baseRight}% ${center - knobSizeScaled}%`,
-      `${baseRight + knobDepthScaled}% ${center - knobSizeScaled}%`,
-      `${baseRight + knobDepthScaled}% ${center + knobSizeScaled}%`,
-      `${baseRight}% ${center + knobSizeScaled}%`,
-      `${baseRight}% ${baseBottom}%`
-    );
-  } else {
-    // Выступ внутрь
-    points.push(
-      `${baseRight}% ${center - knobSizeScaled}%`,
-      `${baseRight - knobDepthScaled}% ${center - knobSizeScaled}%`,
-      `${baseRight - knobDepthScaled}% ${center + knobSizeScaled}%`,
-      `${baseRight}% ${center + knobSizeScaled}%`,
-      `${baseRight}% ${baseBottom}%`
-    );
-  }
-  
-  // Нижняя сторона
-  if (bottom === 0) {
-    points.push(`${baseLeft}% ${baseBottom}%`);
-  } else if (bottom === 1) {
-    // Выступ наружу
-    points.push(
-      `${center + knobSizeScaled}% ${baseBottom}%`,
-      `${center + knobSizeScaled}% ${baseBottom + knobDepthScaled}%`,
-      `${center - knobSizeScaled}% ${baseBottom + knobDepthScaled}%`,
-      `${center - knobSizeScaled}% ${baseBottom}%`,
-      `${baseLeft}% ${baseBottom}%`
-    );
-  } else {
-    // Выступ внутрь
-    points.push(
-      `${center + knobSizeScaled}% ${baseBottom}%`,
-      `${center + knobSizeScaled}% ${baseBottom - knobDepthScaled}%`,
-      `${center - knobSizeScaled}% ${baseBottom - knobDepthScaled}%`,
-      `${center - knobSizeScaled}% ${baseBottom}%`,
-      `${baseLeft}% ${baseBottom}%`
-    );
-  }
-  
-  // Левая сторона
-  if (left === 0) {
-    // Плоская сторона - возвращаемся к началу
-  } else if (left === 1) {
-    // Выступ наружу
-    points.push(
-      `${baseLeft}% ${center + knobSizeScaled}%`,
-      `${baseLeft - knobDepthScaled}% ${center + knobSizeScaled}%`,
-      `${baseLeft - knobDepthScaled}% ${center - knobSizeScaled}%`,
-      `${baseLeft}% ${center - knobSizeScaled}%`
-    );
-  } else {
-    // Выступ внутрь
-    points.push(
-      `${baseLeft}% ${center + knobSizeScaled}%`,
-      `${baseLeft + knobDepthScaled}% ${center + knobSizeScaled}%`,
-      `${baseLeft + knobDepthScaled}% ${center - knobSizeScaled}%`,
-      `${baseLeft}% ${center - knobSizeScaled}%`
-    );
-  }
-  
-  path += points.join(', ') + ')';
-  return path;
 }
 
 // Sides - top, right, bottom, left
@@ -146,10 +26,18 @@ function generateClipPath(sides: number[]): string {
 // Example: [-1, 1, -1, 1] = top in, right out, bottom in, left out
 // Example: [0, 0, 0, 0] = all flat (edge piece)
 
-function JigsawPuzzle({ image, sides, imagePosition }: JigsawPuzzleProps, ref: ForwardedRef<HTMLDivElement>) {
-  const clipPath = generateClipPath(sides);
-  
-  const knobDepth = 12; // должен совпадать с knobDepth в generateClipPath
+function JigsawPuzzle({ image, sides, imagePosition }: JigsawPuzzleProps) {
+  const depth = 24;
+  const clipPath = puzzlePolygon(sides, {
+    headWidth: 25,   // уменьшаем размер головки
+    neckWidth: 18,   // увеличиваем размер шейки для более плавного перехода
+    neckLength: 50,  // увеличиваем длину шейки
+    depth,
+    edgeCurve: 0,   // пока оставляем прямые края, фокусируемся на выступах
+    samplesNeck: 32, // еще больше точек на шейке
+    samplesCap: 48,  // еще больше точек на головке
+    samplesEdge: 4, // возвращаем минимум точек на краях
+  });
   
   // Позиционирование изображения для реального паззла
   let imageStyle: React.CSSProperties = {
@@ -171,15 +59,12 @@ function JigsawPuzzle({ image, sides, imagePosition }: JigsawPuzzleProps, ref: F
   return (
     <AspectRatio ratio={1}>
       <div 
-        ref={ref} 
         className={styles.base}
         style={{
-          clipPath: clipPath,
-          // Увеличиваем размер для размещения выступов, но выходим за границы контейнера
-          width: `calc(100% + ${knobDepth * 2}px)`,
-          height: `calc(100% + ${knobDepth * 2}px)`,
-          // Центрируем, чтобы базовая область совпадала с контейнером AspectRatio
-          transform: `translate(-${knobDepth}px, -${knobDepth}px)`,
+          clipPath,                            // << прямая передача path("…")
+          width: `calc(100% + ${depth * 2}px)`,         // если depthTip=20px в твоих единицах
+          height:`calc(100% + ${depth * 2}px)`,
+          transform: `translate(-${depth}px, -${depth}px)`,
         }}
       >
         <Image 
@@ -194,4 +79,4 @@ function JigsawPuzzle({ image, sides, imagePosition }: JigsawPuzzleProps, ref: F
   );
 }
 
-export default forwardRef(JigsawPuzzle);
+export default JigsawPuzzle;
