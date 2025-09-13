@@ -136,22 +136,22 @@ export default function Home() {
           marginTop: '30px',
           display: 'grid', 
           gridTemplateColumns: `repeat(3, ${size})`, 
-          gap: '50px',
+          gap: '30px',
           justifyContent: 'start'
         }}>
           {/* Первая строка */}
-          <JigsawPuzzle image={hsr} sides={[0, 1, -1, 0]} />
-          <JigsawPuzzle image={hsr} sides={[0, -1, 1, -1]} />
-          <JigsawPuzzle image={hsr} sides={[0, 0, -1, 1]} />
+          <JigsawPuzzle image={hsr} sides={[0, -1, -1, 0]} />
+          <JigsawPuzzle image={hsr} sides={[0, 1, 1, 1]} />
+          <JigsawPuzzle image={hsr} sides={[0, 0, 1, -1]} />
           
           {/* Вторая строка */}
           <JigsawPuzzle image={hsr} sides={[1, -1, 1, 0]} />
           <JigsawPuzzle image={hsr} sides={[-1, 1, -1, 1]} />
-          <JigsawPuzzle image={hsr} sides={[1, 0, -1, -1]} />
+          <JigsawPuzzle image={hsr} sides={[-1, 0, -1, -1]} />
           
           {/* Третья строка */}
           <JigsawPuzzle image={hsr} sides={[-1, 1, 0, 0]} />
-          <JigsawPuzzle image={hsr} sides={[-1, -1, 0, -1]} />
+          <JigsawPuzzle image={hsr} sides={[1, -1, 0, -1]} />
           <JigsawPuzzle image={hsr} sides={[1, 0, 0, 1]} />
         </div>
       </div>

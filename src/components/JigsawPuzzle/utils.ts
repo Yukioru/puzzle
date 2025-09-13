@@ -3,7 +3,31 @@
  * - sides: [top, right, bottom, left]  (0 — ровно, 1 — наружу, -1 — внутрь)
  * - натуральная форма выступа: шейка -> полуокружность -> шейка (семплирование)
  * - порядок обхода: по часовой стрелке от левого верхнего угла
- * - никаких дубликатов/самопересечений; углы корректны
+ * - никаких дубликатов/самопересечен  // ПРАВО (идём сверху -> вниз)
+  if (RIG  // НИЗ (идём справа -> влево)
+  if (BOTT  // ЛЕВО (идём снизу -> вверх)
+  if (LEFT === 0) {
+    // Прямой край без выноса
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const y = B - (B - T) * u; // движемся снизу вверх
+      const x = getCurvedX(y, L, false, false, true); // плоский край без кривизны
+      pts.push(P(x, y));
+    } {
+    // Прямой край без выноса
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const x = R - (R - L) * u; // движемся справа влево
+      const y = getCurvedY(x, B, false, false, true); // плоский край без кривизны
+      pts.push(P(x, y));
+    } {
+    // Прямой край без выноса
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const y = T + (B - T) * u;
+      const x = getCurvedX(y, R, false, true, true); // плоский край без кривизны
+      pts.push(P(x, y));
+    }корректны
  */
 export function puzzlePolygon(
   sides: [number, number, number, number],
@@ -53,56 +77,10 @@ export function puzzlePolygon(
     // Кубическая интерполяция для более гладкого перехода
     return t * t * (3 - 2 * t);
   };
-  
-  // Функция для создания плавного перехода между шейкой и головкой с кривыми Безье
-  const createSmoothTransition = (startW: number, endW: number, startY: number, endY: number, side: 'left' | 'right', steps = 16) => {
-    for (let i = 1; i <= steps; i++) {
-      const t = i / (steps + 1);
-      
-      // Более гладкая S-образная кривая для предотвращения резких переходов
-      const smoothT = t * t * t * (t * (t * 6 - 15) + 10); // 6t^5 - 15t^4 + 10t^3
-      
-      // Плавное изменение ширины с более сильной коррекцией
-      const w = startW + (endW - startW) * smoothT;
-      
-      // Плавное изменение высоты с улучшенной коррекцией
-      const y = startY + (endY - startY) * smoothT;
-      
-      // Увеличенная коррекция по X для более плавного следования касательной к окружности
-      const tangentFactor = Math.sin(Math.PI * t * 0.5) * (endW - startW) * 0.15;
-      const baseX = side === 'left' ? CX - w : CX + w;
-      const x = side === 'left' ? baseX - tangentFactor : baseX + tangentFactor;
-      
-      pts.push(P(x, y));
-    }
-  };
-  
-  // Функция для создания плавного перехода между шейкой и головкой (вертикально)
-  const createSmoothTransitionV = (startW: number, endW: number, startX: number, endX: number, side: 'top' | 'bottom', steps = 16) => {
-    for (let i = 1; i <= steps; i++) {
-      const t = i / (steps + 1);
-      
-      // Более гладкая S-образная кривая
-      const smoothT = t * t * t * (t * (t * 6 - 15) + 10);
-      
-      // Плавное изменение ширины
-      const w = startW + (endW - startW) * smoothT;
-      
-      // Плавное изменение позиции по X
-      const x = startX + (endX - startX) * smoothT;
-      
-      // Увеличенная коррекция по Y для следования касательной к окружности
-      const tangentFactor = Math.sin(Math.PI * t * 0.5) * (endW - startW) * 0.15;
-      const baseY = side === 'top' ? CY - w : CY + w;
-      const y = side === 'top' ? baseY - tangentFactor : baseY + tangentFactor;
-      
-      pts.push(P(x, y));
-    }
-  };
 
   // Функция для получения Y-координаты на кривом горизонтальном крае
-  const getCurvedY = (x: number, baseY: number, isOutward: boolean, isTopEdge: boolean) => {
-    if (bow === 0) return baseY;
+  const getCurvedY = (x: number, baseY: number, isOutward: boolean, isTopEdge: boolean, isFlat: boolean = false) => {
+    if (bow === 0 || isFlat) return baseY; // нет кривизны или плоский край
     const u = (x - L) / (R - L); // нормализованная позиция от 0 до 1
     
     // Определяем направление кривизны в зависимости от стороны и типа выноса
@@ -119,8 +97,8 @@ export function puzzlePolygon(
   };
 
   // Функция для получения X-координаты на кривом вертикальном крае  
-  const getCurvedX = (y: number, baseX: number, isOutward: boolean, isRightEdge: boolean) => {
-    if (bow === 0) return baseX;
+  const getCurvedX = (y: number, baseX: number, isOutward: boolean, isRightEdge: boolean, isFlat: boolean = false) => {
+    if (bow === 0 || isFlat) return baseX; // нет кривизны или плоский край
     const u = (y - T) / (B - T); // нормализованная позиция от 0 до 1
     
     // Определяем направление кривизны в зависимости от стороны и типа выноса
@@ -306,7 +284,7 @@ export function puzzlePolygon(
     for (let i=1; i<=S_EDGE; i++){
       const u = i / S_EDGE;
       const x = L + (R - L) * u;
-      const y = getCurvedY(x, T, false, true); // нет выноса, кривизна произвольная, верхний край
+      const y = getCurvedY(x, T, false, true, true); // плоский край без кривизны
       pts.push(P(x, y));
     }
   } else {
@@ -341,7 +319,7 @@ export function puzzlePolygon(
     for (let i=1; i<=S_EDGE; i++){
       const u = i / S_EDGE;
       const y = T + (B - T) * u;
-      const x = getCurvedX(y, R, false, true); // нет выноса, кривизна произвольная, правый край
+      const x = getCurvedX(y, R, false, true, true); // плоский край без кривизны
       pts.push(P(x, y));
     }
   } else {
@@ -375,7 +353,7 @@ export function puzzlePolygon(
     for (let i=1; i<=S_EDGE; i++){
       const u = i / S_EDGE;
       const x = R - (R - L) * u; // идем справа -> влево
-      const y = getCurvedY(x, B, false, false); // нет выноса, кривизна произвольная, нижний край
+      const y = getCurvedY(x, B, false, false, true); // плоский край без кривизны
       pts.push(P(x, y));
     }
   } else {
@@ -409,7 +387,7 @@ export function puzzlePolygon(
     for (let i=1; i<=S_EDGE; i++){
       const u = i / S_EDGE;
       const y = B - (B - T) * u; // идем снизу -> вверх
-      const x = getCurvedX(y, L, false, false); // нет выноса, кривизна произвольная, левый край
+      const x = getCurvedX(y, L, false, false, true); // плоский край без кривизны
       pts.push(P(x, y));
     }
   } else {
