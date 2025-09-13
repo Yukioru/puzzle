@@ -1,0 +1,10 @@
+.base {
+  position: relative;
+  width: 100%;
+  padding-top: var(--_offset, 56.25%);
+}
+
+.inner {
+  position: absolute;
+  inset: 0;
+}
