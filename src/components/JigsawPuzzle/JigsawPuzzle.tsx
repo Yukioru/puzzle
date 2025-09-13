@@ -33,7 +33,7 @@ function JigsawPuzzle({ image, sides, imagePosition }: JigsawPuzzleProps) {
     neckWidth: 18,   // увеличиваем размер шейки для более плавного перехода
     neckLength: 50,  // увеличиваем длину шейки
     depth,
-    edgeCurve: 0,   // пока оставляем прямые края, фокусируемся на выступах
+    edgeCurve: 3,   // пока оставляем прямые края, фокусируемся на выступах
     samplesNeck: 32, // еще больше точек на шейке
     samplesCap: 48,  // еще больше точек на головке
     samplesEdge: 4, // возвращаем минимум точек на краях

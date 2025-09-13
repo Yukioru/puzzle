@@ -100,42 +100,56 @@ export function puzzlePolygon(
     }
   };
 
-  // вспомогательные дуги "ровных" участков (без самопересечений)
-  const edgeH = (x0:number,x1:number,y:number,sign:number, forward=true) => {
-    const from = forward ? 0 : S_EDGE;
-    const to   = forward ? S_EDGE : 0;
-    const step = forward ? +1 : -1;
-    for (let i=from; forward ? i<=to : i>=to; i+=step){
-      const u=i/S_EDGE, x=x0+(x1-x0)*u;
-      const yy = y + sign*bow*Math.sin(Math.PI*((x-L)/(R-L)));
-      pts.push(P(x,yy));
+  // Функция для получения Y-координаты на кривом горизонтальном крае
+  const getCurvedY = (x: number, baseY: number, isOutward: boolean, isTopEdge: boolean) => {
+    if (bow === 0) return baseY;
+    const u = (x - L) / (R - L); // нормализованная позиция от 0 до 1
+    
+    // Определяем направление кривизны в зависимости от стороны и типа выноса
+    let curveSign: number;
+    if (isTopEdge) {
+      // Верхний край: внешние → вверх (+) = выгнутая, внутренние → вниз (-) = вогнутая
+      curveSign = isOutward ? +1 : -1;
+    } else {
+      // Нижний край: внешние → вниз (-) = выгнутая, внутренние → вверх (+) = вогнутая
+      curveSign = isOutward ? -1 : +1;
     }
-  };
-  const edgeV = (y0:number,y1:number,x:number,sign:number, forward=true, includeEnd=true) => {
-    const from = forward ? 0 : S_EDGE;
-    const to   = forward ? S_EDGE : 0;
-    const step = forward ? +1 : -1;
-    const limit = includeEnd ? to : (forward ? to-1 : to+1);
-    for (let i=from; forward ? i<=limit : i>=limit; i+=step){
-      const u=i/S_EDGE, y=y0+(y1-y0)*u;
-      const xx = x + sign*bow*Math.sin(Math.PI*((y-T)/(B-T)));
-      pts.push(P(xx,y));
-    }
+    
+    return baseY + curveSign * bow * Math.sin(Math.PI * u);
   };
 
-  // горизонтальная "кнопка": шейка -> полуокружность -> шейка
-  // dir: +1 наружу (от базовой области), -1 внутрь
-  // reverse: true для обхода справа -> влево (для нижней стороны)
-  const knobH = (yBase:number, dir:1|-1, reverse = false) => {
+  // Функция для получения X-координаты на кривом вертикальном крае  
+  const getCurvedX = (y: number, baseX: number, isOutward: boolean, isRightEdge: boolean) => {
+    if (bow === 0) return baseX;
+    const u = (y - T) / (B - T); // нормализованная позиция от 0 до 1
+    
+    // Определяем направление кривизны в зависимости от стороны и типа выноса
+    let curveSign: number;
+    if (isRightEdge) {
+      // Правый край: внешние → влево (-), внутренние → вправо (+)
+      curveSign = isOutward ? -1 : +1;
+    } else {
+      // Левый край: внешние → вправо (+), внутренние → влево (-)
+      curveSign = isOutward ? +1 : -1;
+    }
+    
+    return baseX + curveSign * bow * Math.sin(Math.PI * u);
+  };
+
+  // горизонтальная "кнопка" с учетом кривизны края
+  // leftY, rightY - Y-координаты точек соединения с кривым краем
+  const knobHCurved = (yBase:number, dir:1|-1, reverse:boolean, leftY:number, rightY:number) => {
     const cy = yBase - dir*cOff;
 
     if (!reverse) {
       // Обычный обход (слева -> вправо) для верхней стороны
-      // лeвая шейка: от (CX-rNeck, yBase) до точки соединения с головкой
+      // лeвая шейка: от точки на кривой до точки соединения с головкой
       for (let i=0;i<S_NECK;i++){ 
         const t = i/(S_NECK-1); // нормализуем до 1
         const w = rNeck + (rHead - rNeck) * ease(t);
-        const y = yBase - dir*(neckDepth * t);
+        // Интерполируем между leftY (базовая кривая) и yBase (прямая линия)
+        const baseY = leftY + (yBase - leftY) * t;
+        const y = baseY - dir*(neckDepth * t);
         pts.push(P(CX - w, y));
       }
       
@@ -152,16 +166,20 @@ export function puzzlePolygon(
       for (let i=S_NECK-1;i>=0;i--){
         const t = i/(S_NECK-1); // нормализуем до 1
         const w = rNeck + (rHead - rNeck) * ease(t);
-        const y = yBase - dir*(neckDepth * t);
+        // Интерполируем между rightY (базовая кривая) и yBase (прямая линия)
+        const baseY = rightY + (yBase - rightY) * t;
+        const y = baseY - dir*(neckDepth * t);
         pts.push(P(CX + w, y));
       }
     } else {
       // Обратный обход (справа -> влево) для нижней стороны
-      // правая шейка: от (CX+rNeck, yBase) до головки
+      // правая шейка: от точки на кривой до головки
       for (let i=0;i<S_NECK;i++){
         const t = i/(S_NECK-1); // нормализуем до 1
         const w = rNeck + (rHead - rNeck) * ease(t);
-        const y = yBase - dir*(neckDepth * t);
+        // Интерполируем между rightY (базовая кривая) и yBase (прямая линия)
+        const baseY = rightY + (yBase - rightY) * t;
+        const y = baseY - dir*(neckDepth * t);
         pts.push(P(CX + w, y));
       }
       
@@ -178,25 +196,30 @@ export function puzzlePolygon(
       for (let i=S_NECK-1;i>=0;i--){
         const t = i/(S_NECK-1); // нормализуем до 1
         const w = rNeck + (rHead - rNeck) * ease(t);
-        const y = yBase - dir*(neckDepth * t);
+        // Интерполируем между leftY (базовая кривая) и yBase (прямая линия)
+        const baseY = leftY + (yBase - leftY) * t;
+        const y = baseY - dir*(neckDepth * t);
         pts.push(P(CX - w, y));
       }
     }
   };
 
-  // вертикальная "кнопка"
-  // dir: +1 наружу (от базовой области), -1 внутрь  
-  // reverse: true для обхода снизу -> вверх (для левой стороны)
-  const knobV = (xBase:number, dir:1|-1, reverse = false) => {
+
+
+  // вертикальная "кнопка" с учетом кривизны края
+  // topX, bottomX - X-координаты точек соединения с кривым краем
+  const knobVCurved = (xBase:number, dir:1|-1, reverse:boolean, topX:number, bottomX:number) => {
     const cx = xBase + dir*cOff;
 
     if (!reverse) {
       // Обычный обход (сверху -> вниз) для правой стороны
-      // верхняя шейка: от (xBase, CY-rNeck) до головки
+      // верхняя шейка: от точки на кривой до головки
       for (let i=0;i<S_NECK;i++){
         const t = i/(S_NECK-1); // нормализуем до 1
         const w = rNeck + (rHead - rNeck)*ease(t);
-        const x = xBase + dir*(neckDepth * t);
+        // Интерполируем между topX (базовая кривая) и xBase (прямая линия)
+        const baseX = topX + (xBase - topX) * t;
+        const x = baseX + dir*(neckDepth * t);
         pts.push(P(x, CY - w));
       }
       
@@ -237,16 +260,20 @@ export function puzzlePolygon(
       for (let i=S_NECK-1;i>=0;i--){
         const t = i/(S_NECK-1); // нормализуем до 1
         const w = rNeck + (rHead - rNeck)*ease(t);
-        const x = xBase + dir*(neckDepth * t);
+        // Интерполируем между bottomX (базовая кривая) и xBase (прямая линия)
+        const baseX = bottomX + (xBase - bottomX) * t;
+        const x = baseX + dir*(neckDepth * t);
         pts.push(P(x, CY + w));
       }
     } else {
       // Обратный обход (снизу -> вверх) для левой стороны
-      // нижняя шейка: от (xBase, CY+rNeck) до головки
+      // нижняя шейка: от точки на кривой до головки
       for (let i=0;i<S_NECK;i++){
         const t = i/(S_NECK-1); // нормализуем до 1
         const w = rNeck + (rHead - rNeck)*ease(t);
-        const x = xBase + dir*(neckDepth * t);
+        // Интерполируем между bottomX (базовая кривая) и xBase (прямая линия)
+        const baseX = bottomX + (xBase - bottomX) * t;
+        const x = baseX + dir*(neckDepth * t);
         pts.push(P(x, CY + w));
       }
       
@@ -262,109 +289,151 @@ export function puzzlePolygon(
       for (let i=S_NECK-1;i>=1;i--){
         const t = i/(S_NECK-1); // нормализуем до 1
         const w = rNeck + (rHead - rNeck)*ease(t);
-        const x = xBase + dir*(neckDepth * t);
+        // Интерполируем между topX (базовая кривая) и xBase (прямая линия)
+        const baseX = topX + (xBase - topX) * t;
+        const x = baseX + dir*(neckDepth * t);
         pts.push(P(x, CY - w));
       }
     }
   };
-
-  // знак прогиба для "ровных" частей (правило: наружу — вогнуто, внутрь — выгнуто)
-  const sTop    = TOP    === 0 ? 0 : (TOP    === 1 ? +1 : -1);
-  const sRight  = RIGHT  === 0 ? 0 : (RIGHT  === 1 ? +1 : -1);
-  const sBottom = BOTTOM === 0 ? 0 : (BOTTOM === 1 ? -1 : +1);
-  const sLeft   = LEFT   === 0 ? 0 : (LEFT   === 1 ? -1 : +1);
 
   // === обходим строго по часовой стрелке, исключая дубликаты углов ===
   pts.push(P(L, T)); // старт: левый верхний угол
 
   // ВЕРХ (идём слева -> вправо)
   if (TOP === 0) {
-    if (S_EDGE > 0) edgeH(L, R, T, 0, true);
+    // Прямой край без выноса - строим кривую от угла до угла
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const x = L + (R - L) * u;
+      const y = getCurvedY(x, T, false, true); // нет выноса, кривизна произвольная, верхний край
+      pts.push(P(x, y));
+    }
   } else {
-    if (S_EDGE > 0) {
-      // Только первый сегмент включает начальную точку
-      edgeH(L, CX - rNeck, T, sTop, true);
+    // Край с выносом - строим первую часть кривой до точки соединения с выносом
+    for (let i=1; i<S_EDGE; i++){
+      const u = i / S_EDGE;
+      const x = L + (CX - rNeck - L) * u;
+      const y = getCurvedY(x, T, TOP === 1, true); // внешний/внутренний вынос, верхний край
+      pts.push(P(x, y));
     }
-    knobH(T, TOP === 1 ? +1 : -1);
-    if (S_EDGE > 0) {
-      // Второй сегмент пропускает начальную точку (уже есть в knobH)
-      for (let i=1; i<=S_EDGE; i++){
-        const u=i/S_EDGE, x=(CX + rNeck)+(R-(CX + rNeck))*u;
-        const yy = T + sTop*bow*Math.sin(Math.PI*((x-L)/(R-L)));
-        pts.push(P(x,yy));
-      }
+    
+    // Получаем Y-координату левой точки соединения с кривой
+    const leftConnectionY = getCurvedY(CX - rNeck, T, TOP === 1, true);
+    // Получаем Y-координату правой точки соединения с кривой  
+    const rightConnectionY = getCurvedY(CX + rNeck, T, TOP === 1, true);
+    
+    // Добавляем вынос, начинающийся и заканчивающийся на кривой
+    knobHCurved(T, TOP === 1 ? +1 : -1, false, leftConnectionY, rightConnectionY);
+    
+    // Строим вторую часть кривой от точки соединения до правого края
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const x = (CX + rNeck) + (R - (CX + rNeck)) * u;
+      const y = getCurvedY(x, T, TOP === 1, true); // внешний/внутренний вынос, верхний край
+      pts.push(P(x, y));
     }
-  }
-  
-  // Добавляем правый верхний угол только если он не был добавлен краем
-  if (pts[pts.length - 1] !== P(R, T)) {
-    pts.push(P(R, T));
   }
 
   // ПРАВО (сверху -> вниз)
   if (RIGHT === 0) {
-    if (S_EDGE > 0) edgeV(T, B, R, 0, true);
+    // Прямой край без выноса
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const y = T + (B - T) * u;
+      const x = getCurvedX(y, R, false, true); // нет выноса, кривизна произвольная, правый край
+      pts.push(P(x, y));
+    }
   } else {
-    if (S_EDGE > 0) {
-      // Только первый сегмент включает начальную точку
-      edgeV(T, CY - rNeck, R, sRight, true);
+    // Край с выносом - строим первую часть кривой до точки соединения с выносом
+    for (let i=1; i<S_EDGE; i++){
+      const u = i / S_EDGE;
+      const y = T + (CY - rNeck - T) * u;
+      const x = getCurvedX(y, R, RIGHT === 1, true); // внешний/внутренний вынос, правый край
+      pts.push(P(x, y));
     }
-    knobV(R, RIGHT === 1 ? +1 : -1);
-    if (S_EDGE > 0) {
-      // Второй сегмент пропускает начальную точку
-      for (let i=1; i<=S_EDGE; i++){
-        const u=i/S_EDGE, y=(CY + rNeck)+(B-(CY + rNeck))*u;
-        const xx = R + sRight*bow*Math.sin(Math.PI*((y-T)/(B-T)));
-        pts.push(P(xx,y));
-      }
+    
+    // Получаем X-координаты точек соединения с кривой
+    const topConnectionX = getCurvedX(CY - rNeck, R, RIGHT === 1, true);
+    const bottomConnectionX = getCurvedX(CY + rNeck, R, RIGHT === 1, true);
+    
+    // Добавляем вынос, начинающийся и заканчивающийся на кривой
+    knobVCurved(R, RIGHT === 1 ? +1 : -1, false, topConnectionX, bottomConnectionX);
+    
+    // Строим вторую часть кривой от точки соединения до нижнего края
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const y = (CY + rNeck) + (B - (CY + rNeck)) * u;
+      const x = getCurvedX(y, R, RIGHT === 1, true); // внешний/внутренний вынос, правый край
+      pts.push(P(x, y));
     }
-  }
-  
-  // Добавляем правый нижний угол
-  if (pts[pts.length - 1] !== P(R, B)) {
-    pts.push(P(R, B));
   }
 
   // НИЗ (идём справа -> влево)
   if (BOTTOM === 0) {
-    if (S_EDGE > 0) edgeH(R, L, B, 0, false);
+    // Прямой край без выноса
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const x = R - (R - L) * u; // идем справа -> влево
+      const y = getCurvedY(x, B, false, false); // нет выноса, кривизна произвольная, нижний край
+      pts.push(P(x, y));
+    }
   } else {
-    if (S_EDGE > 0) {
-      // Первый сегмент включает начальную точку
-      edgeH(R, CX + rNeck, B, sBottom, false);
+    // Край с выносом - строим первую часть кривой до точки соединения с выносом
+    for (let i=1; i<S_EDGE; i++){
+      const u = i / S_EDGE;
+      const x = R - (R - (CX + rNeck)) * u; // идем справа до выноса
+      const y = getCurvedY(x, B, BOTTOM === 1, false); // внешний/внутренний вынос, нижний край
+      pts.push(P(x, y));
     }
-    knobH(B, BOTTOM === 1 ? -1 : +1, true); // reverse=true для обхода справа->влево
-    if (S_EDGE > 0) {
-      // Второй сегмент пропускает начальную точку
-      for (let i=1; i<=S_EDGE; i++){
-        const u=i/S_EDGE, x=(CX - rNeck)+(L-(CX - rNeck))*u;
-        const yy = B + sBottom*bow*Math.sin(Math.PI*((x-L)/(R-L)));
-        pts.push(P(x,yy));
-      }
+    
+    // Получаем Y-координаты точек соединения с кривой
+    const rightConnectionY = getCurvedY(CX + rNeck, B, BOTTOM === 1, false);
+    const leftConnectionY = getCurvedY(CX - rNeck, B, BOTTOM === 1, false);
+    
+    // Добавляем вынос, начинающийся и заканчивающийся на кривой
+    knobHCurved(B, BOTTOM === 1 ? -1 : +1, true, leftConnectionY, rightConnectionY); // reverse=true для обхода справа->влево
+    
+    // Строим вторую часть кривой от точки соединения до левого края
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const x = (CX - rNeck) - ((CX - rNeck) - L) * u; // от выноса до левого края
+      const y = getCurvedY(x, B, BOTTOM === 1, false); // внешний/внутренний вынос, нижний край
+      pts.push(P(x, y));
     }
-  }
-  
-  // Добавляем левый нижний угол
-  if (pts[pts.length - 1] !== P(L, B)) {
-    pts.push(P(L, B));
   }
 
   // ЛЕВО (снизу -> вверх)
   if (LEFT === 0) {
-    if (S_EDGE > 0) edgeV(B, T, L, 0, false);
-  } else {
-    if (S_EDGE > 0) {
-      // Первый сегмент: от B до CY + rNeck (НЕ включая конечную точку)
-      edgeV(B, CY + rNeck, L, sLeft, false, false);
+    // Прямой край без выноса
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const y = B - (B - T) * u; // идем снизу -> вверх
+      const x = getCurvedX(y, L, false, false); // нет выноса, кривизна произвольная, левый край
+      pts.push(P(x, y));
     }
-    knobV(L, LEFT === 1 ? -1 : +1, true); // reverse=true для обхода снизу->вверх
-    if (S_EDGE > 0) {
-      // Второй сегмент: от CY - rNeck до T (пропускаем начальную точку)
-      for (let i=1; i<=S_EDGE; i++){
-        const u=i/S_EDGE, y=(CY - rNeck)+(T-(CY - rNeck))*u;
-        const xx = L + sLeft*bow*Math.sin(Math.PI*((y-T)/(B-T)));
-        pts.push(P(xx,y));
-      }
+  } else {
+    // Край с выносом - строим первую часть кривой до точки соединения с выносом
+    for (let i=1; i<S_EDGE; i++){
+      const u = i / S_EDGE;
+      const y = B - (B - (CY + rNeck)) * u; // снизу до выноса
+      const x = getCurvedX(y, L, LEFT === 1, false); // внешний/внутренний вынос, левый край
+      pts.push(P(x, y));
+    }
+    
+    // Получаем X-координаты точек соединения с кривой
+    const bottomConnectionX = getCurvedX(CY + rNeck, L, LEFT === 1, false);
+    const topConnectionX = getCurvedX(CY - rNeck, L, LEFT === 1, false);
+    
+    // Добавляем вынос, начинающийся и заканчивающийся на кривой
+    knobVCurved(L, LEFT === 1 ? -1 : +1, true, topConnectionX, bottomConnectionX); // reverse=true для обхода снизу->вверх
+    
+    // Строим вторую часть кривой от точки соединения до верхнего края
+    for (let i=1; i<=S_EDGE; i++){
+      const u = i / S_EDGE;
+      const y = (CY - rNeck) - ((CY - rNeck) - T) * u; // от выноса до верхнего края
+      const x = getCurvedX(y, L, LEFT === 1, false); // внешний/внутренний вынос, левый край
+      pts.push(P(x, y));
     }
   }
   

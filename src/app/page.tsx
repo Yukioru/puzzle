@@ -7,7 +7,7 @@ export default function Home() {
 
   const size = '100px';
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ padding: '30px' }}>
       <h1>Примеры элементов паззла</h1>
       
       <div style={{ marginBottom: '30px' }}>
