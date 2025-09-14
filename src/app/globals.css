@@ -10,7 +10,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: rgb(32, 32, 75);
   color: whitesmoke;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 * {

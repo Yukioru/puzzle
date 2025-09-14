@@ -7,7 +7,6 @@ import { SmartJigsawPiece } from "~/components/SmartJigsawPiece";
 export default function Home() {
   return (
     <>
-      <div style={{ padding: 50, width: 800 }}>
         <JigsawBoard
           difficulty="easy"
           pieces={[
@@ -36,7 +35,6 @@ export default function Home() {
             </SmartJigsawPiece>,
           ]}
         />   
-      </div>
     </>
   );
 }

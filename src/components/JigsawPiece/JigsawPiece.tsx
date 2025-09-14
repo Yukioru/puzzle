@@ -77,7 +77,7 @@ function JigsawPiece({
       <div 
         className={styles.base}
         style={{
-          '--_depth': `min(13px, 7.5%)`,
+          '--_depth': `clamp(4px, 7.5%, 16px)`,
           '--_path': clipPath as string,
         } as CSSProperties}
       >
