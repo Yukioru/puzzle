@@ -4,6 +4,7 @@
 // import { JigsawBoard } from "~/components/JigsawBoard";
 import { JigsawPiece } from "~/components/JigsawPiece";
 import hsr from '~/assets/images/hsr.png'
+import { SmartJigsawPiece } from "~/components/SmartJigsawPiece";
 
 export default function Demo() {
 
@@ -155,6 +156,24 @@ export default function Demo() {
           <JigsawPiece image={hsr} sides={[-1, 1, 0, 0]} />
           <JigsawPiece image={hsr} sides={[1, -1, 0, -1]} />
           <JigsawPiece image={hsr} sides={[1, 0, 0, 1]} />
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '30px' }}>
+        <h2>Пример поворота</h2>
+        <div style={{
+          marginTop: '30px',
+          display: 'grid', 
+          gridTemplateColumns: `repeat(3, ${size})`, 
+          gap: '30px',
+          justifyContent: 'start'
+        }}>
+          <SmartJigsawPiece
+            initialSides={[0, -1, -1, 0]}
+            onClick={(event) => console.log('Smart Piece clicked', event)}
+          >
+            <JigsawPiece image={hsr} sides={[0, -1, -1, 0]} />
+          </SmartJigsawPiece>
         </div>
       </div>
 

@@ -24,22 +24,24 @@ function getDimensions(difficulty: JigsawBoardProps['difficulty']) {
 export function JigsawBoard({ difficulty, pieces }: JigsawBoardProps) {
   const { rows, cols } = getDimensions(difficulty);
   return (
-    <div
-      className={styles.base}
-      style={{
-        gridTemplateRows: `repeat(${rows}, 1fr)`,
-        gridTemplateColumns: `repeat(${cols}, 1fr)`,
-      }}
-    >
-      {Array.from({ length: rows * cols }).map((_, index) => {
-        const piece = pieces?.[index] ?? null;
-        if (piece) {
-          return <Fragment key={index}>{piece}</Fragment>;
-        }
-        return (
-          <AspectRatio key={index} ratio={1} className={styles.cell} />
-        );
-      })}
+    <div className={styles.frame}>
+      <div
+        className={styles.base}
+        style={{
+          gridTemplateRows: `repeat(${rows}, 1fr)`,
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+        }}
+      >
+        {Array.from({ length: rows * cols }).map((_, index) => {
+          const piece = pieces?.[index] ?? null;
+          if (piece) {
+            return <Fragment key={index}>{piece}</Fragment>;
+          }
+          return (
+            <AspectRatio key={index} ratio={1} className={styles.cell} />
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -2,8 +2,11 @@
   clip-path: var(--_path);
   width: calc(100% + var(--_depth) * 2);
   height: calc(100% + var(--_depth) * 2);
-  transform: translate(calc(var(--_depth) * -1), calc(var(--_depth) * -1));
+  transform: translate(calc(var(--_depth) * -1), calc(var(--_depth) * -1)) 
+             scale(1.3);
   position: relative;
+  transform-origin: center;
+  container-type: size;
 }
 
 .stroke {
@@ -13,14 +16,15 @@
   z-index: 2;
 }
 
-.image,
-.strokeSvg {
+.image {
   width: 100%;
   height: 100%;
-}
-
-.image {
   object-fit: cover;
   user-select: none;
   pointer-events: none;
+}
+
+.strokeSvg {
+  width: 100%;
+  height: 100%;
 }

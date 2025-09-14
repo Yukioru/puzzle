@@ -1,11 +1,14 @@
+'use client';
+
 import Image, { ImageProps } from 'next/image';
-import { CSSProperties, ForwardedRef, forwardRef, HTMLProps,  useMemo } from 'react';
+import type { CSSProperties, ForwardedRef, HTMLProps } from 'react';
+import { forwardRef, useMemo } from 'react';
 import { AspectRatio } from '../AspectRatio';
 import { puzzlePolygon } from './utils';
 
 import styles from './JigsawPiece.module.css';
 
-interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
+export interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
   image: ImageProps['src'];
   sides: [number, number, number, number];
   imagePosition?: {
@@ -31,9 +34,8 @@ function JigsawPiece({
   imagePosition,
   ...props
 }: JigsawPieceProps, ref: ForwardedRef<HTMLDivElement>) {
-  const depth = 24;
   const clipPath = puzzlePolygon(sides, {
-    depth,
+    depth: 24,
     headWidth: 25,
     neckWidth: 18,
     neckLength: 50,
@@ -77,7 +79,7 @@ function JigsawPiece({
       <div 
         className={styles.base}
         style={{
-          '--_depth': `${depth}px`,
+          '--_depth': `min(13px, 7.5%)`,
           '--_path': clipPath as string,
         } as CSSProperties}
       >
