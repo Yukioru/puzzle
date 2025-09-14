@@ -1,5 +1,3 @@
-'use client';
-
 import Image, { ImageProps } from 'next/image';
 import type { CSSProperties, ForwardedRef, HTMLProps } from 'react';
 import { forwardRef, useMemo } from 'react';
