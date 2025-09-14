@@ -1,0 +1,1 @@
+export { default as JigsawPiece } from './JigsawPiece';

@@ -1,9 +1,12 @@
 'use client';
 
+import { Fragment, ReactNode } from 'react';
+import { AspectRatio } from '../AspectRatio';
 import styles from './JigsawBoard.module.css';
 
 interface JigsawBoardProps {
   difficulty: 'easy' | 'medium' | 'hard';
+  pieces?: (ReactNode | null)[];
 }
 
 function getDimensions(difficulty: JigsawBoardProps['difficulty']) {
@@ -18,7 +21,7 @@ function getDimensions(difficulty: JigsawBoardProps['difficulty']) {
   }
 }
 
-export function JigsawBoard({ difficulty }: JigsawBoardProps) {
+export function JigsawBoard({ difficulty, pieces }: JigsawBoardProps) {
   const { rows, cols } = getDimensions(difficulty);
   return (
     <div
@@ -28,9 +31,15 @@ export function JigsawBoard({ difficulty }: JigsawBoardProps) {
         gridTemplateColumns: `repeat(${cols}, 1fr)`,
       }}
     >
-      {Array.from({ length: rows * cols }).map((_, index) => (
-        <div key={index} className={styles.cell} />
-      ))}
+      {Array.from({ length: rows * cols }).map((_, index) => {
+        const piece = pieces?.[index] ?? null;
+        if (piece) {
+          return <Fragment key={index}>{piece}</Fragment>;
+        }
+        return (
+          <AspectRatio key={index} ratio={1} className={styles.cell} />
+        );
+      })}
     </div>
   );
 }

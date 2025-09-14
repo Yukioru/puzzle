@@ -201,37 +201,12 @@ export function puzzlePolygon(
         pts.push(P(x, CY - w));
       }
       
-      // Промежуточные точки для плавного перехода к головке
-      const neckEndX = xBase + dir*neckDepth;
-      const headStartX = cx + dir*rHead; // X координата верхней точки головки
-      const transitionSteps = 3;
-      
-      for (let i = 1; i <= transitionSteps; i++) {
-        const t = i / (transitionSteps + 1);
-        const smoothT = ease(t);
-        const x = neckEndX + (headStartX - neckEndX) * smoothT;
-        const y = CY - rHead; // Y остаётся постоянным для верхней стороны
-        pts.push(P(x, y));
-      }
-      
       // φ: -π/2..π/2 (сверху -> вниз), без крайних точек
       for (let i=1;i<S_CAP;i++){
         const ph = -Math.PI/2 + (Math.PI*i)/S_CAP;
         const x  = cx + dir*rHead*Math.cos(ph);
         const y  = CY + rHead*Math.sin(ph);
         pts.push(P(x,y));
-      }
-      
-      // Промежуточные точки для перехода от головки к нижней шейке
-      const headEndX = cx + dir*rHead; // X координата нижней точки головки
-      const bottomNeckStartX = xBase + dir*neckDepth;
-      
-      for (let i = 1; i <= transitionSteps; i++) {
-        const t = i / (transitionSteps + 1);
-        const smoothT = ease(t);
-        const x = headEndX + (bottomNeckStartX - headEndX) * smoothT;
-        const y = CY + rHead; // Y остаётся постоянным для нижней стороны
-        pts.push(P(x, y));
       }
       
       // нижняя шейка назад к кромке

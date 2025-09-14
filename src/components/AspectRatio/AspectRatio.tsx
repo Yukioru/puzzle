@@ -1,16 +1,27 @@
-import type { CSSProperties, PropsWithChildren } from "react";
+import { forwardRef } from "react";
+import type { CSSProperties, ForwardedRef, HTMLProps, PropsWithChildren } from "react";
 
 import styles from './AspectRatio.module.css';
+import clsx from "clsx";
 
-interface AspectRatioProps {
+interface AspectRatioProps extends HTMLProps<HTMLDivElement> {
   ratio?: number;
 }
 
-export function AspectRatio({ ratio = 16 / 9, children }: PropsWithChildren<AspectRatioProps>) {
+function AspectRatio({
+  ratio = 16 / 9,
+  className,
+  style = {},
+  children,
+  ...props
+}: PropsWithChildren<AspectRatioProps>, ref: ForwardedRef<HTMLDivElement>) {
   return (
     <div
-      className={styles.base}
+      ref={ref}
+      {...props}
+      className={clsx(styles.base, className)}
       style={{
+        ...style,
         "--_offset": `${(1 / ratio) * 100}%`,
       } as CSSProperties}
     >
@@ -20,3 +31,5 @@ export function AspectRatio({ ratio = 16 / 9, children }: PropsWithChildren<Aspe
     </div>
   );
 }
+
+export default forwardRef(AspectRatio); 
