@@ -9,7 +9,7 @@ import { Stock } from "../Stock";
 
 import hsr from '~/assets/images/hsr.png'
 
-export function JigsawGame({ id, difficulty, pieces, missedPieces }: IJigsawGame) {
+export function JigsawGame({ id, difficulty, pieces, playablePieces }: IJigsawGame) {
 
   const handlePieceRotate = (pieceId: string, newSides: unknown) => {
     console.log('Piece rotated:', pieceId, newSides);
@@ -63,7 +63,7 @@ export function JigsawGame({ id, difficulty, pieces, missedPieces }: IJigsawGame
       </div>
       <div>
         <Stock>
-          {missedPieces.map(piece => (
+          {playablePieces.map(piece => (
             <SmartJigsawPiece
               isInteractable
               key={piece.id}

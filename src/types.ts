@@ -16,5 +16,5 @@ export interface IJigsawGame {
   difficulty: Difficulty;
   pieces: (IJigsawPiece | null)[];
   initialPieces: IJigsawPiece[];
-  missedPieces: IJigsawPiece[];
+  playablePieces: IJigsawPiece[];
 }

@@ -70,29 +70,41 @@ function selectPiecesToRemove(rows: number, cols: number, count: number): number
   return Array.from(selected);
 }
 
-export function shufflePieces(pieces: IJigsawPiece[], difficulty: Difficulty): { pieces: (IJigsawPiece | null)[], missedPieces: IJigsawPiece[] } {
+export function shufflePieces(pieces: IJigsawPiece[], difficulty: Difficulty): { pieces: (IJigsawPiece | null)[], playablePieces: IJigsawPiece[] } {
   const { initialMissing, rows, cols } = getDimensions(difficulty);
   
   const missingIndices = selectPiecesToRemove(rows, cols, initialMissing);
   
   const boardPieces: (IJigsawPiece | null)[] = [];
-  const missedPieces: IJigsawPiece[] = [];
+  const playablePieces: IJigsawPiece[] = [];
   
   pieces.forEach((piece, index) => {
     if (missingIndices.includes(index)) {
       boardPieces[index] = null;
-      missedPieces.push(piece);
+      playablePieces.push(piece);
     } else {
       boardPieces[index] = piece;
     }
   });
   
-  for (let i = missedPieces.length - 1; i > 0; i--) {
+  // Поворачиваем каждый пропущенный элемент на случайный угол
+  playablePieces.forEach(piece => {
+    const rotations = Math.floor(Math.random() * 4); // 0, 1, 2, или 3 поворота на 90°
+    
+    // Поворачиваем sides: при повороте на 90° по часовой стрелке sides сдвигаются влево
+    for (let i = 0; i < rotations; i++) {
+      const [top, right, bottom, left] = piece.sides;
+      piece.sides = [left, top, right, bottom];
+    }
+  });
+  
+  // Перемешиваем сами элементы для дополнительной рандомизации
+  for (let i = playablePieces.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [missedPieces[i], missedPieces[j]] = [missedPieces[j], missedPieces[i]];
+    [playablePieces[i], playablePieces[j]] = [playablePieces[j], playablePieces[i]];
   }
   
-  return { pieces: boardPieces, missedPieces };
+  return { pieces: boardPieces, playablePieces };
 }
 
 export function generateInitialPieces(rows: number, cols: number): IJigsawPiece[] {

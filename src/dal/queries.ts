@@ -7,13 +7,13 @@ export async function getGameById(id: string): Promise<IJigsawGame> {
 
   const initialPieces = generateInitialPieces(boardSize.rows, boardSize.cols);
 
-  const { pieces, missedPieces } = shufflePieces(initialPieces, difficulty);
+  const { pieces, playablePieces } = shufflePieces(initialPieces, difficulty);
 
   return {
     id,
     difficulty,
     pieces,
     initialPieces,
-    missedPieces,
+    playablePieces,
   };
 }
