@@ -1,132 +1,70 @@
+'use client';
 import { JigsawBoard } from "~/components/JigsawBoard";
 import { JigsawPiece } from "~/components/JigsawPiece";
-
-import hsr from '~/assets/images/hsr.png'
 import { SmartJigsawPiece } from "~/components/SmartJigsawPiece";
+import { getDimensions, generateInitialPieces } from "~/utils";
+import { Difficulty } from "~/types";
+import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import hsr from '~/assets/images/hsr.png';
 
-export default function Home() {
+export default function DemoBoards() {
+  const difficulty: Difficulty = 'easy';
+  const boardSize = getDimensions(difficulty);
+  const initialPieces = generateInitialPieces(boardSize.rows, boardSize.cols);
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    })
+  );
+
+  // Преобразуем IJigsawPiece[] в IJigsawPieceWithRender[] для JigsawBoard
+  const boardPieces = initialPieces.map(piece => ({
+    id: piece.id,
+    sides: piece.sides,
+    render: (
+      <SmartJigsawPiece key={piece.id} id={piece.id} initialSides={piece.sides}>
+        <JigsawPiece image={hsr} sides={piece.sides} />
+      </SmartJigsawPiece>
+    )
+  }));
+
   return (
-    <>
-      <div style={{ padding: '30px', width: 480 }}>
-        <JigsawBoard
-          difficulty="easy"
-          pieces={[
-            <SmartJigsawPiece key="img-1" initialSides={[0, -1, -1, 0]}>
-              <JigsawPiece image={hsr} sides={[0, -1, -1, 0]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-2" initialSides={[0, 1, 1, 1]}>
-              <JigsawPiece image={hsr} sides={[0, 1, 1, 1]} />
-            </SmartJigsawPiece>,
-            null,
-            <SmartJigsawPiece key="img-4" initialSides={[1, -1, 1, 0]}>
-              <JigsawPiece image={hsr} sides={[1, -1, 1, 0]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-5" initialSides={[-1, 1, -1, 1]}>
-              <JigsawPiece image={hsr} sides={[-1, 1, -1, 1]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-6" initialSides={[-1, 0, -1, -1]}>
-              <JigsawPiece image={hsr} sides={[-1, 0, -1, -1]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-7" initialSides={[-1, 1, 0, 0]}>
-              <JigsawPiece image={hsr} sides={[-1, 1, 0, 0]} />
-            </SmartJigsawPiece>,
-            null,
-            <SmartJigsawPiece key="img-9" initialSides={[1, 0, 0, 1]}>
-              <JigsawPiece image={hsr} sides={[1, 0, 0, 1]} />
-            </SmartJigsawPiece>,
-          ]}
-        />   
-      </div>
-      <div style={{ padding: '30px', width: 720 }}>
-        <JigsawBoard
-          difficulty="easy"
-          pieces={[
-            <SmartJigsawPiece key="img-1" initialSides={[0, -1, -1, 0]}>
-              <JigsawPiece image={hsr} sides={[0, -1, -1, 0]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-2" initialSides={[0, 1, 1, 1]}>
-              <JigsawPiece image={hsr} sides={[0, 1, 1, 1]} />
-            </SmartJigsawPiece>,
-            null,
-            <SmartJigsawPiece key="img-4" initialSides={[1, -1, 1, 0]}>
-              <JigsawPiece image={hsr} sides={[1, -1, 1, 0]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-5" initialSides={[-1, 1, -1, 1]}>
-              <JigsawPiece image={hsr} sides={[-1, 1, -1, 1]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-6" initialSides={[-1, 0, -1, -1]}>
-              <JigsawPiece image={hsr} sides={[-1, 0, -1, -1]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-7" initialSides={[-1, 1, 0, 0]}>
-              <JigsawPiece image={hsr} sides={[-1, 1, 0, 0]} />
-            </SmartJigsawPiece>,
-            null,
-            <SmartJigsawPiece key="img-9" initialSides={[1, 0, 0, 1]}>
-              <JigsawPiece image={hsr} sides={[1, 0, 0, 1]} />
-            </SmartJigsawPiece>,
-          ]}
-        />   
-      </div>
-      <div style={{ padding: '30px', width: 1200 }}>
-        <JigsawBoard
-          difficulty="easy"
-          pieces={[
-            <SmartJigsawPiece key="img-1" initialSides={[0, -1, -1, 0]}>
-              <JigsawPiece image={hsr} sides={[0, -1, -1, 0]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-2" initialSides={[0, 1, 1, 1]}>
-              <JigsawPiece image={hsr} sides={[0, 1, 1, 1]} />
-            </SmartJigsawPiece>,
-            null,
-            <SmartJigsawPiece key="img-4" initialSides={[1, -1, 1, 0]}>
-              <JigsawPiece image={hsr} sides={[1, -1, 1, 0]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-5" initialSides={[-1, 1, -1, 1]}>
-              <JigsawPiece image={hsr} sides={[-1, 1, -1, 1]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-6" initialSides={[-1, 0, -1, -1]}>
-              <JigsawPiece image={hsr} sides={[-1, 0, -1, -1]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-7" initialSides={[-1, 1, 0, 0]}>
-              <JigsawPiece image={hsr} sides={[-1, 1, 0, 0]} />
-            </SmartJigsawPiece>,
-            null,
-            <SmartJigsawPiece key="img-9" initialSides={[1, 0, 0, 1]}>
-              <JigsawPiece image={hsr} sides={[1, 0, 0, 1]} />
-            </SmartJigsawPiece>,
-          ]}
-        />   
-      </div>
-      <div style={{ padding: '30px', width: 1600 }}>
-        <JigsawBoard
-          difficulty="easy"
-          pieces={[
-            <SmartJigsawPiece key="img-1" initialSides={[0, -1, -1, 0]}>
-              <JigsawPiece image={hsr} sides={[0, -1, -1, 0]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-2" initialSides={[0, 1, 1, 1]}>
-              <JigsawPiece image={hsr} sides={[0, 1, 1, 1]} />
-            </SmartJigsawPiece>,
-            null,
-            <SmartJigsawPiece key="img-4" initialSides={[1, -1, 1, 0]}>
-              <JigsawPiece image={hsr} sides={[1, -1, 1, 0]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-5" initialSides={[-1, 1, -1, 1]}>
-              <JigsawPiece image={hsr} sides={[-1, 1, -1, 1]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-6" initialSides={[-1, 0, -1, -1]}>
-              <JigsawPiece image={hsr} sides={[-1, 0, -1, -1]} />
-            </SmartJigsawPiece>,
-            <SmartJigsawPiece key="img-7" initialSides={[-1, 1, 0, 0]}>
-              <JigsawPiece image={hsr} sides={[-1, 1, 0, 0]} />
-            </SmartJigsawPiece>,
-            null,
-            <SmartJigsawPiece key="img-9" initialSides={[1, 0, 0, 1]}>
-              <JigsawPiece image={hsr} sides={[1, 0, 0, 1]} />
-            </SmartJigsawPiece>,
-          ]}
-        />   
-      </div>
-    </>
+    <DndContext id="demo-boards" sensors={sensors}>
+      <>
+        <div style={{ padding: '30px', width: 480 }}>
+          <JigsawBoard
+            difficulty={difficulty}
+            pieces={boardPieces}
+          />   
+        </div>
+        <div style={{ padding: '30px', width: 720 }}>
+          <JigsawBoard
+            difficulty={difficulty}
+            pieces={boardPieces}
+          />   
+        </div>
+        <div style={{ padding: '30px', width: 1200 }}>
+          <JigsawBoard
+            difficulty={difficulty}
+            pieces={boardPieces}
+          />   
+        </div>
+        <div style={{ padding: '30px', width: 1600 }}>
+          <JigsawBoard
+            difficulty={difficulty}
+            pieces={boardPieces}
+          />   
+        </div>
+      </>
+    </DndContext>
   );
 }
