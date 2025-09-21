@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Honkai: Star Rail - Jigsaw Puzzle
 
-## Getting Started
+Интерактивная игра-пазл с drag-and-drop функциональностью, основанная на вселенной Honkai: Star Rail.
 
-First, run the development server:
+## 🚀 Быстрый старт
+
+### Установка зависимостей
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+bun install
+```
+
+### Запуск в режиме разработки
+
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Откройте [http://localhost:3000](http://localhost:3000) в браузере, чтобы увидеть игру.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Сборка для продакшена
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+bun run build
+```
 
-## Learn More
+### Запуск продакшен сервера
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+bun run start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠 Технологии
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Next.js 15.5** - React фреймворк с App Router
+- **@dnd-kit** - Drag-and-drop библиотека
+- **CSS Modules** - Модульные стили
+- **Bun** - Быстрый пакетный менеджер
 
-## Deploy on Vercel
+## 📁 Структура проекта
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/                    # Next.js App Router страницы
+│   ├── demo-boards/       # Демо доски
+│   ├── demo-pieces/       # Демо элементы
+│   └── game/             # Игровые страницы
+├── components/            # React компоненты
+│   ├── JigsawBoard/      # Игровая доска
+│   ├── JigsawPiece/      # Элемент пазла
+│   ├── SmartJigsawPiece/ # Умный элемент пазла
+│   └── ...
+├── assets/               # Статические ресурсы
+└── dal/                 # Слой доступа к данным
+```
