@@ -6,7 +6,7 @@ import { SmartJigsawPiece } from "~/components/SmartJigsawPiece";
 
 export default function Home() {
   return (
-    <>
+    <div>
         <JigsawBoard
           difficulty="easy"
           pieces={[
@@ -35,6 +35,6 @@ export default function Home() {
             </SmartJigsawPiece>,
           ]}
         />   
-    </>
+    </div>
   );
 }

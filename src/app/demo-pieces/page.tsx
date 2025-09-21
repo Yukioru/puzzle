@@ -169,6 +169,7 @@ export default function Demo() {
           justifyContent: 'start'
         }}>
           <SmartJigsawPiece
+            id="smart-piece-1"
             initialSides={[0, -1, -1, 0]}
             onClick={(event) => console.log('Smart Piece clicked', event)}
           >

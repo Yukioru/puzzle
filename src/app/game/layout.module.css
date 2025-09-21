@@ -1,0 +1,11 @@
+.base {
+  padding: 3em;
+  width: 100vw;
+  height: 100vh;
+  display: grid; 
+  grid-template-columns: 2fr 1fr; 
+  grid-template-rows: 1fr; 
+  gap: 0px 2em; 
+  grid-template-areas: 
+    ". ."; 
+}

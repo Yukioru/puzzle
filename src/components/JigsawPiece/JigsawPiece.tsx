@@ -5,10 +5,11 @@ import { AspectRatio } from '../AspectRatio';
 import { puzzlePolygon } from './utils';
 
 import styles from './JigsawPiece.module.css';
+import { IJigsawPiece } from '~/types';
 
 export interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
   image: ImageProps['src'];
-  sides: [number, number, number, number];
+  sides: IJigsawPiece['sides'];
   imagePosition?: {
     x: number;
     y: number;
@@ -83,9 +84,10 @@ function JigsawPiece({
       >
         <Image 
           src={image} 
-          alt="" 
-          layout="fill"
-          objectFit="cover"
+          alt=""
+          fill
+          priority
+          sizes="280px"
           style={imageStyle}
           className={styles.image}
         />

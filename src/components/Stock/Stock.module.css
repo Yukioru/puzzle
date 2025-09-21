@@ -1,3 +1,7 @@
+.outer {
+  padding: 2rem;
+}
+
 .frame {
   --corner: 1.5em;
   border: var(--corner) solid;
@@ -8,6 +12,9 @@
 }
 
 .base {
+  padding: 2rem;
   display: grid;
   height: 100%;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4rem;
 }
