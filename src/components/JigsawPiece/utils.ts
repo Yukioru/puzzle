@@ -40,6 +40,7 @@ export function puzzlePolygon(
     samplesNeck?: number; // дискретизация шейки (12..24)
     samplesCap?: number;  // дискретизация полуокружности (20..36)
     samplesEdge?: number; // дискретизация ровного участка (4..10)
+    returnSvgPath?: boolean; // если true, возвращает SVG path вместо clip-path polygon
   }
 ): string {
   const [TOP, RIGHT, BOTTOM, LEFT] = sides;
@@ -391,6 +392,16 @@ export function puzzlePolygon(
   }
   
   // Не добавляем начальную точку в конце - полигон замкнется автоматически
+
+  if (opts?.returnSvgPath) {
+    return pts.map((point, index) => {
+        const [x, y] = point.split(' ');
+        const xNum = parseFloat(x.replace('%', ''));
+        const yNum = parseFloat(y.replace('%', ''));
+        return `${index === 0 ? 'M' : 'L'} ${xNum} ${yNum}`;
+      })
+      .join(' ') + ' Z'
+  }
 
   return `polygon(${pts.join(', ')})`;
 

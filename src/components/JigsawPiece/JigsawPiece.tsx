@@ -1,5 +1,5 @@
 import type { CSSProperties, ForwardedRef, HTMLProps } from 'react';
-import { forwardRef, useId, useMemo } from 'react';
+import { forwardRef, useId } from 'react';
 import { AspectRatio } from '../AspectRatio';
 import { puzzlePolygon } from './utils';
 
@@ -28,7 +28,7 @@ function JigsawPiece({
   ...props
 }: JigsawPieceProps, ref: ForwardedRef<HTMLDivElement>) {
   const clipId = useId();
-  const clipPath = puzzlePolygon(sides, {
+  const svgPath = puzzlePolygon(sides, {
     depth: DEPTH,
     headWidth: 25,
     neckWidth: 18,
@@ -37,21 +37,8 @@ function JigsawPiece({
     samplesNeck: 32,
     samplesCap: 48,
     samplesEdge: 4,
+    returnSvgPath: true,
   });
-  
-  const svgPath = useMemo(() => (
-    clipPath
-      .replace('polygon(', '')
-      .replace(')', '')
-      .split(', ')
-      .map((point, index) => {
-        const [x, y] = point.split(' ');
-        const xNum = parseFloat(x.replace('%', ''));
-        const yNum = parseFloat(y.replace('%', ''));
-        return `${index === 0 ? 'M' : 'L'} ${xNum} ${yNum}`;
-      })
-      .join(' ') + ' Z'
-  ), [clipPath]);
 
   return (
     <AspectRatio
@@ -71,7 +58,12 @@ function JigsawPiece({
               <path d={svgPath} />
             </clipPath>
           </defs>
-          <image href={image} height="128" width="128" clipPath={`url(#${clipId})`} />
+          <image
+            href={image}
+            height="100%"
+            width="100%"
+            clipPath={`url(#${clipId})`}
+          />
           <path 
             d={svgPath}
             fill="none"
