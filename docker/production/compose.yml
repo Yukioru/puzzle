@@ -1,0 +1,26 @@
+networks:
+  traefik:
+    name: traefik
+    external: true
+
+services:
+  hsr-puzzle-prod:
+    build:
+      context: ../../
+      dockerfile: docker/production/Dockerfile
+    image: hsr-puzzle-prod
+    container_name: hsr-puzzle-prod
+    restart: always
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.hsr-puzzle-prod.rule=Host(`puzzle.yukio.ru`)
+      - traefik.http.routers.hsr-puzzle-prod.middlewares=gzip@file,hsts@file
+      - traefik.http.routers.hsr-puzzle-prod.entrypoints=websecure
+      - traefik.http.routers.hsr-puzzle-prod.service=hsr-puzzle-prod
+      - traefik.http.routers.hsr-puzzle-prod.tls=true
+      - traefik.http.routers.hsr-puzzle-prod.tls.certresolver=letsencrypt
+      - traefik.http.routers.hsr-puzzle-prod.tls.domains[0].main=yukio.ru
+      - traefik.http.routers.hsr-puzzle-prod.tls.domains[0].sans=*.yukio.ru
+      - traefik.http.services.hsr-puzzle-prod.loadbalancer.server.port=3000
