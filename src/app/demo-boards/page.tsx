@@ -32,7 +32,7 @@ export default function DemoBoards() {
     sides: piece.sides,
     render: (
       <SmartJigsawPiece key={piece.id} id={piece.id} initialSides={piece.sides}>
-        <JigsawPiece image={hsr} sides={piece.sides} />
+        <JigsawPiece image={hsr.src} sides={piece.sides} />
       </SmartJigsawPiece>
     )
   }));

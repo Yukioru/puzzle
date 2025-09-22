@@ -1,6 +1,5 @@
-import Image, { ImageProps } from 'next/image';
 import type { CSSProperties, ForwardedRef, HTMLProps } from 'react';
-import { forwardRef, useMemo } from 'react';
+import { forwardRef, useId, useMemo } from 'react';
 import { AspectRatio } from '../AspectRatio';
 import { puzzlePolygon } from './utils';
 
@@ -8,14 +7,8 @@ import styles from './JigsawPiece.module.css';
 import { IJigsawPiece } from '~/types';
 
 export interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
-  image: ImageProps['src'];
+  image: string;
   sides: IJigsawPiece['sides'];
-  imagePosition?: {
-    x: number;
-    y: number;
-    totalWidth: number;
-    totalHeight: number;
-  };
 }
 
 // Sides - top, right, bottom, left
@@ -27,14 +20,16 @@ export interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
 // Example: [-1, 1, -1, 1] = top in, right out, bottom in, left out
 // Example: [0, 0, 0, 0] = all flat (edge piece)
 
+const DEPTH = 24
+
 function JigsawPiece({
   image,
   sides,
-  imagePosition,
   ...props
 }: JigsawPieceProps, ref: ForwardedRef<HTMLDivElement>) {
+  const clipId = useId();
   const clipPath = puzzlePolygon(sides, {
-    depth: 24,
+    depth: DEPTH,
     headWidth: 25,
     neckWidth: 18,
     neckLength: 50,
@@ -43,17 +38,6 @@ function JigsawPiece({
     samplesCap: 48,
     samplesEdge: 4,
   });
-  
-  let imageStyle: CSSProperties = {};
-  if (imagePosition) {
-    const { x, y, totalWidth, totalHeight } = imagePosition;
-    imageStyle = {
-      width: `${totalWidth * 100}%`,
-      height: `${totalHeight * 100}%`,
-      transform: `translate(-${x * 100}%, -${y * 100}%)`,
-      objectPosition: '0 0',
-    };
-  }
   
   const svgPath = useMemo(() => (
     clipPath
@@ -78,34 +62,23 @@ function JigsawPiece({
       <div 
         className={styles.base}
         style={{
-          '--_depth': `clamp(4px, 7.5%, 16px)`,
-          '--_path': clipPath as string,
+          '--_depth': `${DEPTH}%`,
         } as CSSProperties}
       >
-        <Image 
-          src={image} 
-          alt=""
-          fill
-          priority
-          sizes="280px"
-          style={imageStyle}
-          className={styles.image}
-        />
-        <div className={styles.stroke}>
-          <svg 
-            className={styles.strokeSvg} 
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-          >
-            <path 
-              d={svgPath}
-              fill="none" 
-              stroke="rgba(51, 53, 63, 0.5)" 
-              strokeWidth="2"
-              vectorEffect="non-scaling-stroke"
-            />
-          </svg>
-        </div>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs>
+            <clipPath id={clipId}>
+              <path d={svgPath} />
+            </clipPath>
+          </defs>
+          <image href={image} height="128" width="128" clipPath={`url(#${clipId})`} />
+          <path 
+            d={svgPath}
+            fill="none"
+            stroke="rgba(30, 39, 35, 0.4)" 
+            strokeWidth="1"
+          />
+        </svg>
       </div>
     </AspectRatio>
   );

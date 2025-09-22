@@ -47,7 +47,7 @@ export function JigsawGame({ id, difficulty, pieces, playablePieces }: IJigsawGa
           id={piece.id}
           initialSides={piece.sides}
         >
-          <JigsawPiece image={hsr} sides={piece.sides} />
+          <JigsawPiece image={hsr.src} sides={piece.sides} />
         </SmartJigsawPiece>
       )
     };
@@ -71,7 +71,7 @@ export function JigsawGame({ id, difficulty, pieces, playablePieces }: IJigsawGa
               initialSides={piece.sides}
               onClick={(newSides) => handlePieceRotate(piece.id, newSides)}
             >
-              <JigsawPiece image={hsr} sides={piece.sides} />
+              <JigsawPiece image={hsr.src} sides={piece.sides} />
             </SmartJigsawPiece>
           ))}
         </Stock>
