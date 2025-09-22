@@ -1,27 +1,27 @@
 'use client';
-
+import { unstable_ViewTransition as ViewTransition } from 'react';
 import { AspectRatio } from '../AspectRatio';
 import styles from './JigsawBoard.module.css';
 import { DroppableContainer } from '../DroppableContainer';
-import { Difficulty, IJigsawPieceWithRender } from '~/types';
-import { getDimensions } from '~/utils';
+import { IJigsawPieceWithRender } from '~/types';
+import { CSSProperties, ForwardedRef, forwardRef } from 'react';
 
 interface JigsawBoardProps {
-  difficulty: Difficulty;
+  rows: number;
+  cols: number;
   pieces?: IJigsawPieceWithRender[];
 }
 
-export function JigsawBoard({ difficulty, pieces }: JigsawBoardProps) {
-  const { rows, cols } = getDimensions(difficulty);
+function JigsawBoard({ rows, cols, pieces }: JigsawBoardProps, ref: ForwardedRef<HTMLDivElement>) {
   return (
-    <div className={styles.outer}>
-      <div className={styles.frame}>
+    <ViewTransition name="jigsaw-board">
+      <div ref={ref} className={styles.frame}>
         <div
           className={styles.base}
           style={{
-            gridTemplateRows: `repeat(${rows}, 1fr)`,
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          }}
+            '--_cols': cols,
+            '--_rows': rows,
+          } as CSSProperties}
         >
           {Array.from({ length: rows * cols }).map((_, index) => {
             const piece = pieces?.[index];
@@ -36,6 +36,8 @@ export function JigsawBoard({ difficulty, pieces }: JigsawBoardProps) {
           })}
         </div>
       </div>
-    </div>
+    </ViewTransition>
   );
 }
+
+export default forwardRef(JigsawBoard);

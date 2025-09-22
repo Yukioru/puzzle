@@ -1,1 +1,38 @@
-.layout
+.base {
+  position: relative;
+  height: 100%;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 12rem;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: whitesmoke;
+}
+
+.overlay h1 {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.footer {
+  margin-top: auto;
+  text-align: center;
+}
+
+.button {
+  all: unset;
+  cursor: pointer;
+  padding: 0.5em 1em;
+  border: .4rem solid whitesmoke;
+  border-radius: 1em;
+  font-size: 4rem;
+  transition: background-color 0.3s, color 0.3s;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: whitesmoke;
+}

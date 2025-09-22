@@ -1,1 +1,1 @@
-export { JigsawBoard } from "./JigsawBoard";
+export { default as JigsawBoard } from "./JigsawBoard";

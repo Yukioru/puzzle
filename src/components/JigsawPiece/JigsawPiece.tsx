@@ -5,6 +5,7 @@ import { puzzlePolygon } from './utils';
 
 import styles from './JigsawPiece.module.css';
 import { IJigsawPiece } from '~/types';
+import clsx from 'clsx';
 
 export interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
   image: string;
@@ -20,11 +21,12 @@ export interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
 // Example: [-1, 1, -1, 1] = top in, right out, bottom in, left out
 // Example: [0, 0, 0, 0] = all flat (edge piece)
 
-const DEPTH = 24
+const DEPTH = 24;
 
 function JigsawPiece({
   image,
   sides,
+  className,
   ...props
 }: JigsawPieceProps, ref: ForwardedRef<HTMLDivElement>) {
   const clipId = useId();
@@ -44,6 +46,7 @@ function JigsawPiece({
     <AspectRatio
       ref={ref}
       ratio={1}
+      className={clsx(styles.outer, className)}
       {...props}
     >
       <div 

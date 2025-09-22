@@ -1,3 +1,4 @@
 .base {
   margin: calc(0% - var(--_depth));
+  pointer-events: none;
 }
