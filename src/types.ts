@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 export interface IJigsawPiece {
   id: string;
   sides: [number, number, number, number];
+  image: string;
 }
 
 export interface IJigsawPieceWithRender extends IJigsawPiece {

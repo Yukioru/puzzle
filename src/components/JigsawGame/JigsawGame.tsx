@@ -1,21 +1,40 @@
 'use client';
 
-import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { IJigsawGame } from "~/types";
 import { JigsawBoard } from "../JigsawBoard";
 import { SmartJigsawPiece } from "../SmartJigsawPiece";
 import { JigsawPiece } from "../JigsawPiece";
 import { Stock } from "../Stock";
 
-import hsr from '~/assets/images/hsr.png'
-import { getDimensions } from "~/utils";
-import { HTMLProps, useEffect, useRef } from "react";
+import { getDimensions } from "~/utils/getDimentions";
+import { HTMLProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import styles from './JigsawGame.module.css';
 import clsx from "clsx";
 
 type JigsawGameProps = IJigsawGame & HTMLProps<HTMLDivElement> & {
   showStock?: boolean;
+}
+
+interface PiecePosition {
+  x: number;
+  y: number;
+}
+
+function generateDefaultPiecesPosition(pieces: IJigsawGame['pieces']) {
+
+  const positions: Record<string, PiecePosition> = {};
+  pieces.forEach((piece) => {
+    if (piece) {
+      positions[piece.id] = {
+        x: 0,
+        y: 0
+      };
+    }
+  });
+  
+  return positions;
 }
 
 export function JigsawGame({
@@ -32,6 +51,7 @@ export function JigsawGame({
   const baseRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const { rows, cols } = getDimensions(difficulty);
+  const [piecesPosition, setPiecesPosition] = useState(generateDefaultPiecesPosition(playablePieces));
 
   const handlePieceRotate = (pieceId: string, newSides: unknown) => {
     console.log('Piece rotated:', pieceId, newSides);
@@ -68,7 +88,7 @@ export function JigsawGame({
       const piece = Math.floor(Math.min(pieceByWidth, pieceByHeight));
       
       if (baseRef.current && Number.isFinite(piece) && piece > 0) {
-        baseRef.current.style.setProperty('--piece-size', `${piece}px`);
+        baseRef.current.style.setProperty('--piece-size', `${piece - 1}px`);
       }
     };
 
@@ -91,33 +111,49 @@ export function JigsawGame({
     };
   }, [cols, rows]);
 
-  const boardPieces = pieces.map((piece, index) => {
+  const boardPieces = useMemo(() => pieces.map((piece, index) => {
     if (!piece) {
       return {
         id: `empty-${index}`,
         sides: [0, 0, 0, 0] as [number, number, number, number],
-        render: null
+        render: null,
+        image: '',
       };
     }
     
     return {
       id: piece.id,
       sides: piece.sides,
+      image: piece.image,
       render: (
         <SmartJigsawPiece
           key={piece.id}
           id={piece.id}
           initialSides={piece.sides}
         >
-          <JigsawPiece image={hsr.src} sides={piece.sides} />
+          <JigsawPiece image={piece.image} sides={piece.sides} />
         </SmartJigsawPiece>
       )
     };
-  });
+  }), [pieces]);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    console.log('Drag ended:', event);
+    setPiecesPosition((prev) => {
+      const prevEl = prev[event.active.id];
+      return {
+        ...prev,
+        [event.active.id]: {
+          x:  prevEl.x + event.delta.x,
+          y: prevEl.y + event.delta.y,
+        },
+      };
+    });
+  }, []);
 
   return (
     <div ref={baseRef} className={clsx(styles.base, className)} {...props}>
-      <DndContext id={id} sensors={sensors}>
+      <DndContext id={id} sensors={sensors} onDragEnd={handleDragEnd}>
         <div className={styles.board}>
           <JigsawBoard
             ref={boardRef}
@@ -129,17 +165,23 @@ export function JigsawGame({
         {showStock && (
           <div className={styles.stock}>
             <Stock>
-              {playablePieces.map(piece => (
-                <SmartJigsawPiece
-                  isInteractable
-                  key={piece.id}
-                  id={piece.id}
-                  initialSides={piece.sides}
-                  onClick={(newSides) => handlePieceRotate(piece.id, newSides)}
-                >
-                  <JigsawPiece image={hsr.src} sides={piece.sides} />
-                </SmartJigsawPiece>
-              ))}
+              {playablePieces.map(piece => {
+                const pieceCoords = piecesPosition[piece.id];
+                return (
+                  <div className={styles.reserve} key={piece.id}>
+                    <SmartJigsawPiece
+                      isInteractable
+                      key={piece.id}
+                      id={piece.id}
+                      coords={pieceCoords}
+                      initialSides={piece.sides}
+                      onClick={(newSides) => handlePieceRotate(piece.id, newSides)}
+                    >
+                      <JigsawPiece image={piece.image} sides={piece.sides} />
+                    </SmartJigsawPiece>
+                  </div>
+                );
+              })}
             </Stock>
           </div>
         )}

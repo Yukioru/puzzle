@@ -5,12 +5,17 @@ import styles from './SmartJigsawPiece.module.css';
 import { IJigsawPiece } from "~/types";
 import { useDraggable, useDndMonitor } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import clsx from "clsx";
 
 interface SmartJigsawPieceProps {
   id: IJigsawPiece['id'];
   initialSides: IJigsawPiece['sides'];
   onClick?: (newSides: IJigsawPiece['sides'], event: MouseEvent<HTMLDivElement>) => void;
   isInteractable?: boolean;
+  coords?: {
+    x: number;
+    y: number;
+  }
 }
 
 export function SmartJigsawPiece({
@@ -18,6 +23,7 @@ export function SmartJigsawPiece({
   initialSides,
   onClick,
   children,
+  coords,
   isInteractable = false
 }: PropsWithChildren<SmartJigsawPieceProps>) {
   const [rotation, setRotation] = useState(0);
@@ -57,16 +63,26 @@ export function SmartJigsawPiece({
     ];
     onClick?.(newSides, event);
   }, [onClick, rotation, initialSides, isDragging, isInteractable]);
-  
+ 
+  const coordsStyle: CSSProperties = {};
+  if (coords?.x && coords?.y) {
+    coordsStyle.left = coords.x;
+    coordsStyle.top = coords.y;
+  }
+
   return (
     <div
       ref={setNodeRef}
       {...(isInteractable ? listeners : {})}
       {...(isInteractable ? attributes : {})}
       onClick={handleClick}
+      className={clsx(styles.base, {
+        [styles.interactable]: isInteractable,
+        [styles.dragging]: isDragging,
+      })}
       style={{
-        cursor: isInteractable ? 'pointer' : 'default',
         transform: CSS.Translate.toString(transform),
+        ...coordsStyle,
       }}
     >
       <div

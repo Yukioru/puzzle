@@ -3,7 +3,7 @@
   border: var(--corner) solid;
   border-image-source: var(--card-border-source);
   border-image-slice: 3;
-  padding: calc(var(--corner) * 2.5);
+  padding: calc(var(--corner) * 2.2);
   filter: drop-shadow(0 0 12px rgba(0,0,0,0.2));
   background-color: rgba(34, 88, 66, 0.2);
 }
@@ -11,7 +11,5 @@
 .base {
   display: grid;
   grid-template-columns: repeat(2, var(--piece-size));
-  gap: 6.5rem;
-
-  > * { min-width: 0; min-height: 0; }
+  gap: 3rem;
 }

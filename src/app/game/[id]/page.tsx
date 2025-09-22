@@ -9,7 +9,6 @@ export default async function Game({ params }: Readonly<GameProps>) {
   const { id } = await params;
 
   const data = await getGameById(id);
-  console.log('Game data:', data);
 
   return <JigsawGame showStock {...data} />;
 }
