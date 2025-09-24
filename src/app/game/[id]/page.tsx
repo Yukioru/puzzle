@@ -1,5 +1,5 @@
 import { getGameById } from "~/dal/queries";
-import GameScreen from "~/components/GameScreen";
+import GameScreen from "~/screens/GameScreen";
 
 interface GameProps {
   params: Promise<{ id: string }>;

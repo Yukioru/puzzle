@@ -3,7 +3,7 @@
 import { IJigsawGame } from "~/types";
 import styles from './GameScreen.module.css';
 import dynamic from "next/dynamic";
-import { LoadingScreen } from "../LoadingScreen";
+import { LoadingScreen } from "~/components/LoadingScreen";
 import { Suspense } from "react";
 
 const JigsawGame = dynamic(
@@ -11,7 +11,7 @@ const JigsawGame = dynamic(
   {
     ssr: false,
   }
-)
+);
 
 interface GameScreenProps {
   data: IJigsawGame;

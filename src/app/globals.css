@@ -1,8 +1,3 @@
-:root, :host {
-  --loading-animation-speed: 20s;
-  --loading-animation-cycle: 100%;
-}
-
 html,
 body {
   height: 100%;
