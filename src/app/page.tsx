@@ -1,5 +1,5 @@
 import { getGameById } from "~/dal/queries";
-import { JigsawGame } from "~/components/JigsawGame";
+import JigsawGame from "~/components/JigsawGame";
 import Link from "next/link";
 
 import styles from './page.module.css';

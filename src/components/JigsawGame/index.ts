@@ -1,1 +1,1 @@
-export { JigsawGame } from "./JigsawGame";
+export { default } from "./JigsawGame";

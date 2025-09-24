@@ -1,0 +1,51 @@
+.dotsDivider {
+  --dot-color: #666;
+  --dot-spacing: 8px;
+  
+  width: 100%;
+  height: 5px;
+  padding: 8px 0;
+  
+  /* Создаем точку как radial-gradient */
+  background-image: radial-gradient(
+    circle at 2.5px center,
+    var(--dot-color) 2.5px,
+    transparent 2.5px
+  );
+  
+  /* Размер одной "плитки" (точка + отступ) */
+  background-size: calc(5px + var(--dot-spacing)) 5px;
+  
+  /* Повторяем только по горизонтали */
+  background-repeat: repeat-x;
+  
+  /* Позиционируем точки */
+  background-position: 2.5px center;
+}
+
+/* Вариации цветов */
+.dotsDivider.light {
+  --dot-color: #ccc;
+}
+
+.dotsDivider.dark {
+  --dot-color: #333;
+}
+
+.dotsDivider.primary {
+  --dot-color: #007bff;
+}
+
+/* Анимация */
+.dotsDivider.animated {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}

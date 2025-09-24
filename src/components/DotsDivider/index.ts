@@ -1,0 +1,1 @@
+export { DotsDivider, default } from './DotsDivider';

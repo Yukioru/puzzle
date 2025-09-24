@@ -37,7 +37,7 @@ function generateDefaultPiecesPosition(pieces: IJigsawGame['pieces']) {
   return positions;
 }
 
-export function JigsawGame({
+export default function JigsawGame({
   id,
   difficulty,
   pieces,
