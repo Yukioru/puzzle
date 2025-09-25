@@ -1,7 +1,6 @@
 import { PropsWithChildren, ReactNode } from 'react';
 import styles from './Stock.module.css';
 import clsx from 'clsx';
-import Scrollbars from 'react-custom-scrollbars-2';
 
 interface StockProps {
   footer?: ReactNode;
