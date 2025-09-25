@@ -9,7 +9,7 @@ import clsx from 'clsx';
 
 export interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
   image: string;
-  sides: IJigsawPiece['sides'];
+  initialSides: IJigsawPiece['initialSides'];
   isShadow?: boolean;
 }
 
@@ -26,14 +26,14 @@ const DEPTH = 24;
 
 function JigsawPiece({
   image,
-  sides,
+  initialSides,
   className,
   isShadow,
   ...props
 }: JigsawPieceProps, ref: ForwardedRef<HTMLDivElement>) {
   const clipId = useId();
   const shapeId = useId();
-  const svgPath = puzzlePolygon(sides, {
+  const svgPath = puzzlePolygon(initialSides, {
     depth: DEPTH,
     headWidth: 25,
     neckWidth: 18,

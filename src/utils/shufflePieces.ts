@@ -18,13 +18,14 @@ export async function shufflePieces(
     if (missingIndices.includes(index)) {
       boardPieces[index] = {
         id: piece.id,
-        sides: [0, 0, 0, 0],
-        image: '',
+        initialSides: [...piece.initialSides],
+        image: piece.image,
+        isEmpty: true,
       };
       // Создаем глубокую копию паззла для playablePieces
       playablePieces.push({
         ...piece,
-        sides: [...piece.sides] as [number, number, number, number]
+        initialSides: [...piece.initialSides] as [number, number, number, number]
       });
     } else {
       boardPieces[index] = piece;
@@ -35,8 +36,8 @@ export async function shufflePieces(
     const rotations = Math.floor(Math.random() * 4);
     
     for (let i = 0; i < rotations; i++) {
-      const [top, right, bottom, left] = piece.sides;
-      piece.sides = [left, top, right, bottom];
+      const [top, right, bottom, left] = piece.initialSides;
+      piece.initialSides = [left, top, right, bottom];
     }
     
     if (rotations > 0 && piece.image) {

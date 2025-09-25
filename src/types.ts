@@ -1,9 +1,21 @@
+import { Over } from "@dnd-kit/core";
 import { ReactNode } from "react";
 
 export interface IJigsawPiece {
   id: string;
-  sides: [number, number, number, number];
+  initialSides: [number, number, number, number];
+  currentSides?: [number, number, number, number];
   image: string;
+  isMissed?: boolean;
+  isComplete?: boolean;
+  isEmpty?: boolean;
+  isOnBoard?: boolean;
+  isMatches?: boolean;
+  coords?: {
+    x: number;
+    y: number;
+  };
+  cellOver?: Over | null;
 }
 
 export interface IJigsawPieceWithRender extends IJigsawPiece {

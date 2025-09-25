@@ -46,7 +46,7 @@ export function generateInitialPieces(rows: number, cols: number): Partial<IJigs
     for (let col = 0; col < cols; col++) {
       pieces.push({
         id: `piece-${row}-${col}`,
-        sides: sidesMatrix[row][col] as [number, number, number, number],
+        initialSides: sidesMatrix[row][col] as [number, number, number, number],
       });
     }
   }

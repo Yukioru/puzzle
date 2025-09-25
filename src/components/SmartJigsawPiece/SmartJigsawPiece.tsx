@@ -9,8 +9,8 @@ import clsx from "clsx";
 
 interface SmartJigsawPieceProps {
   id: IJigsawPiece['id'];
-  initialSides: IJigsawPiece['sides'];
-  onClick?: (newSides: IJigsawPiece['sides'], event: MouseEvent<HTMLDivElement>) => void;
+  initialSides: IJigsawPiece['initialSides'];
+  onClick?: (newSides: IJigsawPiece['initialSides'], event: MouseEvent<HTMLDivElement>) => void;
   isInteractable?: boolean;
   isMatches?: boolean;
   coords?: {
@@ -59,7 +59,7 @@ export function SmartJigsawPiece({
     const newRotation = Math.round(rotation + 90);
     setRotation(newRotation);
     const times = (newRotation % 360) / 90;
-    const newSides: IJigsawPiece['sides'] = [
+    const newSides: IJigsawPiece['initialSides'] = [
       initialSides[(0 - times + 4) % 4],
       initialSides[(1 - times + 4) % 4],
       initialSides[(2 - times + 4) % 4],
