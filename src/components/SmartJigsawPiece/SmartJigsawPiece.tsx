@@ -12,10 +12,12 @@ interface SmartJigsawPieceProps {
   initialSides: IJigsawPiece['sides'];
   onClick?: (newSides: IJigsawPiece['sides'], event: MouseEvent<HTMLDivElement>) => void;
   isInteractable?: boolean;
+  isMatches?: boolean;
   coords?: {
     x: number;
     y: number;
-  }
+  };
+  className?: string;
 }
 
 export function SmartJigsawPiece({
@@ -24,7 +26,9 @@ export function SmartJigsawPiece({
   onClick,
   children,
   coords,
-  isInteractable = false
+  isInteractable = false,
+  isMatches = false,
+  className
 }: PropsWithChildren<SmartJigsawPieceProps>) {
   const [rotation, setRotation] = useState(0);
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ 
@@ -79,7 +83,8 @@ export function SmartJigsawPiece({
       className={clsx(styles.base, {
         [styles.interactable]: isInteractable,
         [styles.dragging]: isDragging,
-      })}
+        [styles.matches]: isMatches,
+      }, className)}
       style={{
         transform: CSS.Translate.toString(transform),
         ...coordsStyle,

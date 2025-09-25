@@ -1,7 +1,11 @@
 .base {
-  width: var(--piece-size);
-  height: var(--piece-size);
+  --_internal-piece-size: var(--_overrided-piece-size, var(--piece-size));
+  width: var(--_internal-piece-size);
+  height: var(--_internal-piece-size);
   cursor: default;
+
+  outline: none;
+  will-change: width, height;
 }
 
 .base.interactable {
@@ -11,9 +15,32 @@
 
 .base.dragging {
   z-index: 1000;
+  transition: width 0.15s ease-out, height 0.15s ease-out;
 }
 
 .inner {
   rotate: var(--_rotation, 0deg);
   transition: rotate 0.4s linear(0, 0.008 1.1%, 0.034 2.3%, 0.134 4.9%, 0.264 7.3%, 0.683 14.3%, 0.797 16.5%, 0.89 18.6%, 0.967 20.7%, 1.027 22.8%, 1.073 25%, 1.104 27.3%, 1.123 30.6%, 1.119 34.3%, 1.018 49.5%, 0.988 58.6%, 0.985 65.2%, 1 84.5%, 1);
+}
+
+.base.interactable svg > [data-id="stroke"] {
+  transition: stroke-width 0.15s ease-out, stroke 0.15s ease-out;
+  will-change: stroke-width, stroke;
+}
+
+.base.interactable:hover svg > [data-id="stroke"] {
+  stroke-width: 3;
+  stroke: whitesmoke;
+}
+
+.base.dragging svg > [data-id="stroke"],
+.base.dragging:hover svg > [data-id="stroke"] {
+  stroke-width: 3;
+  stroke: #f8b865;
+}
+
+.base.matches svg > [data-id="stroke"],
+.base.matches:hover svg > [data-id="stroke"] {
+  stroke-width: 3;
+  stroke: #65f58e;
 }

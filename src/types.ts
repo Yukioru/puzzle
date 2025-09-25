@@ -15,7 +15,7 @@ export type Difficulty = 'easy' | 'medium' | 'hard';
 export interface IJigsawGame {
   id: string;
   difficulty: Difficulty;
-  pieces: (IJigsawPiece | null)[];
+  pieces: IJigsawPiece[];
   initialPieces: IJigsawPiece[];
   playablePieces: IJigsawPiece[];
 }

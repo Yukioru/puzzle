@@ -1,15 +1,20 @@
 .frame {
-  --corner: 1.5em;
-  border: var(--corner) solid;
-  border-image-source: var(--card-border-source);
-  border-image-slice: 3;
-  padding: calc(var(--corner) * 2.2);
   filter: drop-shadow(0 0 12px rgba(0,0,0,0.2));
   background-color: rgba(34, 88, 66, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rem;
 }
 
 .base {
+  --_stock-piece-size: var(--_overrided-piece-size, var(--piece-size));
+
   display: grid;
-  grid-template-columns: repeat(2, var(--piece-size));
-  gap: 3rem;
+  grid-template-columns: repeat(2, var(--_stock-piece-size));
+  gap: min(4rem, 4vw);
+}
+
+.footer {
+  margin-top: auto;
 }

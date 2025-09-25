@@ -1,6 +1,5 @@
 .base {
   --piece-size: clamp(40px, 8vmin, 120px);
-  --card-border-source: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" fill="rgba(34, 88, 66, 0.6)"><path d="M0 0h2v2H0zm0 3h2v2H0zm0 3h2v2H0zm6 0h2v2H6zm0-3h2v2H6zM3 6h2v2H3zm0-6h2v2H3zm3 0h2v2H6z" /></svg>');
   display: flex;
   gap: 3rem;
 }
@@ -14,8 +13,30 @@
   min-height: 0;
 }
 
+.stock {
+  --_overrided-piece-size: min(7rem, var(--piece-size));
+}
+
 .reserve {
-  width: var(--piece-size);
-  height: var(--piece-size);
+  --_internal-piece-size: var(--_overrided-piece-size, var(--piece-size));
+  width: var(--_internal-piece-size);
+  height: var(--_internal-piece-size);
   position: relative;
+}
+
+.reservePiece {
+  position: absolute;
+  inset: 0;
+}
+
+.onBoard {
+  --_overrided-piece-size: var(--piece-size);
+}
+
+.resetButton {
+  all: unset;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 400;
 }

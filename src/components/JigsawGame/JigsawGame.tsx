@@ -1,6 +1,6 @@
 'use client';
 
-import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragMoveEvent, DragOverEvent, MouseSensor, TouchSensor, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { IJigsawGame } from "~/types";
 import { JigsawBoard } from "../JigsawBoard";
 import { SmartJigsawPiece } from "../SmartJigsawPiece";
@@ -8,7 +8,7 @@ import { JigsawPiece } from "../JigsawPiece";
 import { Stock } from "../Stock";
 
 import { getDimensions } from "~/utils/getDimentions";
-import { HTMLProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { HTMLProps, PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import styles from './JigsawGame.module.css';
 import clsx from "clsx";
@@ -20,21 +20,40 @@ type JigsawGameProps = IJigsawGame & HTMLProps<HTMLDivElement> & {
 interface PiecePosition {
   x: number;
   y: number;
+  isOnBoard?: boolean;
+  isMatches?: boolean;
+  isComplete?: boolean;
+  currentSides?: [number, number, number, number];
 }
 
 function generateDefaultPiecesPosition(pieces: IJigsawGame['pieces']) {
-
   const positions: Record<string, PiecePosition> = {};
   pieces.forEach((piece) => {
     if (piece) {
       positions[piece.id] = {
         x: 0,
-        y: 0
+        y: 0,
+        isOnBoard: false,
+        isMatches: false,
+        isComplete: false,
+        currentSides: piece.sides, // Изначально текущие стороны равны исходным
       };
     }
   });
   
   return positions;
+}
+
+function SystemBoard({ children }: PropsWithChildren) {
+  const { setNodeRef } = useDroppable({
+    id: 'system-board',
+  });
+
+  return (
+    <div ref={setNodeRef} className={styles.board}>
+      {children}
+    </div>
+  )
 }
 
 export default function JigsawGame({
@@ -44,7 +63,6 @@ export default function JigsawGame({
   playablePieces,
   showStock,
   className,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   initialPieces,
   ...props
 }: JigsawGameProps) {
@@ -53,9 +71,23 @@ export default function JigsawGame({
   const { rows, cols } = getDimensions(difficulty);
   const [piecesPosition, setPiecesPosition] = useState(generateDefaultPiecesPosition(playablePieces));
 
-  const handlePieceRotate = (pieceId: string, newSides: unknown) => {
+  const handlePieceRotate = useCallback((pieceId: string, newSides: [number, number, number, number]) => {
     console.log('Piece rotated:', pieceId, newSides);
-  };
+    
+    setPiecesPosition((prev) => {
+      const currentState = prev[pieceId];
+      
+      return {
+        ...prev,
+        [pieceId]: {
+          ...currentState,
+          currentSides: newSides, // Сохраняем текущие повернутые стороны
+          isMatches: false, // Сбрасываем isMatches при повороте
+          isComplete: false, // Также сбрасываем isComplete
+        },
+      };
+    });
+  }, []);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -111,13 +143,11 @@ export default function JigsawGame({
     };
   }, [cols, rows]);
 
-  const boardPieces = useMemo(() => pieces.map((piece, index) => {
-    if (!piece) {
+  const boardPieces = useMemo(() => pieces.map((piece) => {
+    if (!piece.image) {
       return {
-        id: `empty-${index}`,
-        sides: [0, 0, 0, 0] as [number, number, number, number],
+        ...piece,
         render: null,
-        image: '',
       };
     }
     
@@ -137,43 +167,134 @@ export default function JigsawGame({
     };
   }), [pieces]);
 
+  const isOnBoard = useCallback((event: DragEndEvent | DragMoveEvent | DragOverEvent) => {
+    return Boolean(event.collisions?.find(collision => collision.id === 'system-board'));
+  }, []);
+
+  const isMatches = useCallback(({
+    pieceId,
+    currentSides,
+    cellOver,
+  }: {
+    pieceId: string,
+    currentSides?: [number, number, number, number],
+    cellOver?: DragOverEvent['over'],
+  }) => {
+    if (!pieceId || !currentSides) return false;
+
+    const targetCell = initialPieces.find(piece => piece.id === pieceId);
+    const isOverTargetCell = targetCell && targetCell.id === cellOver?.id && targetCell.id === pieceId;
+    const isSidesMatch = JSON.stringify(currentSides) === JSON.stringify(targetCell?.sides);
+
+    return isOverTargetCell && isSidesMatch;
+  }, [initialPieces]);
+
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     console.log('Drag ended:', event);
+    const currentIsOnBoard = isOnBoard(event);
+    const pieceId = String(event.active.id);
+
     setPiecesPosition((prev) => {
       const prevEl = prev[event.active.id];
+      const currentSides = prevEl.currentSides;
+      
+      const currentIsMatches = currentIsOnBoard && isMatches({
+        pieceId,
+        currentSides,
+        cellOver: event.over,
+      });
+
       return {
         ...prev,
         [event.active.id]: {
+          ...prevEl,
           x:  prevEl.x + event.delta.x,
           y: prevEl.y + event.delta.y,
+          isOnBoard: currentIsOnBoard,
+          isMatches: false,
+          isComplete: currentIsMatches,
         },
       };
     });
-  }, []);
+  }, [isOnBoard, isMatches]);
+
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    const currentIsOnBoard = isOnBoard(event);
+    const pieceId = String(event.active.id);
+
+    console.log('Target cell on drag over:', {
+      myCell: pieceId,
+      event,
+    });
+
+    setPiecesPosition((prev) => {
+      const currentSides = prev[event.active.id]?.currentSides;
+      const currentIsMatches = currentIsOnBoard && isMatches({
+        pieceId,
+        currentSides,
+        cellOver: event.over,
+      });
+      return {
+        ...prev,
+        [event.active.id]: {
+          ...prev[event.active.id],
+          isOnBoard: currentIsOnBoard,
+          isMatches: currentIsMatches,
+        },
+      };
+    });
+  }, [isOnBoard, isMatches]);
+
+  const handleReset = useCallback(() => {
+    setPiecesPosition(generateDefaultPiecesPosition(playablePieces));
+  }, [playablePieces]);
 
   return (
     <div ref={baseRef} className={clsx(styles.base, className)} {...props}>
-      <DndContext id={id} sensors={sensors} onDragEnd={handleDragEnd}>
-        <div className={styles.board}>
+      <DndContext
+        id={id}
+        sensors={sensors}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+      >
+        <SystemBoard>
           <JigsawBoard
             ref={boardRef}
             rows={rows}
             cols={cols}
             pieces={boardPieces}
           />
-        </div>
+        </SystemBoard>
         {showStock && (
           <div className={styles.stock}>
-            <Stock>
+            <Stock
+              footer={(
+                <button
+                  className={styles.resetButton}
+                  onClick={handleReset}
+                >
+                  Вернуть фрагменты
+                </button>
+              )}
+            >
               {playablePieces.map(piece => {
-                const pieceCoords = piecesPosition[piece.id];
+                const pieceState = piecesPosition[piece.id];
                 return (
                   <div className={styles.reserve} key={piece.id}>
+                    <JigsawPiece isShadow image={piece.image} sides={piece.sides}className={styles.reservePiece} />
+
                     <SmartJigsawPiece
+                      className={clsx({
+                        [styles.onBoard]: pieceState?.isOnBoard,
+                      })}
+                      isMatches={pieceState?.isMatches}
                       isInteractable
                       key={piece.id}
                       id={piece.id}
-                      coords={pieceCoords}
+                      coords={{
+                        x: pieceState?.x || 0,
+                        y: pieceState?.y || 0,
+                      }}
                       initialSides={piece.sides}
                       onClick={(newSides) => handlePieceRotate(piece.id, newSides)}
                     >

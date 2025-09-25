@@ -2,3 +2,13 @@
   margin: calc(0% - var(--_depth));
   pointer-events: none;
 }
+
+.base.shadow {
+  scale: 0.99;
+}
+
+.base.shadow > svg > [data-id="stroke"] {
+  fill: rgba(255, 255, 255, 0.2);
+  stroke-width: 2px;
+  stroke: whitesmoke;
+}

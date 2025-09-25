@@ -6,18 +6,26 @@ import sharp from "sharp";
 export async function shufflePieces(
   pieces: IJigsawPiece[],
   difficulty: Difficulty
-): Promise<{ pieces: (IJigsawPiece | null)[], playablePieces: IJigsawPiece[] }> {
+): Promise<{ pieces: IJigsawPiece[], playablePieces: IJigsawPiece[] }> {
   const { initialMissing, rows, cols } = getDimensions(difficulty);
   
   const missingIndices = selectPiecesToRemove(rows, cols, initialMissing);
   
-  const boardPieces: (IJigsawPiece | null)[] = [];
+  const boardPieces: IJigsawPiece[] = [];
   const playablePieces: IJigsawPiece[] = [];
   
   pieces.forEach((piece, index) => {
     if (missingIndices.includes(index)) {
-      boardPieces[index] = null;
-      playablePieces.push(piece);
+      boardPieces[index] = {
+        id: piece.id,
+        sides: [0, 0, 0, 0],
+        image: '',
+      };
+      // Создаем глубокую копию паззла для playablePieces
+      playablePieces.push({
+        ...piece,
+        sides: [...piece.sides] as [number, number, number, number]
+      });
     } else {
       boardPieces[index] = piece;
     }

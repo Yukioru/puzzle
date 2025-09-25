@@ -1,14 +1,25 @@
 import type { Metadata } from "next";
 import type { PropsWithChildren } from "react";
-import { Geologica } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 import styles from './layout.module.css';
 
-const geologica = Geologica({
-  variable: "--font-geologica",
-  subsets: ["latin", "cyrillic"],
-});
+const honkai = localFont({
+  variable: "--font-honkai",
+  src: [
+    {
+      path: '../assets/fonts/medium.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../assets/fonts/bold.woff2',
+      weight: '700',
+      style: 'normal',
+    }
+  ],
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -29,7 +40,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<PropsWithChildren>) {
   return (
-    <html lang="ru" className={geologica.variable}>
+    <html lang="ru" className={honkai.variable}>
       <body>
         <main className={styles.base}>
           {children}

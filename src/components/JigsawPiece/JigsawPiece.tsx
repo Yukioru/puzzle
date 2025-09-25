@@ -10,6 +10,7 @@ import clsx from 'clsx';
 export interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
   image: string;
   sides: IJigsawPiece['sides'];
+  isShadow?: boolean;
 }
 
 // Sides - top, right, bottom, left
@@ -27,9 +28,11 @@ function JigsawPiece({
   image,
   sides,
   className,
+  isShadow,
   ...props
 }: JigsawPieceProps, ref: ForwardedRef<HTMLDivElement>) {
   const clipId = useId();
+  const shapeId = useId();
   const svgPath = puzzlePolygon(sides, {
     depth: DEPTH,
     headWidth: 25,
@@ -50,28 +53,41 @@ function JigsawPiece({
       {...props}
     >
       <div 
-        className={styles.base}
+        className={clsx(styles.base, {
+          [styles.shadow]: isShadow,
+        })}
         style={{
           '--_depth': `${DEPTH}%`,
         } as CSSProperties}
       >
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlnsXlink="http://www.w3.org/1999/xlink"
+        >
           <defs>
+            <path id={shapeId} d={svgPath} />
             <clipPath id={clipId}>
-              <path d={svgPath} />
+              <use xlinkHref={`#${shapeId}`} />
             </clipPath>
           </defs>
-          <image
-            href={image}
-            height="100%"
-            width="100%"
+          {!isShadow && (
+            <image
+              href={image}
+              height="100%"
+              width="100%"
+              clipPath={`url(#${clipId})`}
+            />
+          )}
+          <use
+            data-id="stroke"
+            xlinkHref={`#${shapeId}`}
             clipPath={`url(#${clipId})`}
-          />
-          <path 
-            d={svgPath}
             fill="none"
             stroke="rgba(30, 39, 35, 0.4)" 
             strokeWidth="1"
+            className={styles.stroke}
           />
         </svg>
       </div>
