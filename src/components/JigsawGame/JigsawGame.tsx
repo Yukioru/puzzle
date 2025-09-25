@@ -1,6 +1,9 @@
 'use client';
 
-import { DndContext, DragEndEvent, DragMoveEvent, DragOverEvent, MouseSensor, TouchSensor, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragMoveEvent, DragOverEvent, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { HTMLProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import clsx from "clsx";
+import { MdOutlineMoveDown } from "react-icons/md";
 import { IJigsawGame } from "~/types";
 import { JigsawBoard } from "../JigsawBoard";
 import { SmartJigsawPiece } from "../SmartJigsawPiece";
@@ -8,13 +11,16 @@ import { JigsawPiece } from "../JigsawPiece";
 import { Stock } from "../Stock";
 
 import { getDimensions } from "~/utils/getDimentions";
-import { HTMLProps, PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import styles from './JigsawGame.module.css';
-import clsx from "clsx";
+import { IconTextButton } from "../IconTextButton";
+import { SystemBoard } from "../SystemBoard/SystemBoard";
 
 type JigsawGameProps = IJigsawGame & HTMLProps<HTMLDivElement> & {
   showStock?: boolean;
+  stockClassName?: string;
+  stockWrapperClassName?: string;
+  boardClassName?: string;
 }
 
 function resetPlayablePieces(playablePieces: IJigsawGame['playablePieces']) {
@@ -28,24 +34,15 @@ function resetPlayablePieces(playablePieces: IJigsawGame['playablePieces']) {
   }));
 }
 
-function SystemBoard({ children }: PropsWithChildren) {
-  const { setNodeRef } = useDroppable({
-    id: 'system-board',
-  });
-
-  return (
-    <div ref={setNodeRef} className={styles.board}>
-      {children}
-    </div>
-  )
-}
-
 export default function JigsawGame({
   id,
   difficulty,
   pieces: initialBoardPieces,
   playablePieces: initialPlayablePieces,
   showStock,
+  stockClassName,
+  stockWrapperClassName,
+  boardClassName,
   className,
   initialPieces,
   ...props
@@ -297,7 +294,7 @@ export default function JigsawGame({
         onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
       >
-        <SystemBoard>
+        <SystemBoard className={boardClassName}>
           <JigsawBoard
             ref={boardRef}
             rows={rows}
@@ -306,15 +303,18 @@ export default function JigsawGame({
           />
         </SystemBoard>
         {showStock && (
-          <div className={styles.stock}>
+          <div className={clsx(styles.stock, stockWrapperClassName)}>
             <Stock
+              className={stockClassName}
               footer={(
-                <button
+                <IconTextButton
+                  size="large"
                   className={styles.resetButton}
                   onClick={handleReset}
+                  icon={<MdOutlineMoveDown />}
                 >
                   Вернуть фрагменты
-                </button>
+                </IconTextButton>
               )}
             >
               {playablePieces.map(piece => {

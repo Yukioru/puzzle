@@ -1,0 +1,39 @@
+.base {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-block: 0.5rem;
+  padding-inline: 1rem;
+
+  font-size: 1.75rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  color: whitesmoke;
+  cursor: pointer;
+}
+
+.base.medium {
+  --_icon-size: 2.625rem;
+}
+
+.base.large {
+  --_icon-size: 3.75rem;
+}
+
+.icon {
+  width: var(--_icon-size);
+  height: var(--_icon-size);
+  font-size: calc(var(--_icon-size) * 0.6);
+  background-color: whitesmoke;
+  border-radius: 100vw;
+  color: #131313;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon svg {
+  position: relative;
+  left: 1px;
+}

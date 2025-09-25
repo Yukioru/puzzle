@@ -1,20 +1,17 @@
 .base {
   --piece-size: clamp(40px, 8vmin, 120px);
   display: flex;
+  flex-direction: column;
   gap: 3rem;
 }
 
-.board {
-  flex-grow: 1;
-}
-
-.board, .stock {
+.stock {
   min-width: 0;
   min-height: 0;
 }
 
 .stock {
-  --_overrided-piece-size: min(7rem, var(--piece-size));
+  --_overrided-piece-size: min(8rem, calc(1.5 * var(--piece-size)));
 }
 
 .reserve {
@@ -33,10 +30,47 @@
   --_overrided-piece-size: var(--piece-size);
 }
 
-.resetButton {
-  all: unset;
-  cursor: pointer;
-  padding: 0.5rem;
+.resetButton.resetButton {
+  --_icon-size: 2.375rem;
+  gap: 0.75rem;
+  padding-inline: 3rem;
   font-size: 1.125rem;
-  font-weight: 400;
+}
+
+@media screen and (min-width: 992px) {
+  .stock {
+    --_overrided-piece-size: min(5rem, var(--piece-size));
+  }
+  .base {
+    flex-direction: row;
+  }
+  .resetButton.resetButton {
+    --_icon-size: 2.625rem;
+    gap: 0.75rem;
+    padding-inline: 3rem;
+    font-size: 1.375rem;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .resetButton.resetButton {
+    gap: 1.2rem;
+    font-size: 1.75rem;
+    --_icon-size: 3.75rem;
+  }
+}
+
+@media screen and (min-width: 1600px) {
+  .stock {
+    --_overrided-piece-size: min(6rem, var(--piece-size));
+  }
+}
+
+@media screen and (min-width: 2000px) {
+  .stock {
+    --_overrided-piece-size: min(7rem, var(--piece-size));
+  }
+  .resetButton.resetButton {
+    gap: 1.2rem;
+  }
 }

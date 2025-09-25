@@ -1,0 +1,27 @@
+.base {
+  height: 1px;
+  background-color: whitesmoke;
+  position: relative;
+  opacity: 0.75;
+}
+
+.base::before,
+.base::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  background-color: white;
+  border: 1px solid lightgray;
+  border-radius: 100vw;
+}
+
+.base::before {
+  left: 0;
+}
+
+.base::after {
+  right: 0;
+}

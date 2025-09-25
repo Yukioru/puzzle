@@ -1,10 +1,15 @@
 'use client';
 
-import { IJigsawGame } from "~/types";
-import styles from './GameScreen.module.css';
+import { Suspense } from "react";
+import { FaRegSave } from "react-icons/fa";
+import { FaPuzzlePiece, FaInfo } from "react-icons/fa6";
 import dynamic from "next/dynamic";
 import { LoadingScreen } from "~/components/LoadingScreen";
-import { Suspense } from "react";
+import { IJigsawGame } from "~/types";
+
+import styles from './GameScreen.module.css';
+import { Divider } from "~/components/Divider";
+import { IconTextButton } from "~/components/IconTextButton";
 
 const JigsawGame = dynamic(
   () => import('~/components/JigsawGame'),
@@ -21,7 +26,39 @@ export default function GameScreen({ data }: GameScreenProps) {
   return (
     <Suspense fallback={<LoadingScreen />}>
       <div className={styles.base}>
-        <JigsawGame showStock {...data} />
+        <div className={styles.header}>
+          <div className={styles.heading}>
+            <div className={styles.title}>
+              <FaPuzzlePiece />
+              Мозаика грёз
+            </div>
+            <Divider className={styles.divider} />
+            <div className={styles.subtitle}>
+              Перетаскивайте фрагменты,<br />
+              чтобы собрать Мозаику грёз
+            </div>
+          </div>
+          <div className={styles.actions}>
+            <IconTextButton icon={<FaRegSave />} className={styles.button}>
+              Сохранить
+            </IconTextButton>
+            <IconTextButton icon={<FaInfo />} className={styles.button}>
+              Правила
+            </IconTextButton>
+          </div>
+        </div>
+        <JigsawGame
+          showStock
+          boardClassName={styles.board}
+          stockWrapperClassName={styles.stockWrapper}
+          stockClassName={styles.stockFrame}
+          {...data}
+        />
+        <div className={styles.footer}>
+          <div className={styles.footerMessage}>
+            Чтобы повернуть фрагмент, нажмите на него
+          </div>
+        </div>
       </div>
     </Suspense>
   );

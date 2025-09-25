@@ -8,10 +8,10 @@ interface DroppableContainerProps {
 }
 
 export function DroppableContainer({ id, children }: PropsWithChildren<DroppableContainerProps>) {
-  const { isOver, setNodeRef } = useDroppable({ id });
+  const { setNodeRef } = useDroppable({ id });
   
   return (
-    <div ref={setNodeRef} style={{ outline: isOver ? '2px solid blue' : 'none' }}>
+    <div ref={setNodeRef}>
       {children}
     </div>
   );

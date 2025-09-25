@@ -1,4 +1,4 @@
-import { IJigsawGame } from "~/types";
+import { Difficulty, IJigsawGame } from "~/types";
 import { getDimensions } from "~/utils/getDimentions";
 import { shufflePieces } from "~/utils/shufflePieces";
 import { generateInitialPieces } from "~/utils/generateInitialPieces";
@@ -8,9 +8,7 @@ import { attachImageToPieces } from "~/utils/attachImageToPieces";
 
 const imagesFolder = '/boards';
 
-export async function getGameById(id: string): Promise<IJigsawGame> {
-  const difficulty = 'easy';
-
+export async function getGameById(id: string, difficulty: Difficulty = 'easy'): Promise<IJigsawGame> {
   const imagesPath = path.join(process.cwd(), 'public', imagesFolder);
   const imageFiles = fs.readdirSync(imagesPath).filter(file => /\.(jpe?g|png|webp)$/i.test(file));
   if (imageFiles.length === 0) {
