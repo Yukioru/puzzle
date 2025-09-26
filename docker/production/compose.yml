@@ -14,6 +14,7 @@ services:
     networks:
       - traefik
     labels:
+      - com.centurylinklabs.watchtower.enable=true
       - traefik.enable=true
       - traefik.http.routers.hsr-puzzle-prod.rule=Host(`puzzle.yukio.ru`)
       - traefik.http.routers.hsr-puzzle-prod.middlewares=gzip@file,hsts@file
@@ -24,3 +25,13 @@ services:
       - traefik.http.routers.hsr-puzzle-prod.tls.domains[0].main=yukio.ru
       - traefik.http.routers.hsr-puzzle-prod.tls.domains[0].sans=*.yukio.ru
       - traefik.http.services.hsr-puzzle-prod.loadbalancer.server.port=3000
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower-hsr-puzzle-prod
+    restart: always
+    networks:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --interval 300 hsr-puzzle-prod
