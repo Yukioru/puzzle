@@ -31,4 +31,4 @@ services:
       - traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --cleanup --interval 600 hsr-puzzle-prod
+    command: --cleanup --interval 600 --log-level error hsr-puzzle-prod
