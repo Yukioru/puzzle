@@ -28,7 +28,8 @@ jobs:
         id: vars
         run: |
           TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
-
+          REPO_LC=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
+      
           if [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
             echo "TAG_LATEST=dev-latest" >> $GITHUB_ENV
             echo "TAG_TIME=dev-${TIMESTAMP}" >> $GITHUB_ENV
@@ -38,8 +39,8 @@ jobs:
             echo "TAG_TIME=prod-${TIMESTAMP}" >> $GITHUB_ENV
             echo "DOCKERFILE=docker/production/Dockerfile" >> $GITHUB_ENV
           fi
-
-          echo "IMAGE_BASE=ghcr.io/${GITHUB_REPOSITORY}/hsr-puzzle" >> $GITHUB_ENV
+      
+          echo "IMAGE_BASE=ghcr.io/${REPO_LC}/hsr-puzzle" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: |
