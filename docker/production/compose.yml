@@ -5,10 +5,7 @@ networks:
 
 services:
   hsr-puzzle-prod:
-    build:
-      context: ../../
-      dockerfile: docker/production/Dockerfile
-    image: hsr-puzzle-prod
+    image: ghcr.io/yukioru/puzzle/hsr-puzzle:prod-latest
     container_name: hsr-puzzle-prod
     restart: always
     networks:
@@ -34,4 +31,4 @@ services:
       - traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --cleanup --interval 300 hsr-puzzle-prod
+    command: --cleanup --interval 600 hsr-puzzle-prod
