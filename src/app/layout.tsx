@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { PropsWithChildren } from "react";
 import localFont from "next/font/local";
 import "./globals.css";
 
 import styles from './layout.module.css';
+import { GlobalContextProvider } from "~/contexts/GlobalContext";
 
 const honkai = localFont({
   variable: "--font-honkai",
@@ -19,7 +20,14 @@ const honkai = localFont({
       style: 'normal',
     }
   ],
-})
+});
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -42,9 +50,9 @@ export default function RootLayout({ children }: Readonly<PropsWithChildren>) {
   return (
     <html lang="ru" className={honkai.variable}>
       <body>
-        <main className={styles.base}>
+        <GlobalContextProvider className={styles.base}>
           {children}
-        </main>
+        </GlobalContextProvider>
       </body>
     </html>
   );

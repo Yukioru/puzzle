@@ -5,6 +5,20 @@
   flex-direction: column;
 }
 
+.base .stockFrame,
+.base .footer,
+.base .board {
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.5, 0, 0.75, 0);
+}
+
+.base.loaded .stockFrame,
+.base.loaded .footer,
+.base.loaded .board {
+  opacity: 1;
+}
+
+
 .header {
   display: flex;
   justify-content: space-between;

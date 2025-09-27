@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { FaRegSave } from "react-icons/fa";
 import { FaPuzzlePiece, FaInfo } from "react-icons/fa6";
 import dynamic from "next/dynamic";
@@ -10,6 +10,7 @@ import { IJigsawGame } from "~/types";
 import styles from './GameScreen.module.css';
 import { Divider } from "~/components/Divider";
 import { IconTextButton } from "~/components/IconTextButton";
+import clsx from "clsx";
 
 const JigsawGame = dynamic(
   () => import('~/components/JigsawGame'),
@@ -23,9 +24,21 @@ interface GameScreenProps {
 }
 
 export default function GameScreen({ data }: GameScreenProps) {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoaded(true);
+    }, 200);
+  }, []);
+  
   return (
     <Suspense fallback={<LoadingScreen />}>
-      <div className={styles.base}>
+      <div
+        className={clsx(styles.base, {
+          [styles.loaded]: isLoaded,
+        })}
+      >
         <div className={styles.header}>
           <div className={styles.heading}>
             <div className={styles.title}>

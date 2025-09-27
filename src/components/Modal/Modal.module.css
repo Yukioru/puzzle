@@ -1,0 +1,80 @@
+.modal {
+  --_offset-padding: 0.75rem;
+  position: absolute;
+
+  top: 20vh;
+
+  left: 0;
+  right: 0;
+  transform: translateY(20%);
+  margin: 0 auto;
+
+  width: 100%;
+  max-width: calc(1360px + var(--_offset-padding) * 2);
+  min-height: 18.75rem;
+  padding: var(--_offset-padding);
+  outline: none;
+
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.13, 0, 0.39, 0);
+}
+
+.overlay:global(.ReactModal__Overlay--after-open) .modal {
+  opacity: 1;
+  transform: translateY(0%);
+  transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0, 0.55, 0.45, 1);
+}
+
+.overlay:global(.ReactModal__Overlay--before-close) .modal {
+  opacity: 0;
+  transform: translateY(20%);
+  transition: opacity 0.4s ease-out, transform 0.3s cubic-bezier(0.13, 0, 0.39, 0);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(3rem) contrast(1.25);
+
+  opacity: 0;
+  transition-property: opacity;
+  transition-timing-function: ease-out;
+  transition-duration: 0.2s;
+}
+
+.overlay:global(.ReactModal__Overlay--after-open) {
+  opacity: 1;
+  transition-duration: 0.2s;
+}
+
+.overlay:global(.ReactModal__Overlay--before-close) {
+  opacity: 0;
+  transition-duration: 0.4s;
+}
+
+.content {
+  --_modal-background: #dfddda;
+  --_radius: 3.75rem;
+  background-color: var(--_modal-background);
+  border-top-right-radius: var(--_radius);
+  color: #131313;
+  flex: 1;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.content::before {
+  content: '';
+  position: absolute;
+  top: var(--_offset-padding);
+  left: calc(var(--_offset-padding) * -1);
+  right: var(--_offset-padding);
+  bottom: calc(var(--_offset-padding) * -1);
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+  z-index: -1;
+}

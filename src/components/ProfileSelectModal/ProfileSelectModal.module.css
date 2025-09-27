@@ -1,0 +1,182 @@
+.trigger {
+  display: contents;
+}
+
+.content {
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.info {
+  position: relative;
+  isolation: isolate;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image {
+  user-select: none;
+  pointer-events: none;
+  width: 320px;
+  height: auto;
+  display: flex;
+}
+
+.infoOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.infoContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 197px;
+  gap: 2rem;
+}
+
+.selectedImage {
+  border-radius: 100vw;
+  user-select: none;
+  pointer-events: none;
+}
+
+.selectedTitle {
+  font-size: 2rem;
+  color: #434344;
+  text-align: center;
+}
+
+.profilesWrapper {
+  width: 100%;
+  padding-top: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.profilesTitle {
+  font-size: 2.375rem;
+  padding-bottom: 1rem;
+}
+
+.scrollWrapper {
+  flex: 1;
+  position: relative;
+  border-top: 2px solid #a68f78;
+}
+
+.scrollWrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2rem;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 0%, var(--_modal-background) 90%);
+}
+
+.profiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.75rem;
+  padding-block: 1.125rem;
+  padding-inline: 0.75rem;
+}
+
+.profile {
+  width: 130px;
+  height: 130px;
+  border-radius: 100vw;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+  background-color: #cabea5;
+}
+
+.profile::before {
+  content: '';
+  position: absolute;
+  display: block;
+  border-radius: 100vw;
+  inset: 0;
+  box-shadow: inset 0 0 0 3px #a68f78;
+}
+
+.profileImage {
+  user-select: none;
+  pointer-events: none;
+}
+
+.scrollbarTrack {
+  position: absolute;
+  width: 6px;
+  right: 2px;
+  bottom: 36px;
+  top: 24px;
+  background-color: #cdc2c1;
+}
+
+.scrollbarThumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  background-color: #575353
+}
+
+.footer {
+  background-color: #262626;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 24px;
+  padding-block: 32px;
+  gap: 2rem;
+}
+
+.actionButton {
+  padding: 1rem 3rem;
+  font-size: 2rem;
+  line-height: 2.25rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+  .content {
+    padding: 0 36px;
+    gap: 6rem;
+  }
+  .footer {
+    padding-inline: 36px;
+  }
+}
+
+@media screen and (min-width: 992px) {
+  .content {
+    padding: 0 64px;
+    flex-direction: row;
+    gap: 6rem;
+  }
+  .info {
+    padding-bottom: 6.25rem;
+  }
+  .footer {
+    padding-inline: 48px;
+    flex-direction: row;
+    gap: 4rem;
+  }
+}

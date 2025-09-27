@@ -4,60 +4,11 @@ import { LoadingDotsBright } from "./components/LoadingDotsBright";
 import { Window } from "./components/Window";
 import { Line } from "./components/Line";
 
-import hertaSpaceStation from '~/assets/loadings/loading-herta-space-station.webp';
-import jariloVI from '~/assets/loadings/loading-jarilo-vi.webp';
-import xianzhouLuofu from '~/assets/loadings/loading-xianzhou-luofu.webp';
-import penaconyReality from '~/assets/loadings/loading-penacony-reality.webp';
-import penaconyDreamscape from '~/assets/loadings/loading-penacony-dreamscape.webp';
-import amphoreusDawn from '~/assets/loadings/loading-amphoreus-dawn.webp';
-import amphoreusEvernight from '~/assets/loadings/loading-amphoreus-evernight.webp';
 
-import abundance from '~/assets/paths/abundance.webp';
-import destruction from '~/assets/paths/destruction.webp';
-import elation from '~/assets/paths/elation.webp';
-import enigmata from '~/assets/paths/enigmata.webp';
-import equilibrium from '~/assets/paths/equilibrium.webp';
-import erudition from '~/assets/paths/erudition.webp';
-import harmony from '~/assets/paths/harmony.webp';
-import hunt from '~/assets/paths/hunt.webp';
-import nihility from '~/assets/paths/nihility.webp';
-import order from '~/assets/paths/order.webp';
-import preservation from '~/assets/paths/preservation.webp';
-import propagation from '~/assets/paths/propagation.webp';
-import remembrance from '~/assets/paths/remembrance.webp';
-import trailblaze from '~/assets/paths/trailblaze.webp';
-import voracity from '~/assets/paths/voracity.webp';
 
 import styles from "./LoadingScreen.module.css";
 import Image from "next/image";
-
-const LOADING_IMAGES = [
-  hertaSpaceStation,
-  jariloVI,
-  xianzhouLuofu,
-  penaconyReality,
-  penaconyDreamscape,
-  amphoreusDawn,
-  amphoreusEvernight,
-];
-
-const LOADING_PATH_IMAGES = [
-  abundance,
-  destruction,
-  elation,
-  enigmata,
-  equilibrium,
-  erudition,
-  harmony,
-  hunt,
-  nihility,
-  order,
-  preservation,
-  propagation,
-  remembrance,
-  trailblaze,
-  voracity,
-];
+import { LOADING_IMAGES, LOADING_PATH_IMAGES } from "~/constants";
 
 function getRandomAssets(seed: number) {
   const imageIndex = Math.floor(seed * LOADING_IMAGES.length);
