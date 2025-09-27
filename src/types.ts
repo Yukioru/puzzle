@@ -5,7 +5,8 @@ export interface IJigsawPiece {
   id: string;
   initialSides: [number, number, number, number];
   currentSides?: [number, number, number, number];
-  image: string;
+  imageUrl: string;
+  imageRotation?: number;
   isMissed?: boolean;
   isComplete?: boolean;
   isEmpty?: boolean;

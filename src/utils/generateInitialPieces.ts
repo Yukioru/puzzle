@@ -1,6 +1,9 @@
-import { IJigsawPiece } from "~/types";
+import { Difficulty, IJigsawPiece } from "~/types";
+import { getDimensions } from "./getDimentions";
 
-export function generateInitialPieces(rows: number, cols: number): Partial<IJigsawPiece>[] {
+export function generateInitialPieces(difficulty: Difficulty): Partial<IJigsawPiece>[] {
+  const { rows, cols } = getDimensions(difficulty);
+
   const pieces: Partial<IJigsawPiece>[] = [];
   
   const sidesMatrix: number[][][] = [];

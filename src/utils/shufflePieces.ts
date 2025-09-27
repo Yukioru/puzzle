@@ -1,7 +1,6 @@
 import { Difficulty, IJigsawPiece } from "~/types";
 import { getDimensions } from "./getDimentions";
 import { selectPiecesToRemove } from "./selectPiecesToRemove";
-import sharp from "sharp";
 
 export async function shufflePieces(
   pieces: IJigsawPiece[],
@@ -19,10 +18,9 @@ export async function shufflePieces(
       boardPieces[index] = {
         id: piece.id,
         initialSides: [...piece.initialSides],
-        image: piece.image,
+        imageUrl: piece.imageUrl,
         isEmpty: true,
       };
-      // Создаем глубокую копию паззла для playablePieces
       playablePieces.push({
         ...piece,
         initialSides: [...piece.initialSides] as [number, number, number, number]
@@ -34,22 +32,12 @@ export async function shufflePieces(
   
   for (const piece of playablePieces) {
     const rotations = Math.floor(Math.random() * 4);
-    
     for (let i = 0; i < rotations; i++) {
       const [top, right, bottom, left] = piece.initialSides;
       piece.initialSides = [left, top, right, bottom];
     }
-    
-    if (rotations > 0 && piece.image) {
-      const imageData = piece.image.split(',')[1];
-      const buffer = Buffer.from(imageData, 'base64');
-      
-      const rotatedBuffer = await sharp(buffer)
-        .rotate(rotations * 90)
-        .jpeg()
-        .toBuffer();
-        
-      piece.image = `data:image/jpeg;base64,${rotatedBuffer.toString('base64')}`;
+    if (rotations > 0) {
+      piece.imageRotation = rotations * 90;
     }
   }
   

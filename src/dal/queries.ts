@@ -1,5 +1,4 @@
 import { Difficulty, IJigsawGame } from "~/types";
-import { getDimensions } from "~/utils/getDimentions";
 import { shufflePieces } from "~/utils/shufflePieces";
 import { generateInitialPieces } from "~/utils/generateInitialPieces";
 import fs from 'node:fs';
@@ -17,12 +16,9 @@ export async function getGameById(id: string, difficulty: Difficulty = 'easy'): 
   const randomImage = imageFiles[Math.floor(Math.random() * imageFiles.length)];
   const image = path.join(imagesFolder, randomImage);
 
-  const boardSize = getDimensions(difficulty);
-  const initialPieces = generateInitialPieces(boardSize.rows, boardSize.cols);
-
+  const initialPieces = generateInitialPieces(difficulty);
   const filePath = path.join(process.cwd(), 'public', image);
-  const imageBuffer = fs.readFileSync(filePath);
-  const piecesWithImages = await attachImageToPieces(imageBuffer, initialPieces, boardSize);
+  const piecesWithImages = await attachImageToPieces(filePath, initialPieces, difficulty);
   const { pieces, playablePieces } = await shufflePieces(piecesWithImages, difficulty);
 
   return {

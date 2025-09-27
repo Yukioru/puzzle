@@ -9,6 +9,7 @@ import clsx from 'clsx';
 
 export interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
   image: string;
+  imageRotation?: number;
   initialSides: IJigsawPiece['initialSides'];
   isShadow?: boolean;
 }
@@ -26,6 +27,7 @@ const DEPTH = 24;
 
 function JigsawPiece({
   image,
+  imageRotation,
   initialSides,
   className,
   isShadow,
@@ -73,12 +75,15 @@ function JigsawPiece({
             </clipPath>
           </defs>
           {!isShadow && (
-            <image
-              href={image}
-              height="100%"
-              width="100%"
-              clipPath={`url(#${clipId})`}
-            />
+            <g clipPath={`url(#${clipId})`}>
+              <image
+                data-id="image"
+                href={image}
+                height="100%"
+                width="100%"
+                transform={imageRotation ? `rotate(${imageRotation} 50 50)` : undefined}
+              />
+            </g>
           )}
           <use
             data-id="stroke"

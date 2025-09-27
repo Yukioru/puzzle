@@ -152,7 +152,11 @@ export default function JigsawGame({
           id={piece.id}
           initialSides={piece.initialSides}
         >
-          <JigsawPiece image={piece.image} initialSides={piece.initialSides} />
+          <JigsawPiece
+            image={piece.imageUrl}
+            imageRotation={piece.imageRotation}
+            initialSides={piece.initialSides}
+          />
         </SmartJigsawPiece>
       )
     };
@@ -322,7 +326,8 @@ export default function JigsawGame({
                   return (
                     <JigsawPiece
                       key={piece.id}
-                      image={piece.image}
+                      image={piece.imageUrl}
+                      imageRotation={piece.imageRotation}
                       initialSides={piece.initialSides}
                       isShadow
                     />
@@ -332,7 +337,9 @@ export default function JigsawGame({
                 return (
                   <div key={piece.id} className={styles.reserve}>
                     <JigsawPiece
-                      isShadow image={piece.image}
+                      isShadow
+                      image={piece.imageUrl}
+                      imageRotation={piece.imageRotation}
                       initialSides={piece.initialSides}
                       className={styles.reservePiece}
                     />
@@ -353,7 +360,8 @@ export default function JigsawGame({
                       onClick={(newSides) => handlePieceRotate(piece.id, newSides)}
                     >
                       <JigsawPiece
-                        image={piece.image}
+                        image={piece.imageUrl}
+                        imageRotation={piece.imageRotation}
                         initialSides={piece.initialSides}
                       />
                     </SmartJigsawPiece>
