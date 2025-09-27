@@ -13,6 +13,7 @@ import { PROFILES } from "~/constants";
 import { Button } from "../Button";
 
 import styles from './ProfileSelectModal.module.css';
+import clsx from "clsx";
 
 interface ProfileSelectModalProps {
   defaultOpen?: boolean;
@@ -98,15 +99,17 @@ export function ProfileSelectModal({
                   {getProfiles().map(profile => (
                     <div
                       key={profile.id}
-                      className={styles.profile}
+                      className={clsx(styles.profile, {
+                        [styles.selected]: profile.id === selectedProfile.id,
+                      })}
                       onClick={() => selectProfile(profile)}
                     >
                       <Image
                         className={styles.profileImage}
                         src={profile.image}
                         alt={profile.title}
-                        width={120}
-                        height={120}
+                        width={130}
+                        height={130}
                         quality={90}
                       />
                     </div>

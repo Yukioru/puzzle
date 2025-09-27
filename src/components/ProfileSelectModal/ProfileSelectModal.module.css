@@ -103,6 +103,15 @@
   position: relative;
   box-sizing: border-box;
   background-color: #cabea5;
+  box-shadow: 0 0 0 4px transparent;
+  transition: box-shadow 0.2s ease-out;
+  will-change: box-shadow;
+}
+
+.profile:hover,
+.profile:focus-visible,
+.profile.selected {
+  box-shadow: 0 0 0 4px white;
 }
 
 .profile::before {
