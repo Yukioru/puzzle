@@ -14,12 +14,19 @@ import amphoreusEvernight from '~/assets/loadings/loading-amphoreus-evernight.we
 
 import abundance from '~/assets/paths/abundance.webp';
 import destruction from '~/assets/paths/destruction.webp';
+import elation from '~/assets/paths/elation.webp';
+import enigmata from '~/assets/paths/enigmata.webp';
+import equilibrium from '~/assets/paths/equilibrium.webp';
 import erudition from '~/assets/paths/erudition.webp';
 import harmony from '~/assets/paths/harmony.webp';
 import hunt from '~/assets/paths/hunt.webp';
 import nihility from '~/assets/paths/nihility.webp';
+import order from '~/assets/paths/order.webp';
 import preservation from '~/assets/paths/preservation.webp';
+import propagation from '~/assets/paths/propagation.webp';
 import remembrance from '~/assets/paths/remembrance.webp';
+import trailblaze from '~/assets/paths/trailblaze.webp';
+import voracity from '~/assets/paths/voracity.webp';
 
 import styles from "./LoadingScreen.module.css";
 import Image from "next/image";
@@ -37,17 +44,32 @@ const LOADING_IMAGES = [
 const LOADING_PATH_IMAGES = [
   abundance,
   destruction,
+  elation,
+  enigmata,
+  equilibrium,
   erudition,
   harmony,
   hunt,
   nihility,
+  order,
   preservation,
+  propagation,
   remembrance,
+  trailblaze,
+  voracity,
 ];
 
+function getRandomAssets(seed: number) {
+  const imageIndex = Math.floor(seed * LOADING_IMAGES.length);
+  const pathImageIndex = Math.floor(seed * LOADING_PATH_IMAGES.length);
+  const image = LOADING_IMAGES[imageIndex];
+  const pathImage = LOADING_PATH_IMAGES[pathImageIndex];
+
+  return { image, pathImage };
+}
+
 export function LoadingScreen() {
-  const randomImage = LOADING_IMAGES[Math.floor(Math.random() * LOADING_IMAGES.length)];
-  const randomPathImage = LOADING_PATH_IMAGES[Math.floor(Math.random() * LOADING_PATH_IMAGES.length)];
+  const { image, pathImage } = getRandomAssets(Math.random());
 
   return (
     <div className={styles.base}>
@@ -62,7 +84,7 @@ export function LoadingScreen() {
           {[0, 1, 2].map((i) => (
             <Window
               key={i}
-              image={randomImage.src}
+              image={image.src}
               windowIndex={i}
               totalWindows={3}
               showPomPom={i === 1}
@@ -80,7 +102,7 @@ export function LoadingScreen() {
         </div>
         <DotsDivider dotColor="#403f3b" />
         <Image
-          src={randomPathImage}
+          src={pathImage}
           alt="Path Emblem"
           width={100}
           height={100}
