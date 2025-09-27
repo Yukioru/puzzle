@@ -1,0 +1,14 @@
+.base {
+  --_size: 2.625rem;
+  --_color: #face96;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0c0b07;
+  border-radius: 100vw;
+  border: 3px solid var(--_color);
+  color: var(--_color);
+  width: var(--_size);
+  height: var(--_size);
+  font-size: calc(var(--_size) * 0.54);
+}

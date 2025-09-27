@@ -30,13 +30,13 @@
 
 .base.interactable:hover svg > [data-id="stroke"] {
   stroke-width: 3;
-  stroke: whitesmoke;
+  stroke: white;
 }
 
 .base.dragging svg > [data-id="stroke"],
 .base.dragging:hover svg > [data-id="stroke"] {
   stroke-width: 3;
-  stroke: #f8b865;
+  stroke: #face96;
 }
 
 .base.matches svg > [data-id="stroke"],

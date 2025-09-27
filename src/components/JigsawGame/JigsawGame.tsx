@@ -21,6 +21,7 @@ type JigsawGameProps = IJigsawGame & HTMLProps<HTMLDivElement> & {
   stockClassName?: string;
   stockWrapperClassName?: string;
   boardClassName?: string;
+  boardFrameClassName?: string;
 }
 
 function resetPlayablePieces(playablePieces: IJigsawGame['playablePieces']) {
@@ -43,6 +44,7 @@ export default function JigsawGame({
   stockClassName,
   stockWrapperClassName,
   boardClassName,
+  boardFrameClassName,
   className,
   initialPieces,
   ...props
@@ -300,6 +302,7 @@ export default function JigsawGame({
       >
         <SystemBoard className={boardClassName}>
           <JigsawBoard
+            className={boardFrameClassName}
             ref={boardRef}
             rows={rows}
             cols={cols}

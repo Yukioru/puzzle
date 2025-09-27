@@ -7,6 +7,7 @@ import { Suspense } from "react";
 
 import styles from './HomeScreen.module.css';
 import { IJigsawGame } from "~/types";
+import { Button } from "~/components/Button";
 
 
 const JigsawGame = dynamic(
@@ -24,11 +25,19 @@ export default function HomeScreen({ data }: HomeScreenProps) {
   return (
     <Suspense fallback={<LoadingScreen />}>
       <div className={styles.base}>
-        <JigsawGame {...data} showStock={false} />
+        <JigsawGame
+          {...data}
+          showStock={false}
+          className={styles.game}
+          boardFrameClassName={styles.boardFrame}
+        />
         <div className={styles.overlay}>
-          <h1>Honkai: Star Rail - Jigsaw Puzzle</h1>
+          <h1>
+            Honkai: Star Rail<br/>
+            Мозаика грёз
+          </h1>
           <div className={styles.footer}>
-            <Link href={`/game/${data.id}`} className={styles.button}>Начать игру</Link>
+            <Button as={Link} href={`/game/${data.id}`} className={styles.button}>Начать игру</Button>
           </div>
         </div>
       </div>

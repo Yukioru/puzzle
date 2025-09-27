@@ -1,0 +1,1 @@
+export { AccentIconFrame } from './AccentIconFrame';

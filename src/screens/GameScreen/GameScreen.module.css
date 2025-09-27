@@ -62,7 +62,7 @@
   width: 7px;
   height: 7px;
   border-radius: 100vw;
-  background-color: whitesmoke;
+  background-color: white;
 }
 
 .actions {
@@ -104,7 +104,7 @@
   font-size: 1.2rem;
   padding: 0.5rem var(--_offset);
   background-color: rgba(0, 0, 0, 0.3);
-  color: whitesmoke;
+  color: white;
   position: relative;
 }
 

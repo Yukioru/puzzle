@@ -5,11 +5,15 @@
   gap: 0.75rem;
   padding-block: 0.5rem;
   padding-inline: 1rem;
+  letter-spacing: -.04em;
 
   font-size: 1.75rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  color: whitesmoke;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+  color: white;
   cursor: pointer;
+
+  transition: color 0.2s ease-out;
+  will-change: color;
 }
 
 .base.medium {
@@ -24,16 +28,34 @@
   width: var(--_icon-size);
   height: var(--_icon-size);
   font-size: calc(var(--_icon-size) * 0.6);
-  background-color: whitesmoke;
+  background-color: white;
   border-radius: 100vw;
   color: #131313;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: inset 0 0 10px transparent, inset 0 0 0 3px transparent, 0 0 0 2px transparent;
+  transition: box-shadow 0.2s ease-out;
+  will-change: box-shadow;
 }
 
 .icon svg {
   position: relative;
   left: 1px;
+}
+
+.base:hover,
+.base:focus-visible {
+  color: #face96;
+}
+
+.base:hover .icon,
+.base:focus-visible .icon {
+  box-shadow: inset 0 0 10px #c0c0c0, inset 0 0 0 3px #c0c0c0, 0 0 0 2px white;
+}
+
+
+.base:active {
+  color: #facf96a1;
 }
