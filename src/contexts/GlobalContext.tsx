@@ -19,7 +19,7 @@ interface GlobalContextValue {
     isEnabled: boolean;
     seed: string;
     progress?: number;
-    toggle: (enabled: boolean, seed?: string, progress?: number) => void;
+    toggle: (enabled: boolean, options?: { seed?: string; progress?: number }) => void;
     setProgress: (progress: number) => void;
   };
 }
@@ -39,6 +39,7 @@ export const GlobalContext = createContext<GlobalContextValue>({
 
 export function GlobalContextProvider({ children, ...props }: PropsWithChildren<HTMLProps<HTMLElement>>) {
   const pathname = usePathname();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const rootRef = useRef<HTMLElement | null>(null);
 
   const resetLoadingScreenState = useCallback(() => {
@@ -51,20 +52,35 @@ export function GlobalContextProvider({ children, ...props }: PropsWithChildren<
 
   const [loadingScreenState, setLoadingScreenState] = useState(() => resetLoadingScreenState());
 
-  const toggleLoadingScreen = useCallback((enabled: boolean, seed?: string, progress?: number) => {
-    setLoadingScreenState(state => {
-      const newState = {
-        ...state,
-        isEnabled: enabled,
-        progress: progress || enabled ? 0 : 100,
-      };
+  const toggleLoadingScreen = useCallback((enabled: boolean, { seed, progress }: { seed?: string; progress?: number } = {}) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
 
-      if (seed) {
-        newState.seed = seed;
-      }
+    if (typeof progress !== 'undefined') {
+      setLoadingScreenState(prevState => ({
+        ...prevState,
+        progress: progress || (enabled ? 0 : 100),
+      }));
+    }
 
-      return newState;
-    });
+    const delay = (progress === 100 || !enabled) ? 300 : 0;
+    
+    timeoutRef.current = setTimeout(() => {
+      setLoadingScreenState(state => {
+        const newState = {
+          ...state,
+          isEnabled: enabled,
+        };
+  
+        if (seed) {
+          newState.seed = seed;
+        }
+  
+        return newState;
+      });
+    }, delay);
+
   }, []);
 
   const setLoadingProgress = useCallback((progress: number) => {
@@ -98,7 +114,7 @@ export function GlobalContextProvider({ children, ...props }: PropsWithChildren<
       <main ref={rootRef} {...props}>
         {loadingScreenState.isEnabled && (
           <LoadingScreen
-            continuous
+            continuous={loadingScreenState.progress !== 100}
             seed={loadingScreenState.seed}
             progress={loadingScreenState.progress}
             style={{ position: 'absolute', inset: 0, zIndex: 10 }}

@@ -10,7 +10,7 @@ export function useImageLoaderManager(scopeRef: RefObject<HTMLElement | null>) {
 
   useEffect(() => {
     if (!allImagesLoaded && !ctx.loadingScreen.isEnabled) {
-      ctx.loadingScreen.toggle(true);
+      ctx.loadingScreen.toggle(true, { progress: 40 });
       return;
     }
 
@@ -19,7 +19,7 @@ export function useImageLoaderManager(scopeRef: RefObject<HTMLElement | null>) {
       ctx.loadingScreen.seed === pathname &&
       ctx.loadingScreen.isEnabled
     ) {
-      ctx.loadingScreen.toggle(false);
+      ctx.loadingScreen.toggle(false, { progress: 100 });
     }
   }, [allImagesLoaded, ctx, pathname]);
 

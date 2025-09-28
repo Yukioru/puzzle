@@ -33,7 +33,7 @@ export default function HomeScreen({ data }: HomeScreenProps) {
 
   const handleStartGame = useCallback((profileId: string) => {
     const nextPath = `/game/${data.id}`;
-    ctx.loadingScreen.toggle(true, nextPath, 40);
+    ctx.loadingScreen.toggle(true, { seed: nextPath, progress: 20 });
     router.push(`${nextPath}?profile=${profileId}`);
   }, [ctx, data.id, router]);
 
