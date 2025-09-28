@@ -33,12 +33,12 @@ export default function HomeScreen({ data }: HomeScreenProps) {
 
   const handleStartGame = useCallback((profileId: string) => {
     const nextPath = `/game/${data.id}`;
-    ctx.loadingScreen.toggle(true, nextPath);
+    ctx.loadingScreen.toggle(true, nextPath, 40);
     router.push(`${nextPath}?profile=${profileId}`);
   }, [ctx, data.id, router]);
 
   return (
-    <Suspense fallback={<LoadingScreen seed="/" />}>
+    <Suspense fallback={<LoadingScreen seed="/" progress={25} progressMax={40} continuous />}>
       <div
         ref={homeScreenRef}
         className={clsx(styles.base, {

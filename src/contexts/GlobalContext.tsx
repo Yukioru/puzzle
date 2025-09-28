@@ -19,7 +19,7 @@ interface GlobalContextValue {
     isEnabled: boolean;
     seed: string;
     progress?: number;
-    toggle: (enabled: boolean, seed?: string) => void;
+    toggle: (enabled: boolean, seed?: string, progress?: number) => void;
     setProgress: (progress: number) => void;
   };
 }
@@ -51,11 +51,12 @@ export function GlobalContextProvider({ children, ...props }: PropsWithChildren<
 
   const [loadingScreenState, setLoadingScreenState] = useState(() => resetLoadingScreenState());
 
-  const toggleLoadingScreen = useCallback((enabled: boolean, seed?: string) => {
+  const toggleLoadingScreen = useCallback((enabled: boolean, seed?: string, progress?: number) => {
     setLoadingScreenState(state => {
       const newState = {
         ...state,
         isEnabled: enabled,
+        progress: progress || enabled ? 0 : 100,
       };
 
       if (seed) {
@@ -97,6 +98,7 @@ export function GlobalContextProvider({ children, ...props }: PropsWithChildren<
       <main ref={rootRef} {...props}>
         {loadingScreenState.isEnabled && (
           <LoadingScreen
+            continuous
             seed={loadingScreenState.seed}
             progress={loadingScreenState.progress}
             style={{ position: 'absolute', inset: 0, zIndex: 10 }}

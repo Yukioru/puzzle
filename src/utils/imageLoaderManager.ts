@@ -41,10 +41,8 @@ class ScopedImageLoader {
     const sig = this.signature(el);
     const prev = this.tracked.get(el);
 
-    // Если ресурс не поменялся — повторно не трекаем
     if (prev && prev.sig === sig) return;
 
-    // Если был старый незавершённый трек — снимаем
     if (prev && !prev.done) {
       this.pending = Math.max(0, this.pending - 1);
       prev.cleanup();
@@ -63,13 +61,11 @@ class ScopedImageLoader {
     };
 
     if (el instanceof HTMLImageElement) {
-      // Уже загружено
       if (el.complete && el.naturalWidth > 0) {
         queueMicrotask(done);
         this.tracked.set(el, { sig, cleanup: () => {}, done: true });
         return;
       }
-      // Cancelled
       if (el.complete && el.naturalWidth === 0) {
         queueMicrotask(done);
         this.tracked.set(el, { sig, cleanup: () => {}, done: true });
@@ -94,7 +90,6 @@ class ScopedImageLoader {
 
       this.tracked.set(el, { sig, cleanup, done: false });
     } else {
-      // SVG <image>
       const href =
         el.href?.baseVal ??
         el.getAttribute("href") ??
@@ -106,7 +101,6 @@ class ScopedImageLoader {
         return;
       }
 
-      // создаём временный Image() для отлова load/error
       const img = new Image();
       const onLoad = () => {
         cleanup();
