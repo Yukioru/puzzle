@@ -29,7 +29,7 @@ export default function GameScreen({ data }: GameScreenProps) {
   const isLoaded =useImageLoaderManager(gameScreenRef);
 
   return (
-    <Suspense fallback={<LoadingScreen />}>
+    <Suspense fallback={<LoadingScreen seed={`/game/${data.id}`} />}>
       <div
         ref={gameScreenRef}
         className={clsx(styles.base, {

@@ -38,7 +38,7 @@ export default function HomeScreen({ data }: HomeScreenProps) {
   }, [ctx, data.id, router]);
 
   return (
-    <Suspense fallback={<LoadingScreen />}>
+    <Suspense fallback={<LoadingScreen seed="/" />}>
       <div
         ref={homeScreenRef}
         className={clsx(styles.base, {

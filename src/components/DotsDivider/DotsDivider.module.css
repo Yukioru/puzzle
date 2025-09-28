@@ -3,8 +3,8 @@
   --dot-spacing: 8px;
   
   width: 100%;
-  height: 5px;
-  padding: 8px 0;
+  height: 0.3125rem;
+  padding: 0.25rem 0;
   
   /* Создаем точку как radial-gradient */
   background-image: radial-gradient(

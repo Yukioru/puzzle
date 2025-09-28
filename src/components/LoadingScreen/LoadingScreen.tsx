@@ -9,11 +9,12 @@ import { Line } from "./components/Line";
 import styles from "./LoadingScreen.module.css";
 import Image from "next/image";
 import { LOADING_IMAGES, LOADING_PATH_IMAGES } from "~/constants";
-import { HTMLProps } from "react";
+import { CSSProperties, HTMLProps } from "react";
 import clsx from "clsx";
 
 interface LoadingScreenProps extends HTMLProps<HTMLDivElement> {
   seed?: string;
+  progress?: number;
 }
 
 function hashString(str: string): number {
@@ -36,6 +37,7 @@ function getRandomAssets(seed: string) {
 export function LoadingScreen({
   className,
   seed = Math.random().toString(),
+  progress = 0,
   ...props
 }: LoadingScreenProps) {
   const { image, pathImage } = getRandomAssets(seed);
@@ -69,7 +71,10 @@ export function LoadingScreen({
           </h1>
           <p className={styles.text}>Сейчас мы всё загрузим</p>
         </div>
-        <DotsDivider dotColor="#403f3b" />
+        <div className={styles.divider}>
+          <DotsDivider dotColor="#403f3b" />
+          <div className={styles.progressDivider} style={{ '--_progress': `${progress}%` } as CSSProperties} />
+        </div>
         <Image
           src={pathImage}
           alt="Path Emblem"

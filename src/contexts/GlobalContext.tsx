@@ -18,7 +18,9 @@ interface GlobalContextValue {
   loadingScreen: {
     isEnabled: boolean;
     seed: string;
+    progress?: number;
     toggle: (enabled: boolean, seed?: string) => void;
+    setProgress: (progress: number) => void;
   };
 }
 
@@ -29,7 +31,9 @@ export const GlobalContext = createContext<GlobalContextValue>({
   loadingScreen: {
     isEnabled: defaultLoadingScreenEnabled,
     seed: '',
+    progress: 0,
     toggle: () => {},
+    setProgress: () => {},
   },
 });
 
@@ -41,6 +45,7 @@ export function GlobalContextProvider({ children, ...props }: PropsWithChildren<
     return {
       isEnabled: defaultLoadingScreenEnabled,
       seed: pathname,
+      progress: 0,
     };
   }, [pathname]);
 
@@ -61,17 +66,28 @@ export function GlobalContextProvider({ children, ...props }: PropsWithChildren<
     });
   }, []);
 
+  const setLoadingProgress = useCallback((progress: number) => {
+    setLoadingScreenState(state => ({
+      ...state,
+      progress,
+    }));
+  }, []);
+
   const ctx = useMemo(() => ({
     rootRef,
     loadingScreen: {
       isEnabled: loadingScreenState.isEnabled,
       seed: loadingScreenState.seed,
+      progress: loadingScreenState.progress,
       toggle: toggleLoadingScreen,
+      setProgress: setLoadingProgress,
     }
   }), [
     loadingScreenState.isEnabled,
     loadingScreenState.seed,
-    toggleLoadingScreen
+    loadingScreenState.progress,
+    toggleLoadingScreen,
+    setLoadingProgress,
   ]);
 
   return (
@@ -82,6 +98,7 @@ export function GlobalContextProvider({ children, ...props }: PropsWithChildren<
         {loadingScreenState.isEnabled && (
           <LoadingScreen
             seed={loadingScreenState.seed}
+            progress={loadingScreenState.progress}
             style={{ position: 'absolute', inset: 0, zIndex: 10 }}
           />
         )}
