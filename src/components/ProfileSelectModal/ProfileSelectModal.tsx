@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, PropsWithChildren, useCallback, useState } from "react";
+import { PropsWithChildren, useCallback, useState } from "react";
 import Image from "next/image";
 import Scrollbars from "react-custom-scrollbars-2";
 import { FaCheck } from "react-icons/fa6";
@@ -38,7 +38,9 @@ export function ProfileSelectModal({
 
   const handleClose = useCallback(() => {
     setIsOpenModal(false);
-    selectProfile(resetProfileSelection());
+    setTimeout(() => {
+      selectProfile(resetProfileSelection());
+    }, 400);
   }, []);
 
   const handleConfirm = useCallback((profileId: string) => {

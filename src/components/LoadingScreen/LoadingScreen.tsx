@@ -9,21 +9,39 @@ import { Line } from "./components/Line";
 import styles from "./LoadingScreen.module.css";
 import Image from "next/image";
 import { LOADING_IMAGES, LOADING_PATH_IMAGES } from "~/constants";
+import { HTMLProps } from "react";
+import clsx from "clsx";
 
-function getRandomAssets(seed: number) {
-  const imageIndex = Math.floor(seed * LOADING_IMAGES.length);
-  const pathImageIndex = Math.floor(seed * LOADING_PATH_IMAGES.length);
+interface LoadingScreenProps extends HTMLProps<HTMLDivElement> {
+  seed?: string;
+}
+
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function getRandomAssets(seed: string) {
+  const hash = hashString(seed);
+  const imageIndex = hash % LOADING_IMAGES.length;
+  const pathImageIndex = hash % LOADING_PATH_IMAGES.length;
   const image = LOADING_IMAGES[imageIndex];
   const pathImage = LOADING_PATH_IMAGES[pathImageIndex];
-
   return { image, pathImage };
 }
 
-export function LoadingScreen() {
-  const { image, pathImage } = getRandomAssets(Math.random());
+export function LoadingScreen({
+  className,
+  seed = Math.random().toString(),
+  ...props
+}: LoadingScreenProps) {
+  const { image, pathImage } = getRandomAssets(seed);
 
   return (
-    <div className={styles.base}>
+    <div className={clsx(styles.base, className)} {...props}>
       <div className={styles.dotsWrapper}>
         <LoadingDots className={styles.dots} />
       </div>
