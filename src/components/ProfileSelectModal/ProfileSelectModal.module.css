@@ -6,7 +6,7 @@
   padding: 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 4rem;
+  gap: 2rem;
 }
 
 .info {
@@ -89,27 +89,50 @@
 .profiles {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 1.75rem;
   padding-block: 1.125rem;
-  padding-inline: 0.75rem;
+  padding-inline: 1rem;
 }
 
 .profile {
   width: 130px;
   height: 130px;
   border-radius: 100vw;
-  overflow: hidden;
   cursor: pointer;
   position: relative;
   box-sizing: border-box;
   background-color: #cabea5;
   box-shadow: 0 0 0 4px transparent;
-  transition: box-shadow 0.2s ease-out;
-  will-change: box-shadow;
+  opacity: 1;
+  transition: box-shadow 0.2s ease-out, opacity 0.2s ease-out;
+  will-change: box-shadow, opacity;
 }
 
-.profile:hover,
-.profile:focus-visible,
+.profile:hover:not(.selected),
+.profile:focus-visible:not(.selected) {
+  opacity: 0.7; 
+}
+
+.profile:active:not(.selected) {
+  opacity: 1;
+}
+
+.profile::after {
+  content: '';
+  position: absolute;
+  display: block;
+  border-radius: 100vw;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.0);
+  transition: background-color 0.2s ease-out;
+  will-change: background-color;
+}
+
+.profile:active:not(.selected)::after {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
 .profile.selected {
   box-shadow: 0 0 0 4px white;
 }
@@ -121,6 +144,73 @@
   border-radius: 100vw;
   inset: 0;
   box-shadow: inset 0 0 0 3px #a68f78;
+}
+
+.profile .profileImage {
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.profile .selectedOverlay {
+  content: '';
+  position: absolute;
+  display: block;
+  border-radius: 100vw;
+  inset: -12px;
+  pointer-events: none;
+  border: 2px dotted #434344;
+  box-sizing: border-box;
+  transform: rotate(90deg);
+  animation: rotateSelectedOverlay 25s linear infinite;
+}
+
+.selectedOverlay .selectedOverlayDot {
+  width: 26px;
+  height: 12px;
+  background-color: var(--_modal-background);
+  border-radius: 100vw;
+  position: absolute;
+  z-index: 1;
+}
+
+.selectedOverlay .selectedOverlayDot::before {
+  content: '';
+  top: 2px;
+  bottom: 2px;
+  left: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  display: block;
+  position: absolute;
+  border-radius: 100vw;
+  background-color: #434344;
+  z-index: 2;
+}
+
+.selectedOverlayDot.selectedOverlayTop {
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.selectedOverlayDot.selectedOverlayBottom {
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.profile .selectedMark {
+  position: absolute;
+  top: -1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.125rem;
+  z-index: 2;
+  animation: selectedMarkBounce 1s linear infinite;
 }
 
 .profileImage {
@@ -187,5 +277,29 @@
     padding-inline: 48px;
     flex-direction: row;
     gap: 4rem;
+  }
+  .profiles {
+    justify-content: flex-start;
+  }
+}
+
+@keyframes selectedMarkBounce {
+  0% {
+    transform: translateX(-50%) translateY(3px);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-2px);
+  }
+  100% {
+    transform: translateX(-50%) translateY(3px);
+  }
+}
+
+@keyframes rotateSelectedOverlay {
+  0% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(450deg);
   }
 }

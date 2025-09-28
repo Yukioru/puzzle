@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
 import { PropsWithChildren, useCallback, useState } from "react";
 import Image from "next/image";
 import Scrollbars from "react-custom-scrollbars-2";
 import { FaCheck } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
-import profileSelect from '~/assets/images/profile-select.webp';
+import profileSelect from "~/assets/images/profile-select.webp";
 import { Modal } from "~/components/Modal";
 
 import { AccentIconFrame } from "~/components/AccentIconFrame";
 import { PROFILES } from "~/constants";
 import { Button } from "../Button";
 
-import styles from './ProfileSelectModal.module.css';
+import styles from "./ProfileSelectModal.module.css";
 import clsx from "clsx";
 
 interface ProfileSelectModalProps {
@@ -21,11 +21,11 @@ interface ProfileSelectModalProps {
 }
 
 function resetProfileSelection() {
-  return PROFILES.find(p => p.id === 'default')!;
+  return PROFILES.find((p) => p.id === "default")!;
 }
 
 function getProfiles() {
-  return PROFILES.filter(p => p.id !== 'default');
+  return PROFILES.filter((p) => p.id !== "default");
 }
 
 export function ProfileSelectModal({
@@ -43,19 +43,19 @@ export function ProfileSelectModal({
     }, 400);
   }, []);
 
-  const handleConfirm = useCallback((profileId: string) => {
-    if (onConfirm) {
-      onConfirm(profileId);
-    }
-    handleClose();
-  }, [handleClose, onConfirm]);
+  const handleConfirm = useCallback(
+    (profileId: string) => {
+      if (onConfirm) {
+        onConfirm(profileId);
+      }
+      handleClose();
+    },
+    [handleClose, onConfirm]
+  );
 
   return (
     <>
-      <div
-        className={styles.trigger}
-        onClick={() => setIsOpenModal(true)}
-      >
+      <div className={styles.trigger} onClick={() => setIsOpenModal(true)}>
         {children}
       </div>
       <Modal isOpen={isOpenModal}>
@@ -78,7 +78,9 @@ export function ProfileSelectModal({
                   height={150}
                   quality={90}
                 />
-                <div className={styles.selectedTitle}>{selectedProfile.title}</div>
+                <div className={styles.selectedTitle}>
+                  {selectedProfile.title}
+                </div>
               </div>
             </div>
           </div>
@@ -94,28 +96,69 @@ export function ProfileSelectModal({
                 autoHeightMin={400}
                 renderThumbHorizontal={() => <div />}
                 renderTrackHorizontal={() => <div />}
-                renderTrackVertical={() => <div className={styles.scrollbarTrack} />}
-                renderThumbVertical={() => <div className={styles.scrollbarThumb} />}
+                renderTrackVertical={() => (
+                  <div className={styles.scrollbarTrack} />
+                )}
+                renderThumbVertical={() => (
+                  <div className={styles.scrollbarThumb} />
+                )}
               >
                 <div className={styles.profiles}>
-                  {getProfiles().map(profile => (
-                    <div
-                      key={profile.id}
-                      className={clsx(styles.profile, {
-                        [styles.selected]: profile.id === selectedProfile.id,
-                      })}
-                      onClick={() => selectProfile(profile)}
-                    >
-                      <Image
-                        className={styles.profileImage}
-                        src={profile.image}
-                        alt={profile.title}
-                        width={130}
-                        height={130}
-                        quality={90}
-                      />
-                    </div>
-                  ))}
+                  {getProfiles().map((profile) => {
+                    const isSelected = profile.id === selectedProfile.id;
+                    return (
+                      <div
+                        key={profile.id}
+                        className={clsx(styles.profile, {
+                          [styles.selected]: isSelected,
+                        })}
+                        onClick={() => selectProfile(profile)}
+                      >
+                        {isSelected && (
+                          <>
+                            <div className={styles.selectedMark}>
+                              <svg
+                                width="1em"
+                                height="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 47 50"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  fill="#262626"
+                                  stroke="white"
+                                  strokeWidth="2"
+                                  d="M23 44 4 17h8l11 15 10-15h8L23 44Zm-8-28 8-12 7 12-7 11-8-11Z"
+                                />
+                              </svg>
+                            </div>
+                            <div className={styles.selectedOverlay}>
+                              <div
+                                className={clsx(
+                                  styles.selectedOverlayDot,
+                                  styles.selectedOverlayTop
+                                )}
+                              />
+                              <div
+                                className={clsx(
+                                  styles.selectedOverlayDot,
+                                  styles.selectedOverlayBottom
+                                )}
+                              />
+                            </div>
+                          </>
+                        )}
+                        <Image
+                          className={styles.profileImage}
+                          src={profile.image}
+                          alt={profile.title}
+                          width={130}
+                          height={130}
+                          quality={90}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </Scrollbars>
             </div>
@@ -128,7 +171,7 @@ export function ProfileSelectModal({
             className={styles.actionButton}
             icon={
               <AccentIconFrame>
-                <IoClose style={{ fontSize: '1.9rem' }} />
+                <IoClose style={{ fontSize: "1.9rem" }} />
               </AccentIconFrame>
             }
           >
@@ -137,7 +180,7 @@ export function ProfileSelectModal({
           <Button
             onClick={() => handleConfirm(selectedProfile.id)}
             className={styles.actionButton}
-            disabled={selectedProfile.id === 'default'}
+            disabled={selectedProfile.id === "default"}
             icon={
               <AccentIconFrame>
                 <FaCheck />
