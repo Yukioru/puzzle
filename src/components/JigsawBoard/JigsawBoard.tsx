@@ -25,12 +25,12 @@ function JigsawBoard({ rows, cols, pieces, className }: JigsawBoardProps, ref: F
         } as CSSProperties}
       >
         {pieces?.map((piece, index) => {
-          if (piece && piece.render) {
+          if (piece && piece.render && !piece.isEmpty) {
             return <Fragment key={index}>{piece.render}</Fragment>;
           }
           return (
             <DroppableContainer id={piece.id} key={index}>
-              <AspectRatio ratio={1} />
+              {piece && piece.render ? piece.render : <AspectRatio ratio={1} />}
             </DroppableContainer>
           );
         })}

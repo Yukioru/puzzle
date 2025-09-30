@@ -1,5 +1,4 @@
 .frame {
-  background-color: rgba(34, 88, 66, 0.2);
   filter: drop-shadow(0 0 12px rgba(0,0,0,0.2));
   display: flex;
   overflow: hidden;

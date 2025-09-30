@@ -37,6 +37,7 @@ function resetPlayablePieces(playablePieces: IJigsawGame['playablePieces']) {
 
 export default function JigsawGame({
   id,
+  imageFileName,
   difficulty,
   pieces: initialBoardPieces,
   playablePieces: initialPlayablePieces,
@@ -140,9 +141,19 @@ export default function JigsawGame({
 
   const boardPiecesWithRender = useMemo(() => boardPieces.map((piece) => {
     if (piece.isEmpty) {
+      const imageFile = piece.imageUrl.split('/').pop();
+      const outlineImageUrl = `/pieces/outline/${imageFileName}/${difficulty}/${imageFile}`;
       return {
         ...piece,
-        render: null,
+        render: (
+          <JigsawPiece
+            key={piece.id}
+            id={piece.id}
+            image={outlineImageUrl}
+            imageRotation={piece.imageRotation}
+            initialSides={piece.initialSides}
+          />
+        ),
       };
     }
     
@@ -162,7 +173,7 @@ export default function JigsawGame({
         </SmartJigsawPiece>
       )
     };
-  }), [boardPieces]);
+  }), [boardPieces, difficulty, imageFileName]);
 
   const isOnBoard = useCallback((event: DragEndEvent | DragMoveEvent | DragOverEvent) => {
     return Boolean(event.collisions?.find(collision => collision.id === 'system-board'));

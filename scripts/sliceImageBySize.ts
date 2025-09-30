@@ -11,7 +11,8 @@ import { getDimensions } from "~/utils/getDimentions";
  */
 export async function sliceImageBySize(
   imagePath: string,
-  difficulty: 'easy' | 'medium' | 'hard'
+  difficulty: 'easy' | 'medium' | 'hard',
+  outputDirPrefix: string
 ): Promise<void> {
   const fileName = path.basename(imagePath, path.extname(imagePath));
   const { rows, cols } = getDimensions(difficulty);
@@ -34,7 +35,7 @@ export async function sliceImageBySize(
   const standardWidth = basePieceWidth + overlapX * 2;
   const standardHeight = basePieceHeight + overlapY * 2;
 
-  const outputDir = path.join(process.cwd(), 'public', 'pieces', fileName, difficulty);
+  const outputDir = path.join(outputDirPrefix, fileName, difficulty);
   fs.mkdirSync(outputDir, { recursive: true });
 
   for (let row = 0; row < rows; row++) {

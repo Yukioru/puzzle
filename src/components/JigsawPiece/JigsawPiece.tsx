@@ -12,6 +12,7 @@ export interface JigsawPieceProps extends HTMLProps<HTMLDivElement> {
   imageRotation?: number;
   initialSides: IJigsawPiece['initialSides'];
   isShadow?: boolean;
+  isEmpty?: boolean;
 }
 
 // Sides - top, right, bottom, left
@@ -90,7 +91,7 @@ function JigsawPiece({
             xlinkHref={`#${shapeId}`}
             clipPath={`url(#${clipId})`}
             fill="none"
-            stroke="rgba(30, 39, 35, 0.4)" 
+            stroke="rgba(30, 39, 35, 0.2)"
             strokeWidth="1"
             className={styles.stroke}
           />

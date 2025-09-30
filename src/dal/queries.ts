@@ -20,9 +20,11 @@ export async function getGameById(id: string, difficulty: Difficulty = 'easy'): 
   const filePath = path.join(process.cwd(), 'public', image);
   const piecesWithImages = await attachImageToPieces(filePath, initialPieces, difficulty);
   const { pieces, playablePieces } = await shufflePieces(piecesWithImages, difficulty);
+  const imageFileName = path.basename(image, path.extname(image));
 
   return {
     id,
+    imageFileName,
     difficulty,
     pieces,
     initialPieces: piecesWithImages,

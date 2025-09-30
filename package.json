@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "bun run scripts/generatePieces.ts",
+    "predev": "bun run scripts/prepareBoardImages.ts",
     "dev": "NEXT_TELEMETRY_DISABLED=1 next dev --turbopack",
-    "prebuild": "bun run scripts/generatePieces.ts",
+    "prebuild": "bun run scripts/prepareBoardImages.ts",
     "build": "NEXT_TELEMETRY_DISABLED=1 next build --turbopack",
     "start": "NEXT_TELEMETRY_DISABLED=1 next start",
     "lint": "eslint"
