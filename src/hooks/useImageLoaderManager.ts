@@ -3,7 +3,7 @@ import { GlobalContext } from "~/contexts/GlobalContext";
 import { useScopedImagesLoaded } from "./useScopedImagesLoaded";
 import { usePathname } from "next/navigation";
 
-export function useImageLoaderManager(scopeRef: RefObject<HTMLElement | null>) {
+export function useImageLoaderManager(scopeRef?: RefObject<HTMLElement | null>) {
   const ctx = use(GlobalContext);
   const pathname = usePathname();
   const allImagesLoaded = useScopedImagesLoaded(scopeRef);

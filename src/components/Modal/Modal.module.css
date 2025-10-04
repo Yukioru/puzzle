@@ -1,38 +1,60 @@
 .modal {
-  --_offset-padding: 0.75rem;
-  --_offset-margin: clamp(1rem, 6vh, 10rem);
+
   position: absolute;
-
-  top: var(--_offset-margin);
-
   left: 0;
   right: 0;
-  transform: translateY(20%);
   margin: 0 auto;
-
   width: 100%;
-  max-width: calc(1360px + var(--_offset-padding) * 2);
-  min-height: 18.75rem;
-  padding-inline: var(--_offset-padding);
-  padding-block: var(--_offset-padding) var(--_offset-margin);
   outline: none;
-
   display: flex;
   flex-direction: column;
-  opacity: 0;
-  transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.13, 0, 0.39, 0);
 }
 
-.overlay:global(.ReactModal__Overlay--after-open) .modal {
+.modal.variant-content {
+  --_offset-padding: 0.75rem;
+  --_offset-margin: clamp(1rem, 6vh, 10rem);
+  top: var(--_offset-margin);
+  transform: translateY(20%);
+  max-width: calc(1360px + var(--_offset-padding) * 2);
+  padding-inline: var(--_offset-padding);
+  padding-block: var(--_offset-padding) var(--_offset-margin);
+  transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.13, 0, 0.39, 0);
+  opacity: 0;
+  min-height: 18.75rem;
+}
+
+.modal.variant-guide {
+  --_offset-margin: clamp(1rem, 6vh, 10rem);
+  top: 50%;
+  transform: translateY(-50%);
+  clip-path: inset(50% 0 50% 0);
+  max-height: 70vh;
+  opacity: 0;
+  transition: clip-path 0.2s cubic-bezier(0.13, 0, 0.39, 0), opacity 0.2s ease-out;
+}
+
+.overlay:global(.ReactModal__Overlay--after-open) .modal.variant-content {
   opacity: 1;
   transform: translateY(0%);
   transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0, 0.55, 0.45, 1);
 }
 
-.overlay:global(.ReactModal__Overlay--before-close) .modal {
+.overlay:global(.ReactModal__Overlay--before-close) .modal.variant-content {
   opacity: 0;
   transform: translateY(20%);
   transition: opacity 0.4s ease-out, transform 0.3s cubic-bezier(0.13, 0, 0.39, 0);
+}
+
+.overlay:global(.ReactModal__Overlay--after-open) .modal.variant-guide {
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.2s cubic-bezier(0, 0.55, 0.45, 1), opacity 0.2s ease-out;
+}
+
+.overlay:global(.ReactModal__Overlay--before-close) .modal.variant-guide {
+  opacity: 0;
+  clip-path: inset(50% 0 50% 0);
+  transition: clip-path 0.2s cubic-bezier(0.13, 0, 0.39, 0), opacity 0.2s ease-out;
 }
 
 .overlay {
@@ -58,7 +80,7 @@
   transition-duration: 0.4s;
 }
 
-.content {
+.modal.variant-content .content {
   --_modal-background: #dfddda;
   --_radius: 3.75rem;
   background-color: var(--_modal-background);
@@ -69,7 +91,7 @@
   position: relative;
 }
 
-.content::before {
+.modal.variant-content .content::before {
   content: '';
   position: absolute;
   top: var(--_offset-padding);
@@ -82,20 +104,91 @@
   z-index: -1;
 }
 
+.modal.variant-guide .content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex: 1;
+  overflow-y: hidden;
+  max-height: 100%;
+}
+
+.modal.variant-guide .innerContent {
+  --_modal-background: #18181ad7;
+  --_line-offset: 20px;
+  background-color: var(--_modal-background);
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0 L20 10 L10 20 L0 10 Z' fill='none' stroke='%2318181a49' stroke-width='2'/%3E%3C/svg%3E");
+  background-size: 14px 14px;
+  padding-block: 1.375rem;
+  overflow: hidden;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.modal.variant-guide .innerContent::before,
+.modal.variant-guide .innerContent::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #a68f787a;
+  z-index: 1;
+}
+
+.modal.variant-guide .innerContent::before {
+  top: var(--_line-offset);
+}
+
+.modal.variant-guide .innerContent::after {
+  bottom: var(--_line-offset);
+}
+
+.modal.variant-guide .container {
+  max-width: 75rem;
+  margin: 0 auto;
+  padding-inline: 1.5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.modal.variant-guide .extra {
+  text-align: center;
+  padding-block: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.overlay:global(.ReactModal__Overlay--after-open) .modal.variant-guide .extra {
+  opacity: 1;
+  transition: opacity 0.2s ease-out 0.2s;
+}
+
+.overlay:global(.ReactModal__Overlay--before-close) .modal.variant-guide .extra {
+  opacity: 0;
+  transition: opacity 0.1s ease-out;
+}
+
+
 @media screen and (min-width: 1400px) {
-  .modal {
+  .modal.variant-content {
     --_offset-margin: clamp(2rem, 10vh, 15rem);
   }
 }
 
 @media screen and (min-width: 1800px) {
-  .modal {
+  .modal.variant-content {
     --_offset-margin: clamp(3rem, 15vh, 20rem);
   }
 }
 
 @media screen and (min-width: 2000px) {
-  .modal {
+  .modal.variant-content {
     --_offset-margin: clamp(4rem, 20vh, 25rem);
   }
 }

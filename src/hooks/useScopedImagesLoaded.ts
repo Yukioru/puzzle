@@ -1,10 +1,15 @@
 import { useEffect, useState, RefObject } from "react";
 import { createScopedLoader } from "~/utils/imageLoaderManager";
 
-export function useScopedImagesLoaded(rootRef: RefObject<HTMLElement | null>) {
+export function useScopedImagesLoaded(rootRef?: RefObject<HTMLElement | null>) {
   const [allLoaded, setAllLoaded] = useState(false);
 
   useEffect(() => {
+    if (!rootRef) {
+      setAllLoaded(true);
+      return;
+    }
+
     let stopObserve: (() => void) | null = null;
     let rafId: number | null = null;
     const onAllLoaded = () => {
