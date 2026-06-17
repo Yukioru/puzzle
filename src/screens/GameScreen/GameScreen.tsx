@@ -1,17 +1,19 @@
 'use client';
 
-import { Suspense, useRef } from "react";
-import { FaRegSave } from "react-icons/fa";
+import { Suspense, use, useCallback, useRef } from "react";
+import { FaDoorOpen } from "react-icons/fa";
 import { FaPuzzlePiece, FaInfo } from "react-icons/fa6";
 import dynamic from "next/dynamic";
+import clsx from "clsx";
+import Link from "next/link";
 import { LoadingScreen } from "~/components/LoadingScreen";
 import { IJigsawGame, IJigsawGameCompleteInfo } from "~/types";
 
 import styles from './GameScreen.module.css';
 import { Divider } from "~/components/Divider";
 import { IconTextButton } from "~/components/IconTextButton";
-import clsx from "clsx";
 import { useImageLoaderManager } from "~/hooks/useImageLoaderManager";
+import { GlobalContext } from "~/contexts/GlobalContext";
 
 const JigsawGame = dynamic(
   () => import('~/components/JigsawGame'),
@@ -26,11 +28,16 @@ interface GameScreenProps {
 
 export default function GameScreen({ data }: GameScreenProps) {
   const gameScreenRef = useRef<HTMLDivElement>(null);
+  const ctx = use(GlobalContext);
   const isLoaded = useImageLoaderManager(gameScreenRef);
 
   function handleCompleteGame(gameInfo: IJigsawGameCompleteInfo) {
     console.log('Game completed!', gameInfo);
   }
+
+  const handleExit = useCallback(() => {
+    ctx.loadingScreen.toggle(true, { seed: '/', progress: 20 });
+  }, [ctx]);
 
   return (
     <Suspense
@@ -62,11 +69,17 @@ export default function GameScreen({ data }: GameScreenProps) {
             </div>
           </div>
           <div className={styles.actions}>
-            <IconTextButton icon={<FaRegSave />} className={styles.button}>
-              Сохранить
-            </IconTextButton>
             <IconTextButton icon={<FaInfo />} className={styles.button}>
               Правила
+            </IconTextButton>
+            <IconTextButton
+              as={Link}
+              href="/"
+              icon={<FaDoorOpen />}
+              className={styles.button}
+              onClick={handleExit}
+            >
+              Выйти
             </IconTextButton>
           </div>
         </div>

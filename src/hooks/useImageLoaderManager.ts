@@ -10,7 +10,7 @@ export function useImageLoaderManager(scopeRef?: RefObject<HTMLElement | null>) 
 
   useEffect(() => {
     if (!allImagesLoaded && !ctx.loadingScreen.isEnabled) {
-      ctx.loadingScreen.toggle(true, { progress: 40 });
+      ctx.loadingScreen.toggle(true, { seed: pathname, progress: 40 });
       return;
     }
 

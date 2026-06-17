@@ -70,7 +70,7 @@
 .base.light.disabled:hover,
 .base.light:disabled:hover {
   --_bg-color: transparent;
-  box-shadow: 0 0 0 2px rba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
 }
 
 .innerBorder {

@@ -1,27 +1,44 @@
 import clsx from "clsx";
-import { HTMLProps, PropsWithChildren, ReactNode } from "react";
+import {
+  ComponentPropsWithoutRef,
+  ElementType,
+  PropsWithChildren,
+  ReactNode,
+} from "react";
 
 import styles from './IconTextButton.module.css';
 
-interface IconTextButtonProps extends Omit<HTMLProps<HTMLButtonElement>, 'size'> {
-  type?: 'button' | 'submit' | 'reset';
-  icon?: ReactNode;
-  size?: 'medium' | 'large';
-}
+type AsProp<T extends ElementType> = {
+  as?: T;
+};
 
-export function IconTextButton({
+type IconTextButtonProps<T extends ElementType> =
+  PropsWithChildren<AsProp<T> & (
+    T extends "button"
+      ? Omit<ComponentPropsWithoutRef<"button">, 'size'>
+      : ComponentPropsWithoutRef<T>
+  ) & {
+    type?: 'button' | 'submit' | 'reset';
+    icon?: ReactNode;
+    size?: 'small' | 'medium' | 'large';
+  }>;
+
+export function IconTextButton<T extends ElementType = "button">({
+  as,
   className,
   type = 'button',
   children,
   icon,
   size = 'medium',
   ...props
-}: PropsWithChildren<IconTextButtonProps>) {
+}: IconTextButtonProps<T>) {
+  const Component = as || "button";
+
   return (
-    <button
-      type={type}
+    <Component
+      {...(Component === "button" ? { type } : {})}
       className={clsx(styles.base, {
-        [styles[size]]: ['medium', 'large'].includes(size),
+        [styles[size]]: ['small', 'medium', 'large'].includes(size),
       }, className)}
       {...props}
     >
@@ -31,6 +48,6 @@ export function IconTextButton({
         </div>
       )}
       {children}
-    </button>
+    </Component>
   )  
 }

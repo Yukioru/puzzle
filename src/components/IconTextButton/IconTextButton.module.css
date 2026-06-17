@@ -16,12 +16,17 @@
   will-change: color;
 }
 
+.base.small {
+  --_icon-size: var(--icon-size, 2.2rem);
+  font-size: 1.375rem;
+}
+
 .base.medium {
-  --_icon-size: 2.625rem;
+  --_icon-size: var(--icon-size, 2.625rem);
 }
 
 .base.large {
-  --_icon-size: 3.75rem;
+  --_icon-size: var(--icon-size, 3.75rem);
 }
 
 .icon {

@@ -17,6 +17,7 @@ import clsx from "clsx";
 
 interface ProfileSelectModalProps {
   defaultOpen?: boolean;
+  disabled?: boolean;
   onConfirm?: (profileId: string) => void;
 }
 
@@ -31,6 +32,7 @@ function getProfiles() {
 export function ProfileSelectModal({
   children,
   defaultOpen = false,
+  disabled = false,
   onConfirm,
 }: PropsWithChildren<ProfileSelectModalProps>) {
   const [isOpenModal, setIsOpenModal] = useState(defaultOpen);
@@ -55,7 +57,14 @@ export function ProfileSelectModal({
 
   return (
     <>
-      <div className={styles.trigger} onClick={() => setIsOpenModal(true)}>
+      <div
+        className={styles.trigger}
+        onClick={() => {
+          if (!disabled) {
+            setIsOpenModal(true);
+          }
+        }}
+      >
         {children}
       </div>
       <Modal isOpen={isOpenModal}>

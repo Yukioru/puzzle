@@ -19,14 +19,8 @@ function getBoardIdsFromFiles(files: string[]) {
   return files.map(file => path.basename(file, path.extname(file)));
 }
 
-export async function getGameById(id: string, difficulty: Difficulty = 'easy'): Promise<IJigsawGame> {
-  const imageFiles = getBoardImageFiles();
-  if (imageFiles.length === 0) {
-    throw new Error('No images found in the images folder');
-  }
-  const randomImage = imageFiles[Math.floor(Math.random() * imageFiles.length)];
-  const image = path.join(imagesFolder, randomImage);
-
+async function getGameByImageFile(gameId: string, imageFile: string, difficulty: Difficulty): Promise<IJigsawGame> {
+  const image = path.join(imagesFolder, imageFile);
   const initialPieces = generateInitialPieces(difficulty);
   const filePath = path.join(process.cwd(), 'public', image);
   const piecesWithImages = await attachImageToPieces(filePath, initialPieces, difficulty);
@@ -35,7 +29,7 @@ export async function getGameById(id: string, difficulty: Difficulty = 'easy'): 
   const shuffledBoardsIds = await getShuffledBoardsIds(imageFileName);
 
   return {
-    id,
+    id: gameId,
     imageFileName,
     shuffledBoardsIds,
     difficulty,
@@ -43,6 +37,31 @@ export async function getGameById(id: string, difficulty: Difficulty = 'easy'): 
     initialPieces: piecesWithImages,
     playablePieces,
   };
+}
+
+export async function getGameById(id: string, difficulty: Difficulty = 'easy'): Promise<IJigsawGame> {
+  const imageFiles = getBoardImageFiles();
+  if (imageFiles.length === 0) {
+    throw new Error('No images found in the images folder');
+  }
+  const randomImage = imageFiles[Math.floor(Math.random() * imageFiles.length)];
+
+  return getGameByImageFile(id, randomImage, difficulty);
+}
+
+export async function getGameByBoardId(
+  gameId: string,
+  boardId: string,
+  difficulty: Difficulty = 'easy'
+): Promise<IJigsawGame> {
+  const imageFiles = getBoardImageFiles();
+  const imageFile = imageFiles.find(file => path.basename(file, path.extname(file)) === boardId);
+
+  if (!imageFile) {
+    throw new Error(`Board "${boardId}" not found`);
+  }
+
+  return getGameByImageFile(gameId, imageFile, difficulty);
 }
 
 export async function getAllBoardsIds(): Promise<string[]> {
