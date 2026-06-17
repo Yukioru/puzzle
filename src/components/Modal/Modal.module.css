@@ -177,7 +177,7 @@
 
 @media screen and (min-width: 1400px) {
   .modal.variant-content {
-    --_offset-margin: clamp(2rem, 10vh, 15rem);
+    --_offset-margin: clamp(2rem, 5vh, 15rem);
   }
 }
 

@@ -29,11 +29,13 @@ import anaxa from '~/assets/profiles/anaxa.webp';
 import archer from '~/assets/profiles/archer.webp';
 import argenti from '~/assets/profiles/argenti.webp';
 import arlan from '~/assets/profiles/arlan.webp';
+import ashveil from '~/assets/profiles/ashveil.webp';
 import asta from '~/assets/profiles/asta.webp';
 import aventurine from '~/assets/profiles/aventurine.webp';
 import bailu from '~/assets/profiles/bailu.webp';
 import blackSwan from '~/assets/profiles/black-swan.webp';
 import blade from '~/assets/profiles/blade.webp';
+import bladeMortenax from '~/assets/profiles/blade-mortenax.webp';
 import boothill from '~/assets/profiles/boothill.webp';
 import bronya from '~/assets/profiles/bronya.webp';
 import caelusDestruction from '~/assets/profiles/caelus_destruction.webp';
@@ -44,10 +46,12 @@ import castorice from '~/assets/profiles/castorice.webp';
 import cerydra from '~/assets/profiles/cerydra.webp';
 import cipher from '~/assets/profiles/cipher.webp';
 import clara from '~/assets/profiles/clara.webp';
+import cyrene from '~/assets/profiles/cyrene.webp';
 import danHeng from '~/assets/profiles/dan-heng.webp';
 import danHengImbibitorLunae from '~/assets/profiles/dan-heng_imbibitor-lunae.webp';
 import danHengPermansorTerrae from '~/assets/profiles/dan_heng_permansor-terrae.webp';
 import drRatio from '~/assets/profiles/dr-ratio.webp';
+import evanescia from '~/assets/profiles/evanescia.webp';
 import evernight from '~/assets/profiles/evernight.webp';
 import feixiao from '~/assets/profiles/feixiao.webp';
 import firefly from '~/assets/profiles/firefly.webp';
@@ -55,10 +59,12 @@ import fuXuan from '~/assets/profiles/fu-xuan.webp';
 import fugue from '~/assets/profiles/fugue.webp';
 import gallagher from '~/assets/profiles/gallagher.webp';
 import gepard from '~/assets/profiles/gepard.webp';
+import gilgamesh from '~/assets/profiles/gilgamesh.webp';
 import guinaifen from '~/assets/profiles/guinaifen.webp';
 import hanya from '~/assets/profiles/hanya.webp';
 import herta from '~/assets/profiles/herta.webp';
 import himeko from '~/assets/profiles/himeko.webp';
+import himekoNova from '~/assets/profiles/himeko-nova.webp';
 import hook from '~/assets/profiles/hook.webp';
 import huohuo from '~/assets/profiles/huohuo.webp';
 import hyacine from '~/assets/profiles/hyacine.webp';
@@ -82,6 +88,7 @@ import pela from '~/assets/profiles/pela.webp';
 import phainon from '~/assets/profiles/phainon.webp';
 import qingque from '~/assets/profiles/qingque.webp';
 import rappa from '~/assets/profiles/rappa.webp';
+import rinTohsaka from '~/assets/profiles/rin-tohsaka.webp';
 import robin from '~/assets/profiles/robin.webp';
 import ruanMei from '~/assets/profiles/ruan-mei.webp';
 import saber from '~/assets/profiles/saber.webp';
@@ -89,13 +96,16 @@ import sampo from '~/assets/profiles/sampo.webp';
 import seele from '~/assets/profiles/seele.webp';
 import serval from '~/assets/profiles/serval.webp';
 import silverWolf from '~/assets/profiles/silver-wolf.webp';
+import silverWolfLv999 from '~/assets/profiles/silver-wolf-lv999.webp';
 import sparkle from '~/assets/profiles/sparkle.webp';
+import sparxie from '~/assets/profiles/sparxie.webp';
 import stelleDestruction from '~/assets/profiles/stelle_destruction.webp';
 import stelleHarmony from '~/assets/profiles/stelle_harmony.webp';
 import stellePreservation from '~/assets/profiles/stelle_preservation.webp';
 import stelleRemembrance from '~/assets/profiles/stelle_remembrance.webp';
 import sunday from '~/assets/profiles/sunday.webp';
 import sushang from '~/assets/profiles/sushang.webp';
+import theDahlia from '~/assets/profiles/the-dahlia.webp';
 import theHerta from '~/assets/profiles/the-herta.webp';
 import tingyun from '~/assets/profiles/tingyun.webp';
 import topaz from '~/assets/profiles/topaz.webp';
@@ -103,6 +113,7 @@ import tribbie from '~/assets/profiles/tribbie.webp';
 import welt from '~/assets/profiles/welt.webp';
 import xueyi from '~/assets/profiles/xueyi.webp';
 import yanqing from '~/assets/profiles/yanqing.webp';
+import yaoGuang from '~/assets/profiles/yao-guang.webp';
 import yukong from '~/assets/profiles/yukong.webp';
 import yunli from '~/assets/profiles/yunli.webp';
 
@@ -143,11 +154,13 @@ export const PROFILES = [
   { id: 'archer', title: 'Арчер', image: archer },
   { id: 'argenti', title: 'Аргенти', image: argenti },
   { id: 'arlan', title: 'Арлан', image: arlan },
+  { id: 'ashveil', title: 'Эшвейл', image: ashveil },
   { id: 'asta', title: 'Аста', image: asta },
   { id: 'aventurine', title: 'Авантюрин', image: aventurine },
   { id: 'bailu', title: 'Байлу', image: bailu },
   { id: 'black-swan', title: 'Чёрный Лебедь', image: blackSwan },
   { id: 'blade', title: 'Блэйд', image: blade },
+  { id: 'blade-mortenax', title: 'Мортенакс Блэйд', image: bladeMortenax },
   { id: 'boothill', title: 'Бутхилл', image: boothill },
   { id: 'bronya', title: 'Броня', image: bronya },
   { id: 'caelus_destruction', title: 'Келус (Разрушение)', image: caelusDestruction },
@@ -158,10 +171,12 @@ export const PROFILES = [
   { id: 'cerydra', title: 'Керидра', image: cerydra },
   { id: 'cipher', title: 'Цифер', image: cipher },
   { id: 'clara', title: 'Клара', image: clara },
+  { id: 'cyrene', title: 'Кирена', image: cyrene },
   { id: 'dan-heng', title: 'Дань Хэн', image: danHeng },
   { id: 'dan-heng_imbibitor-lunae', title: 'Дань Хэн: Пожиратель Луны', image: danHengImbibitorLunae },
   { id: 'dan_heng_permansor-terrae', title: 'Дань Хэн: Освободитель Пустошей', image: danHengPermansorTerrae },
   { id: 'dr-ratio', title: 'Доктор Рацио', image: drRatio },
+  { id: 'evanescia', title: 'Эванесса', image: evanescia },
   { id: 'evernight', title: 'Темень', image: evernight },
   { id: 'feixiao', title: 'Фэйсяо', image: feixiao },
   { id: 'firefly', title: 'Светлячок', image: firefly },
@@ -169,10 +184,12 @@ export const PROFILES = [
   { id: 'fugue', title: 'Фуга', image: fugue },
   { id: 'gallagher', title: 'Галлахер', image: gallagher },
   { id: 'gepard', title: 'Гепард', image: gepard },
+  { id: 'gilgamesh', title: 'Гильгамеш', image: gilgamesh },
   { id: 'guinaifen', title: 'Гуйнайфэнь', image: guinaifen },
   { id: 'hanya', title: 'Ханья', image: hanya },
   { id: 'herta', title: 'Герта', image: herta },
   { id: 'himeko', title: 'Химеко', image: himeko },
+  { id: 'himeko-nova', title: 'Химеко: Нова', image: himekoNova },
   { id: 'hook', title: 'Хук', image: hook },
   { id: 'huohuo', title: 'Хохо', image: huohuo },
   { id: 'hyacine', title: 'Гиацина', image: hyacine },
@@ -196,6 +213,7 @@ export const PROFILES = [
   { id: 'phainon', title: 'Фаенон', image: phainon },
   { id: 'qingque', title: 'Цинцюэ', image: qingque },
   { id: 'rappa', title: 'Раппа', image: rappa },
+  { id: 'rin-tohsaka', title: 'Рин Тосака', image: rinTohsaka },
   { id: 'robin', title: 'Зарянка', image: robin },
   { id: 'ruan-mei', title: 'Жуань Мэй', image: ruanMei },
   { id: 'saber', title: 'Сейбер', image: saber },
@@ -203,13 +221,16 @@ export const PROFILES = [
   { id: 'seele', title: 'Зеле', image: seele },
   { id: 'serval', title: 'Сервал', image: serval },
   { id: 'silver-wolf', title: 'Серебряный Волк', image: silverWolf },
+  { id: 'silver-wolf-lv999', title: 'Серебряный Волк ур.\u00A0999', image: silverWolfLv999 },
   { id: 'sparkle', title: 'Искорка', image: sparkle },
+  { id: 'sparxie', title: 'Искра', image: sparxie },
   { id: 'stelle_destruction', title: 'Стелла (Разрушение)', image: stelleDestruction },
   { id: 'stelle_harmony', title: 'Стелла (Гармония)', image: stelleHarmony },
   { id: 'stelle_preservation', title: 'Стелла (Сохранение)', image: stellePreservation },
   { id: 'stelle_remembrance', title: 'Стелла (Память)', image: stelleRemembrance },
   { id: 'sunday', title: 'Воскресенье', image: sunday },
   { id: 'sushang', title: 'Сушан', image: sushang },
+  { id: 'the-dahlia', title: 'Георгина', image: theDahlia },
   { id: 'the-herta', title: 'Великая Герта', image: theHerta },
   { id: 'tingyun', title: 'Тинъюнь', image: tingyun },
   { id: 'topaz', title: 'Топаз и Счетовод', image: topaz },
@@ -217,6 +238,7 @@ export const PROFILES = [
   { id: 'welt', title: 'Вельт', image: welt },
   { id: 'xueyi', title: 'Сюэи', image: xueyi },
   { id: 'yanqing', title: 'Яньцин', image: yanqing },
+  { id: 'yao-guang', title: 'Яо Гуан', image: yaoGuang },
   { id: 'yukong', title: 'Юйкун', image: yukong },
   { id: 'yunli', title: 'Юньли', image: yunli },
 ];

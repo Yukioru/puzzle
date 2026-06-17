@@ -42,3 +42,5 @@ next-env.d.ts
 
 /public/boards/outline
 /public/pieces
+
+/docker/*/data

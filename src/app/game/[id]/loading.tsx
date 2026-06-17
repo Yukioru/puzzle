@@ -1,10 +1,17 @@
 'use client';
 
-import { usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
 import { LoadingScreen } from "~/components/LoadingScreen";
 
 export default function LoadingGame() {
-  const pathname = usePathname();
+  const params = useParams();
 
-  return <LoadingScreen seed={pathname} progress={10} progressMax={25} continuous />;
+  return (
+    <LoadingScreen
+      seed={`/game/${params.id}`}
+      progress={10}
+      progressMax={25}
+      continuous
+    />
+  );
 }

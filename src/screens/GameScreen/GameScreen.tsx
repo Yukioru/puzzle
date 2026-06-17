@@ -5,7 +5,7 @@ import { FaRegSave } from "react-icons/fa";
 import { FaPuzzlePiece, FaInfo } from "react-icons/fa6";
 import dynamic from "next/dynamic";
 import { LoadingScreen } from "~/components/LoadingScreen";
-import { IJigsawGame } from "~/types";
+import { IJigsawGame, IJigsawGameCompleteInfo } from "~/types";
 
 import styles from './GameScreen.module.css';
 import { Divider } from "~/components/Divider";
@@ -26,10 +26,23 @@ interface GameScreenProps {
 
 export default function GameScreen({ data }: GameScreenProps) {
   const gameScreenRef = useRef<HTMLDivElement>(null);
-  const isLoaded =useImageLoaderManager(gameScreenRef);
+  const isLoaded = useImageLoaderManager(gameScreenRef);
+
+  function handleCompleteGame(gameInfo: IJigsawGameCompleteInfo) {
+    console.log('Game completed!', gameInfo);
+  }
 
   return (
-    <Suspense fallback={<LoadingScreen seed={`/game/${data.id}`} progress={25} progressMax={40} continuous />}>
+    <Suspense
+      fallback={
+        <LoadingScreen
+          seed={`/game/${data.id}`}
+          progress={25}
+          progressMax={40}
+          continuous
+        />
+      }
+    >
       <div
         ref={gameScreenRef}
         className={clsx(styles.base, {
@@ -62,6 +75,7 @@ export default function GameScreen({ data }: GameScreenProps) {
           boardClassName={styles.board}
           stockWrapperClassName={styles.stockWrapper}
           stockClassName={styles.stockFrame}
+          onComplete={handleCompleteGame}
           {...data}
         />
         <div className={styles.footer}>

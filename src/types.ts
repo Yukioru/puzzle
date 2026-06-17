@@ -28,8 +28,14 @@ export type Difficulty = 'easy' | 'medium' | 'hard';
 export interface IJigsawGame {
   id: string;
   imageFileName: string;
+  shuffledBoardsIds: string[];
   difficulty: Difficulty;
   pieces: IJigsawPiece[];
   initialPieces: IJigsawPiece[];
   playablePieces: IJigsawPiece[];
+}
+
+export interface IJigsawGameCompleteInfo {
+  gameId: string;
+  boardId: string;
 }

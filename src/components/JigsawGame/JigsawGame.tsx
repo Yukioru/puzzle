@@ -4,7 +4,7 @@ import { DndContext, DragEndEvent, DragMoveEvent, DragOverEvent, MouseSensor, To
 import { HTMLProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import { MdOutlineMoveDown } from "react-icons/md";
-import { IJigsawGame } from "~/types";
+import { IJigsawGame, IJigsawGameCompleteInfo } from "~/types";
 import { JigsawBoard } from "../JigsawBoard";
 import { SmartJigsawPiece } from "../SmartJigsawPiece";
 import { JigsawPiece } from "../JigsawPiece";
@@ -22,6 +22,7 @@ type JigsawGameProps = IJigsawGame & HTMLProps<HTMLDivElement> & {
   stockWrapperClassName?: string;
   boardClassName?: string;
   boardFrameClassName?: string;
+  onComplete?: (gameInfo: IJigsawGameCompleteInfo) => void;
 }
 
 function resetPlayablePieces(playablePieces: IJigsawGame['playablePieces']) {
@@ -48,10 +49,13 @@ export default function JigsawGame({
   boardFrameClassName,
   className,
   initialPieces,
+  shuffledBoardsIds: _shuffledBoardsIds,
+  onComplete,
   ...props
 }: JigsawGameProps) {
   const baseRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
+  const gameWasCompleteRef = useRef(false);
   const { rows, cols } = getDimensions(difficulty);
   const [playablePieces, setPlayablePieces] = useState(resetPlayablePieces(initialPlayablePieces));
   const [boardPieces, setBoardPieces] = useState(initialBoardPieces);
@@ -299,8 +303,19 @@ export default function JigsawGame({
 
 
   useEffect(() => {
-    console.log('Game is complete:', gameIsComplete);
-  }, [gameIsComplete]);
+    if (!gameIsComplete) {
+      gameWasCompleteRef.current = false;
+      return;
+    }
+
+    if (gameWasCompleteRef.current) return;
+
+    gameWasCompleteRef.current = true;
+    onComplete?.({
+      gameId: id,
+      boardId: imageFileName,
+    });
+  }, [gameIsComplete, id, imageFileName, onComplete]);
 
 
   return (
