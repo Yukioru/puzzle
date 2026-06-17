@@ -1,9 +1,9 @@
 'use client';
 
+import Link from "next/link";
 import { Button } from "~/components/Button";
 
 import styles from './HomeScreen.module.css';
-import Link from "next/link";
 
 export default function HomeScreen() {
   return (

@@ -3,7 +3,7 @@
 FROM oven/bun:alpine AS base
 
 FROM base AS deps
-RUN apk add --no-cache libc6-compat curl npm
+RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
@@ -11,19 +11,20 @@ COPY package.json bun.lock* .npmrc* ./
 
 RUN \
   if [ -f bun.lock ] || [ -f bun.lockb ]; then \
-    bun install --frozen-lockfile && \
-    npm install --os=linux --libc=musl --cpu=x64 sharp; \
+    bun install --frozen-lockfile; \
   else echo "Lockfile not found." && exit 1; \
   fi
 
 FROM base AS builder
 WORKDIR /app
 
+ARG APP_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+RUN if [ "$APP_ENV" != "production" ] && [ -f ".env.${APP_ENV}" ]; then cp ".env.${APP_ENV}" .env.production; fi
 RUN bun run build
 
 FROM base AS runner
@@ -36,6 +37,7 @@ ENV HOSTNAME=0.0.0.0
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
+RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -45,4 +47,4 @@ USER nextjs
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["bun", "server.js"]

@@ -1,0 +1,19 @@
+services:
+  hsr-puzzle-local:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      pull: true
+      args:
+        APP_ENV: local
+    container_name: hsr-puzzle-local
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      DATABASE_PATH: /app/data/puzzle.sqlite
+    volumes:
+      - ./data/local:/app/data

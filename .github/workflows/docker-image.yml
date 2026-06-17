@@ -33,11 +33,11 @@ jobs:
           if [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
             echo "TAG_LATEST=dev-latest" >> $GITHUB_ENV
             echo "TAG_TIME=dev-${TIMESTAMP}" >> $GITHUB_ENV
-            echo "DOCKERFILE=docker/development/Dockerfile" >> $GITHUB_ENV
+            echo "BUILD_ENV=development" >> $GITHUB_ENV
           elif [[ "${GITHUB_REF_NAME}" == "prod" ]]; then
             echo "TAG_LATEST=prod-latest" >> $GITHUB_ENV
             echo "TAG_TIME=prod-${TIMESTAMP}" >> $GITHUB_ENV
-            echo "DOCKERFILE=docker/production/Dockerfile" >> $GITHUB_ENV
+            echo "BUILD_ENV=production" >> $GITHUB_ENV
           fi
       
           echo "IMAGE_BASE=ghcr.io/${REPO_LC}/hsr-puzzle" >> $GITHUB_ENV
@@ -45,7 +45,9 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -f $DOCKERFILE \
+            --pull \
+            -f docker/Dockerfile \
+            --build-arg APP_ENV=$BUILD_ENV \
             -t $IMAGE_BASE:$TAG_LATEST \
             -t $IMAGE_BASE:$TAG_TIME \
             .

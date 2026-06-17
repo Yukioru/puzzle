@@ -5,7 +5,7 @@ import { LandingBackground } from "~/screens/LandingBackground";
 export const dynamic = 'force-dynamic';
 
 export default async function LandingLayout({ children }: Readonly<PropsWithChildren>) {
-  const data = await getGameById('test');
+  const data = await getGameById('home');
 
   return (
     <LandingBackground data={data}>

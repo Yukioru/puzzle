@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "predev": "bun run scripts/prepareBoardImages.ts",
-    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev --turbopack",
+    "dev": "NEXT_TELEMETRY_DISABLED=1 bun -b next dev --turbopack",
     "prebuild": "bun run scripts/prepareBoardImages.ts",
-    "build": "NEXT_TELEMETRY_DISABLED=1 next build --turbopack",
-    "start": "NEXT_TELEMETRY_DISABLED=1 next start",
+    "build": "NEXT_TELEMETRY_DISABLED=1 bun -b next build --turbopack",
+    "start": "NEXT_TELEMETRY_DISABLED=1 bun -b next start",
     "lint": "eslint"
   },
   "dependencies": {
@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
+    "@types/bun": "^1.3.14",
     "@types/node": "^25.9.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
