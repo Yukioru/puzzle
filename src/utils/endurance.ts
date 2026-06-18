@@ -31,10 +31,11 @@ export function getEnduranceTimeBonus(round: number) {
 }
 
 export function getEnduranceRank(points: number) {
-  if (points >= 10_000) return 'S';
-  if (points >= 7_000) return 'A';
-  if (points >= 4_000) return 'B';
-  if (points >= 2_000) return 'C';
+  if (points >= 10_000) return 'SS';
+  if (points >= 6_000) return 'S';
+  if (points >= 4_500) return 'A';
+  if (points >= 3_000) return 'B';
+  if (points >= 1_500) return 'C';
 
   return 'D';
 }

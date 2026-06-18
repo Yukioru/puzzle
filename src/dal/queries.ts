@@ -196,6 +196,32 @@ function parseNextGameState(row: NextGameStateRow | null): IJigsawGame | null {
   return JSON.parse(row.challengeNextGameState) as IJigsawGame;
 }
 
+async function getEnduranceNextGameState({
+  gameId,
+  currentGameState,
+  nextDifficulty,
+}: {
+  gameId: string;
+  currentGameState: IJigsawGame;
+  nextDifficulty: Difficulty;
+}) {
+  const currentQueue = currentGameState.shuffledBoardsIds.length > 0
+    ? currentGameState.shuffledBoardsIds
+    : await getShuffledBoardsIds(currentGameState.imageFileName);
+  const nextBoardId = currentQueue[0];
+
+  if (!nextBoardId) {
+    return getGameById(gameId, nextDifficulty);
+  }
+
+  const nextGameState = await getGameByBoardId(gameId, nextBoardId, nextDifficulty);
+
+  return {
+    ...nextGameState,
+    shuffledBoardsIds: currentQueue.slice(1),
+  };
+}
+
 export async function getOrCreateGameState(game: Pick<IGameRecord, 'id' | 'difficulty'>): Promise<IJigsawGame> {
   const existingGameState = parseGameState(db.query(`
     SELECT gameState
@@ -288,7 +314,12 @@ export async function prepareEnduranceNextRound(id: string) {
   }
 
   const nextDifficulty = getEnduranceDifficulty(game.challengeRound + 1);
-  const nextGameState = await getGameById(id, nextDifficulty);
+  const currentGameState = await getOrCreateGameState(game);
+  const nextGameState = await getEnduranceNextGameState({
+    gameId: id,
+    currentGameState,
+    nextDifficulty,
+  });
   const result = db.query(`
     UPDATE games
     SET challengeNextGameState = $challengeNextGameState
@@ -374,7 +405,11 @@ export async function completeEnduranceRound(
     FROM games
     WHERE id = $id
   `).get({ $id: id }) as NextGameStateRow | null);
-  const nextGameState = preparedNextGameState ?? await getGameById(id, nextDifficulty);
+  const nextGameState = preparedNextGameState ?? await getEnduranceNextGameState({
+    gameId: id,
+    currentGameState: gameState,
+    nextDifficulty,
+  });
   const nextTimeLeft = currentTimeLeft + roundResult.timeBonus;
   const nextPoints = (game.points ?? 0) + roundResult.totalPoints;
   const shouldPause = !nextGamePreloaded;
