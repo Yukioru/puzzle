@@ -143,8 +143,8 @@ export default function JigsawGame({
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 50,
-        tolerance: 3,
+        delay: 180,
+        tolerance: 8,
       },
     })
   );
