@@ -1,7 +1,6 @@
 'use server';
 
 import { redirect } from "next/navigation";
-import { createGameRecord } from "~/dal/queries";
 import { Difficulty, GameMode } from "~/types";
 
 interface CreateGameInput {
@@ -25,6 +24,7 @@ export async function createGameAction({ profileId, mode }: CreateGameInput) {
   const id = crypto.randomUUID();
   const challengeMode = mode === 'challenge';
   const difficulty = challengeMode ? 'easy' : mode;
+  const { createGameRecord } = await import("~/dal/queries");
 
   await createGameRecord({
     id,

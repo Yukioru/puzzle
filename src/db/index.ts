@@ -10,6 +10,7 @@ fs.mkdirSync(databaseDir, { recursive: true });
 
 const db = new Database(databasePath, { create: true });
 
+db.run("PRAGMA busy_timeout = 10000;");
 db.run("PRAGMA journal_mode = WAL;");
 initializeDatabase(db);
 
