@@ -1,0 +1,1 @@
+export { GameCompleteModal } from './GameCompleteModal';

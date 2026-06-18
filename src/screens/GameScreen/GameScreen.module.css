@@ -58,12 +58,17 @@
   filter: drop-shadow(0 2px 2px var(--_shadow-color));
 }
 
+.titleStats {
+  display: flex;
+  align-items: center;
+}
+
 .subtitle {
   font-size: 1.5rem;
   white-space: pre-line;
   position: relative;
   padding-left: 36px;
-  line-height: 1.625rem;
+  line-height: 2rem;
   text-shadow: 0 1px 0 var(--_shadow-color), 0 -1px 0 var(--_shadow-color), 1px 0 0 var(--_shadow-color), -1px 0 0 var(--_shadow-color);
 }
 
@@ -89,24 +94,6 @@
   text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
 }
 
-.completionMessage {
-  width: max-content;
-  max-width: calc(100vw - 4rem);
-  margin-bottom: 1rem;
-  padding: 0.75rem 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: white;
-  font-size: 1.5rem;
-  background-color: rgba(0, 0, 0, 0.45);
-  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
-}
-
-.completionMessage span {
-  font-weight: 700;
-}
-
 .actions {
   display: flex;
   align-items: flex-start;
@@ -128,16 +115,72 @@
   flex: 1;
 }
 
+.completionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-block: 2.5rem;
+}
+
+.completionStatus {
+  font-size: 1.75rem;
+  line-height: 2.6rem;
+}
+
+.highlightRed {
+  color: #c94e4e;
+  font-weight: bold;
+}
+
+.highlightGreen {
+  color: #4ea66c;
+  font-weight: bold;
+}
+
+.completionStat {
+  width: max-content;
+  min-width: 14rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  background-color: rgba(255, 255, 255, 0.55);
+  border-top: 2px solid #a68f78;
+}
+
+.completionStat span {
+  color: #575353;
+  font-size: 1.35rem;
+}
+
+.completionStat strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.actionButton {
+  padding: 1rem 3rem;
+  font-size: 2rem;
+  line-height: 2.25rem;
+  max-width: 400px;
+  width: 100%;
+}
+
 .board {
   padding-inline: 0;
 }
 
 .footer {
   display: none;
-  margin-top: -3vh;
   padding-right: 420px;
   flex-direction: column;
   align-items: center;
+
+  position: absolute;
+  bottom: 3vh;
+  left: 0;
+  right: 0;
 }
 
 .footerMessage {
@@ -190,7 +233,7 @@
 
   .header {
     flex-direction: row;
-    padding-bottom: 3rem;
+    padding-bottom: 2rem;
   }
 
   .heading {
@@ -215,7 +258,7 @@
   .subtitle {
     font-size: 1.75rem;
     padding-left: 3.25rem;
-    line-height: 2.25rem;
+    line-height: 2.5rem;
     padding-left: 3.25rem;
   }
 
@@ -272,7 +315,7 @@
   .subtitle {
     font-size: 1.75rem;
     padding-left: 3.25rem;
-    line-height: 1.75rem;
+    line-height: 2.5rem;
   }
 
   .actions {
@@ -280,7 +323,7 @@
   }
 
   .footer {
-    margin-top: -5vh;
+    margin-top: -2vh;
   }
   .footerMessage {
     --_width: 80px;
@@ -292,11 +335,5 @@
 @media screen and (min-width: 1600px) {
   .footerMessage {
     font-size: 1.8rem;
-  }
-}
-
-@media screen and (min-width: 2000px) {
-  .footer {
-    margin-top: -3vh;
   }
 }

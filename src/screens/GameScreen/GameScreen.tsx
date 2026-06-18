@@ -7,13 +7,16 @@ import dynamic from "next/dynamic";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import { finishGameAction } from "~/actions/finishGame";
+import { AccentIconFrame } from "~/components/AccentIconFrame";
+import { Button } from "~/components/Button";
+import { GameCompleteModal } from "~/components/GameCompleteModal";
+import { GameTimer } from "~/components/GameTimer";
 import { LoadingScreen } from "~/components/LoadingScreen";
 import { IGameRecord, IJigsawGame, IJigsawGameCompleteInfo } from "~/types";
 
 import styles from './GameScreen.module.css';
 import { Divider } from "~/components/Divider";
 import { IconTextButton } from "~/components/IconTextButton";
-import { useGameTimer } from "~/hooks/useGameTimer";
 import { useImageLoaderManager } from "~/hooks/useImageLoaderManager";
 import { GlobalContext } from "~/contexts/GlobalContext";
 
@@ -29,14 +32,6 @@ interface GameScreenProps {
   gameRecord: IGameRecord;
 }
 
-function formatTime(ms: number) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-}
-
 export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   const gameScreenRef = useRef<HTMLDivElement>(null);
   const finishGameRequestRef = useRef(false);
@@ -46,7 +41,6 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   const [currentGameRecord, setCurrentGameRecord] = useState(gameRecord);
   const [showCompletionMessage, setShowCompletionMessage] = useState(gameRecord.status !== 'active');
   const [isPending, startTransition] = useTransition();
-  const elapsedTime = useGameTimer(currentGameRecord);
   const isLoaded = useImageLoaderManager(gameScreenRef);
 
   const gameIsActive = currentGameRecord.status === 'active';
@@ -81,7 +75,6 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   }, [gameIsActive]);
 
   const handleExit = useCallback(() => {
-    ctx.loadingScreen.toggle(true, { seed: '/', progress: 20 });
 
     startTransition(async () => {
       if (gameIsActive && !finishGameRequestRef.current) {
@@ -97,9 +90,13 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
         }
       }
 
-      router.push('/');
+      setShowCompletionMessage(true);
+      if (showCompletionMessage) {
+        ctx.loadingScreen.toggle(true, { seed: '/', progress: 20 });
+        router.push('/');
+      }
     });
-  }, [ctx, currentGameRecord.id, gameIsActive, router]);
+  }, [ctx, currentGameRecord.id, gameIsActive, router, showCompletionMessage]);
 
   return (
     <Suspense
@@ -123,13 +120,13 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
             <div className={styles.title}>
               <FaPuzzlePiece />
               Мозаика грёз
+              <div className={styles.titleStats}>
+                <GameTimer game={currentGameRecord} label="Время: " />
+              </div>
             </div>
             <Divider className={styles.divider} />
             <div className={styles.subtitle}>
-              Перетаскивайте фрагменты, чтобы собрать Мозаику грёз
-            </div>
-            <div className={styles.timer}>
-              {formatTime(elapsedTime)}
+              Перетаскивайте фрагменты, чтобы собрать Мозаику грёз<br />
             </div>
           </div>
           <div className={styles.actions}>
@@ -146,13 +143,51 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
             </IconTextButton>
           </div>
         </div>
-        {showCompletionMessage && (
-          <div className={styles.completionMessage}>
-            {currentGameRecord.status === 'abandoned'
-              ? 'Игра завершена досрочно'
-              : 'Мозаика собрана'}
-            <span>{formatTime(elapsedTime)}</span>
-          </div>
+        {isLoaded && (
+          <GameCompleteModal
+            isOpen={showCompletionMessage}
+            profileId={currentGameRecord.profileId}
+            onRequestClose={() => setShowCompletionMessage(false)}
+            footer={(
+              <>
+                <Button
+                  onClick={handleExit}
+                  className={styles.actionButton}
+                  icon={
+                    <AccentIconFrame>
+                      <FaDoorOpen />
+                    </AccentIconFrame>
+                  }
+                >
+                  Завершить
+                </Button>
+              </>
+            )}
+          >
+            <div className={styles.completionContent}>
+              <div className={styles.completionStatus}>
+                {currentGameRecord.status === 'abandoned'
+                  ? (
+                    <div>
+                      Вы <span className={styles.highlightRed}>не собрали</span> мозаику и покинули игру.<br />
+                      Можете попробовать снова изменив сложность.
+                    </div>
+                  )
+                  : (
+                    <div>
+                      Поздравляем! Вы <span className={styles.highlightGreen}>успешно собрали</span> мозаику!<br />
+                      Вы можете попробовать собрать мозаику снова, выбрав другую сложность.
+                    </div>
+                  )}
+              </div>
+              <div className={styles.completionStat}>
+                <span>Затраченное время</span>
+                <strong>
+                  <GameTimer game={currentGameRecord} />
+                </strong>
+              </div>
+            </div>
+          </GameCompleteModal>
         )}
         <JigsawGame
           showStock

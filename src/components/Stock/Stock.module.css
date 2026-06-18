@@ -73,10 +73,13 @@
 }
 
 @media screen and (min-width: 992px) {
-  .base {
-    grid-template-columns: repeat(2, var(--_stock-piece-size));
-  }
   .title {
     font-size: 1.75rem;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .base {
+    grid-template-columns: repeat(2, var(--_stock-piece-size));
   }
 }
