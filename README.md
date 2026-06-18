@@ -1,6 +1,16 @@
 # Honkai: Star Rail - Jigsaw Puzzle
 
-Интерактивная игра-пазл с drag-and-drop механикой, собранная на Next.js и Bun runtime.
+Интерактивная игра-пазл по Honkai: Star Rail на Next.js и Bun. Игрок выбирает профиль, сложность или режим испытания, собирает мозаику drag-and-drop механикой, а результаты endurance-режима попадают в таблицу лидеров.
+
+## Возможности
+
+- Drag-and-drop сборка пазла на `@dnd-kit`.
+- Три обычные сложности: `easy`, `medium`, `hard`.
+- Endurance/Challenge режим: бесконечные раунды, таймер, очки, бонусы времени и leaderboard.
+- Модалка правил с каруселью и изображениями из `src/assets/help`.
+- Автоподготовка игровых изображений: контуры, нарезанные фрагменты и цветовые палитры досок.
+- SQLite-хранилище через `bun:sqlite`.
+- Docker-сборки для local/development/production окружений.
 
 ## Быстрый Старт
 
@@ -18,27 +28,110 @@ bun dev
 
 Приложение будет доступно на [http://localhost:3000](http://localhost:3000).
 
-Сборка:
+Production build:
 
 ```bash
 bun run build
 ```
 
-Запуск production-сервера без Docker:
+Запуск production-сервера:
 
 ```bash
 bun run start
 ```
 
+## Скрипты
+
+```bash
+bun dev          # predev + Next dev server через Bun/Turbopack
+bun run build    # prebuild + production build через Bun/Turbopack
+bun run start    # Next production server
+bun run lint     # ESLint
+```
+
+Перед `dev` и `build` автоматически запускается:
+
+```bash
+bun run scripts/prepareBoardImages.ts
+```
+
+Этот скрипт:
+
+- генерирует `public/boards/palettes.json` для фона игрового экрана;
+- создаёт контурные версии досок в `public/boards/outline`;
+- нарезает доски на фрагменты в `public/pieces`;
+- нарезает контуры в `public/pieces/outline`.
+
+`sharp` используется только в scripts pipeline, а не в runtime-коде Next.
+
+## Ассеты
+
+Игровые доски лежат в:
+
+```text
+public/boards
+```
+
+Поддерживаемые форматы досок:
+
+```text
+jpg, jpeg, png, webp
+```
+
+Подсказки для модалки правил лежат в:
+
+```text
+src/assets/help/help-1.png
+src/assets/help/help-2.png
+src/assets/help/help-3.png
+```
+
+Сгенерированные директории не коммитятся:
+
+```text
+public/boards/outline
+public/pieces
+```
+
+`public/boards/palettes.json` хранит готовые палитры для досок и используется приложением при рендере игрового фона.
+
+## SQLite
+
+Приложение использует SQLite через `bun:sqlite`.
+
+По умолчанию база создаётся здесь:
+
+```text
+data/puzzle.sqlite
+```
+
+Путь можно переопределить переменной окружения:
+
+```bash
+DATABASE_PATH=/app/data/puzzle.sqlite
+```
+
+База инициализируется автоматически при старте приложения. Используется WAL-режим, поэтому рядом могут появляться служебные файлы:
+
+```text
+puzzle.sqlite-wal
+puzzle.sqlite-shm
+```
+
+Основные таблицы:
+
+- `games` - игровые сессии, статус, таймеры, сохранённое состояние пазла.
+- `game_rounds` - раунды endurance-режима и начисленные очки.
+
 ## Docker
 
-В проекте используется один общий Dockerfile:
+В проекте используется общий Dockerfile:
 
 ```text
 docker/Dockerfile
 ```
 
-Окружения разделены compose-файлами:
+Compose-файлы:
 
 ```text
 docker/compose.local.yml
@@ -66,33 +159,6 @@ docker compose -f docker/compose.production.yml up -d
 
 `development` и `production` compose-файлы рассчитаны на внешний Traefik network `traefik` и Watchtower.
 
-## SQLite
-
-Приложение использует SQLite через `bun:sqlite`.
-
-Путь к базе задаётся переменной:
-
-```bash
-DATABASE_PATH=/app/data/puzzle.sqlite
-```
-
-В Docker база хранится в bind mount директориях:
-
-```text
-docker/data/local/puzzle.sqlite
-docker/data/development/puzzle.sqlite
-docker/data/production/puzzle.sqlite
-```
-
-Папки `docker/data/*` создаются Docker Compose автоматически и не коммитятся в git.
-
-SQLite работает в WAL-режиме, поэтому рядом с базой могут появляться служебные файлы:
-
-```text
-puzzle.sqlite-wal
-puzzle.sqlite-shm
-```
-
 ## CI/CD
 
 GitHub Actions собирает и публикует Docker images в GHCR при push в ветки:
@@ -102,7 +168,7 @@ dev
 prod
 ```
 
-Для сборки используется общий `docker/Dockerfile` и build arg:
+Для сборки используется `docker/Dockerfile` и build arg:
 
 ```bash
 APP_ENV=development
@@ -118,19 +184,32 @@ dev-YYYYMMDD-HHMMSS
 prod-YYYYMMDD-HHMMSS
 ```
 
-## Скрипты
+## Структура
 
-```bash
-bun dev          # Next dev server через Bun
-bun run build    # production build
-bun run start    # Next production server через Bun
-bun run lint     # ESLint
-```
+```text
+src/
+├── actions/       # Server actions
+├── app/           # Next.js App Router
+├── assets/        # Шрифты, профили, loading/help изображения
+├── components/    # UI и игровые компоненты
+├── contexts/      # Глобальный UI context
+├── dal/           # Слой доступа к данным
+├── db/            # SQLite подключение и schema migrations
+├── hooks/         # React hooks
+├── screens/       # Экранные композиции
+└── utils/         # Игровые и общие утилиты
 
-Перед `dev` и `build` автоматически запускается подготовка изображений:
+scripts/
+├── prepareBoardImages.ts
+├── extractBoardPalette.ts
+├── convertToOutline.ts
+└── sliceImageBySize.ts
 
-```bash
-bun run scripts/prepareBoardImages.ts
+docker/
+├── Dockerfile
+├── compose.local.yml
+├── compose.development.yml
+└── compose.production.yml
 ```
 
 ## Технологии
@@ -139,27 +218,9 @@ bun run scripts/prepareBoardImages.ts
 - React 19
 - Bun
 - SQLite через `bun:sqlite`
-- Docker / Docker Compose
-- @dnd-kit
-- Motion
+- `@dnd-kit`
+- `react-modal`
+- `react-icons`
+- `sharp` для подготовки изображений
 - CSS Modules
-
-## Структура
-
-```text
-src/
-├── actions/       # Server actions
-├── app/           # Next.js App Router
-├── components/    # UI и игровые компоненты
-├── dal/           # Слой доступа к данным
-├── db/            # SQLite подключение
-├── hooks/         # React hooks
-├── screens/       # Экранные композиции
-└── utils/         # Игровые и общие утилиты
-
-docker/
-├── Dockerfile
-├── compose.local.yml
-├── compose.development.yml
-└── compose.production.yml
-```
+- Docker / Docker Compose

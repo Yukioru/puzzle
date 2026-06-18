@@ -11,6 +11,7 @@
 .base.interactable {
   cursor: pointer;
   position: absolute;
+  inset: 0;
 }
 
 .base.dragging {
