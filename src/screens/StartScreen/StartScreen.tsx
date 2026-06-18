@@ -1,22 +1,20 @@
 'use client';
 
-import { use, useCallback, useState } from "react";
+import { use, useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { CSSProperties } from "react";
 import { FaArrowLeft, FaBolt } from "react-icons/fa6";
 import clsx from "clsx";
+import { createGameAction } from "~/actions/createGame";
 import { Button } from "~/components/Button";
 import { IconTextButton } from "~/components/IconTextButton";
 import { JigsawPiece } from "~/components/JigsawPiece";
 import { ProfileSelectModal } from "~/components/ProfileSelectModal";
 import { GlobalContext } from "~/contexts/GlobalContext";
-import { useLandingGame } from "~/screens/LandingBackground";
-import { Difficulty } from "~/types";
+import { Difficulty, GameMode } from "~/types";
 import { getDimensions } from "~/utils/getDimentions";
 
 import styles from './StartScreen.module.css';
-
-type GameMode = Difficulty | 'challenge';
 
 const gameModes: Array<{
   id: GameMode;
@@ -45,7 +43,7 @@ const gameModes: Array<{
   {
     id: 'challenge',
     title: 'Испытание',
-    description: 'Бесконечный режим с постоянно увеличивающейся сложностью. Рейтинговая таблица для самых упорных игроков.',
+    description: 'Бесконечный режим с постоянно увеличивающейся сложностью.\nРейтинговая таблица для самых упорных игроков.',
     layout: 'horizontal',
   },
 ];
@@ -92,27 +90,25 @@ const phantomPiecesByDifficulty: Record<Difficulty, Array<{
 
 export default function StartScreen() {
   const ctx = use(GlobalContext);
-  const { game } = useLandingGame();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
-  const selectedDifficulty = selectedMode && isDifficulty(selectedMode) ? selectedMode : undefined;
 
   const handleBack = useCallback(() => {
     router.push('/');
   }, [router]);
 
   const handleStartGame = useCallback((profileId: string) => {
-    if (!selectedDifficulty) return;
+    if (!selectedMode) return;
 
-    const nextPath = `/game/${game.id}`;
-    const params = new URLSearchParams({
-      profile: profileId,
-      difficulty: selectedDifficulty,
+    ctx.loadingScreen.toggle(true, { seed: '/game', progress: 20 });
+    startTransition(async () => {
+      await createGameAction({
+        profileId,
+        mode: selectedMode,
+      });
     });
-
-    ctx.loadingScreen.toggle(true, { seed: nextPath, progress: 20 });
-    router.push(`${nextPath}?${params.toString()}`);
-  }, [ctx, game.id, router, selectedDifficulty]);
+  }, [ctx, selectedMode]);
 
   return (
     <div className={styles.overlay}>
@@ -199,8 +195,8 @@ export default function StartScreen() {
       </div>
 
       <div className={styles.footer}>
-        <ProfileSelectModal disabled={!selectedDifficulty} onConfirm={handleStartGame}>
-          <Button className={styles.button} disabled={!selectedDifficulty}>
+        <ProfileSelectModal disabled={!selectedMode || isPending} onConfirm={handleStartGame}>
+          <Button className={styles.button} disabled={!selectedMode || isPending}>
             Выбрать персонажа
           </Button>
         </ProfileSelectModal>

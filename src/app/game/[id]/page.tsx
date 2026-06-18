@@ -1,17 +1,20 @@
-import { getGameById } from "~/dal/queries";
+import { notFound } from "next/navigation";
+import { getGameRecordById, getOrCreateGameState } from "~/dal/queries";
 import GameScreen from "~/screens/GameScreen";
-import { Difficulty } from "~/types";
 
 interface GameProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ difficulty?: Difficulty }>;
 }
 
-export default async function Game({ params, searchParams }: Readonly<GameProps>) {
+export default async function Game({ params }: Readonly<GameProps>) {
   const { id } = await params;
-  const { difficulty } = await searchParams;
+  const gameRecord = await getGameRecordById(id);
 
-  const data = await getGameById(id, difficulty);
+  if (!gameRecord) {
+    notFound();
+  }
 
-  return <GameScreen data={data} />;
+  const data = await getOrCreateGameState(gameRecord);
+
+  return <GameScreen data={data} gameRecord={gameRecord} />;
 }

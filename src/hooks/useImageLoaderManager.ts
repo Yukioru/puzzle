@@ -9,7 +9,10 @@ export function useImageLoaderManager(scopeRef?: RefObject<HTMLElement | null>) 
   const allImagesLoaded = useScopedImagesLoaded(scopeRef);
 
   useEffect(() => {
-    if (!allImagesLoaded && !ctx.loadingScreen.isEnabled) {
+    if (
+      !allImagesLoaded &&
+      (!ctx.loadingScreen.isEnabled || ctx.loadingScreen.seed !== pathname)
+    ) {
       ctx.loadingScreen.toggle(true, { seed: pathname, progress: 40 });
       return;
     }

@@ -1,6 +1,6 @@
 .base {
   --_paddingVertical: 2rem;
-  padding: var(--_paddingVertical) 2rem;
+  padding: var(--_paddingVertical);
   display: flex;
   flex-direction: column;
 }
@@ -79,6 +79,34 @@
   background-color: white;
 }
 
+.timer {
+  width: max-content;
+  padding: 0.35rem 1rem;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.35);
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
+}
+
+.completionMessage {
+  width: max-content;
+  max-width: calc(100vw - 4rem);
+  margin-bottom: 1rem;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: white;
+  font-size: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.45);
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
+}
+
+.completionMessage span {
+  font-weight: 700;
+}
+
 .actions {
   display: flex;
   align-items: flex-start;
@@ -151,11 +179,6 @@
 }
 
 @media screen and (min-width: 992px) {
-  .base {
-    --_paddingVertical: 2rem;
-    padding: var(--_paddingVertical) 3rem;
-  }
-
   .board {
     padding-inline: max(1rem, min(10vw, 16rem));
   }
@@ -201,16 +224,20 @@
     top: 14px;
   }
 
+  .timer {
+    font-size: 1.75rem;
+  }
+
   .actions {
     gap: 0.5rem;
   }
 
   .stockWrapper {
-    --_offset: 140px;
+    --_offset: 90px;
     margin-top: calc(-1 * var(--_offset));
     display: flex;
     flex-direction: column;
-    height: calc(100vh - var(--_paddingVertical) * 2 - var(--_offset) / 1.5);
+    height: calc(100vh - var(--_paddingVertical) * 2 - var(--_offset));
   }
 
   .footer {
@@ -218,16 +245,11 @@
   }
   
   .board {
-    padding-inline: max(1rem, min(4vw, 6rem));
+    padding-inline: max(1rem, min(6vw, 6rem));
   }
 }
 
 @media screen and (min-width: 1200px) {
-  .base {
-    --_paddingVertical: 4rem;
-    padding: var(--_paddingVertical) 4vw;
-  }
-
   .button.button {
     font-size: 1.75rem;
     --_icon-size: 2.625rem !important;
@@ -248,17 +270,13 @@
   }
 
   .subtitle {
-    font-size: 2rem;
+    font-size: 1.75rem;
     padding-left: 3.25rem;
-    line-height: 2.25rem;
+    line-height: 1.75rem;
   }
 
   .actions {
     gap: 1rem;
-  }
-
-  .board {
-    padding-inline: max(1rem, min(10vw, 16rem));
   }
 
   .footer {

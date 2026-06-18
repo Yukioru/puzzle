@@ -38,4 +38,21 @@ export interface IJigsawGame {
 export interface IJigsawGameCompleteInfo {
   gameId: string;
   boardId: string;
+  gameState: IJigsawGame;
 }
+
+export type GameStatus = 'active' | 'completed' | 'abandoned';
+
+export interface IGameRecord {
+  id: string;
+  profileId: string;
+  difficulty: Difficulty;
+  challengeMode: boolean;
+  startedAt: number;
+  finishedAt: number | null;
+  time: number | null;
+  points: number | null;
+  status: GameStatus;
+}
+
+export type GameMode = Difficulty | 'challenge';

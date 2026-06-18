@@ -4,7 +4,7 @@ import { DndContext, DragEndEvent, DragMoveEvent, DragOverEvent, MouseSensor, To
 import { HTMLProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import { MdOutlineMoveDown } from "react-icons/md";
-import { IJigsawGame, IJigsawGameCompleteInfo } from "~/types";
+import { IJigsawGame, IJigsawGameCompleteInfo, IJigsawPiece } from "~/types";
 import { JigsawBoard } from "../JigsawBoard";
 import { SmartJigsawPiece } from "../SmartJigsawPiece";
 import { JigsawPiece } from "../JigsawPiece";
@@ -23,6 +23,13 @@ type JigsawGameProps = IJigsawGame & HTMLProps<HTMLDivElement> & {
   boardClassName?: string;
   boardFrameClassName?: string;
   onComplete?: (gameInfo: IJigsawGameCompleteInfo) => void;
+  onGameStateChange?: (gameState: IJigsawGame) => void;
+}
+
+function serializePiece(piece: IJigsawPiece): IJigsawPiece {
+  const { cellOver: _cellOver, ...rest } = piece;
+
+  return rest;
 }
 
 function resetPlayablePieces(playablePieces: IJigsawGame['playablePieces']) {
@@ -33,6 +40,17 @@ function resetPlayablePieces(playablePieces: IJigsawGame['playablePieces']) {
     isMatches: false,
     isComplete: false,
     coords: { x: 0, y: 0 },
+  }));
+}
+
+function hydratePlayablePieces(playablePieces: IJigsawGame['playablePieces']) {
+  return playablePieces.map(piece => ({
+    ...piece,
+    currentSides: piece.currentSides ?? piece.initialSides,
+    isOnBoard: piece.isOnBoard ?? false,
+    isMatches: piece.isMatches ?? false,
+    isComplete: piece.isComplete ?? false,
+    coords: piece.coords ?? { x: 0, y: 0 },
   }));
 }
 
@@ -49,16 +67,39 @@ export default function JigsawGame({
   boardFrameClassName,
   className,
   initialPieces,
-  shuffledBoardsIds: _shuffledBoardsIds,
+  shuffledBoardsIds,
   onComplete,
+  onGameStateChange,
   ...props
 }: JigsawGameProps) {
   const baseRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const gameWasCompleteRef = useRef(false);
   const { rows, cols } = getDimensions(difficulty);
-  const [playablePieces, setPlayablePieces] = useState(resetPlayablePieces(initialPlayablePieces));
+  const [playablePieces, setPlayablePieces] = useState(() => hydratePlayablePieces(initialPlayablePieces));
   const [boardPieces, setBoardPieces] = useState(initialBoardPieces);
+
+  const currentGameState = useMemo<IJigsawGame>(() => ({
+    id,
+    imageFileName,
+    shuffledBoardsIds,
+    difficulty,
+    pieces: boardPieces.map(serializePiece),
+    initialPieces: initialPieces.map(serializePiece),
+    playablePieces: playablePieces.map(serializePiece),
+  }), [
+    boardPieces,
+    difficulty,
+    id,
+    imageFileName,
+    initialPieces,
+    playablePieces,
+    shuffledBoardsIds,
+  ]);
+
+  useEffect(() => {
+    onGameStateChange?.(currentGameState);
+  }, [currentGameState, onGameStateChange]);
 
 
   const setPieceCompletion = useCallback((pieceId: string) => {
@@ -314,8 +355,9 @@ export default function JigsawGame({
     onComplete?.({
       gameId: id,
       boardId: imageFileName,
+      gameState: currentGameState,
     });
-  }, [gameIsComplete, id, imageFileName, onComplete]);
+  }, [currentGameState, gameIsComplete, id, imageFileName, onComplete]);
 
 
   return (
