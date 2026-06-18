@@ -124,7 +124,7 @@
   }
 }
 
-@media screen and (min-width: 992px) {
+@media screen and (min-width: 1200px) {
   .base {
     padding: 1.375rem 3.875rem;
     font-size: 2.25rem;

@@ -1,5 +1,5 @@
 .base {
-  --_size: 2.625rem;
+  --_size: 2.2rem;
   --_color: #face96;
   display: flex;
   align-items: center;
@@ -11,4 +11,10 @@
   width: var(--_size);
   height: var(--_size);
   font-size: calc(var(--_size) * 0.54);
+}
+
+@media screen and (min-width: 1200px) {
+  .base {
+    --_size: 2.625rem;
+  }
 }

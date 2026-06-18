@@ -289,7 +289,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
           <div className={styles.heading}>
             <div className={styles.title}>
               <FaPuzzlePiece />
-              Мозаика грёз
+              <span className={styles.titleText}>Мозаика грёз</span>
               <div className={styles.titleStats}>
                 {isEndurance ? (
                   <EnduranceHud

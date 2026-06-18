@@ -198,10 +198,10 @@
 }
 
 .actionButton {
-  padding: 1rem 3rem;
-  font-size: 2rem;
-  line-height: 2.25rem;
-  max-width: 400px;
+  max-width: 340px;
+  padding: 0.6rem 2rem;
+  font-size: 1.5rem;
+  line-height: 1.75rem;
   width: 100%;
 }
 
@@ -252,6 +252,10 @@
   background: linear-gradient(to right, rgba(0, 0, 0, 0.3), transparent);
 }
 
+.titleText {
+  display: none;
+}
+
 @media screen and (min-width: 768px) {
   .actions {
     flex-direction: row;
@@ -275,7 +279,7 @@
   }
 
   .heading {
-    --_padding: 1rem;
+    --_padding: 0.5rem;
     padding-inline: var(--_padding) calc(2.5 * var(--_padding));
   }
 
@@ -298,9 +302,8 @@
   }
 
   .subtitle {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     padding-left: 3.25rem;
-    line-height: 2.5rem;
   }
 
   .subtitle::before {
@@ -329,11 +332,21 @@
   }
   
   .board {
-    padding-inline: max(1rem, min(2vw, 6rem));
+    padding-inline: max(1rem, min(1vw, 6rem));
   }
 }
 
 @media screen and (min-width: 1200px) {
+  .actionButton {
+    padding: 1rem 3rem;
+    font-size: 2rem;
+    line-height: 2.25rem;
+    max-width: 400px;
+  }
+  .titleText {
+    display: inline;
+  }
+
   .button.button {
     font-size: 1.75rem;
     --_icon-size: 2.625rem !important;

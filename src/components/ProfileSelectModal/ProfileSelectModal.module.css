@@ -6,7 +6,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1.75rem;
+  gap: 1.5rem;
   padding-block: 1.125rem;
   padding-inline: 1rem;
 }
@@ -145,11 +145,23 @@
 @media screen and (min-width: 992px) {
   .profile,
   .profile img {
-    width: 120px;
-    height: 120px;
+    width: 95px;
+    height: 95px;
   }
   .profiles {
     justify-content: flex-start;
+  }
+}
+
+@media screen and (min-width: 1025px) {
+  .profiles {
+    gap: 1.75rem;
+  }
+
+  .profile,
+  .profile img {
+    width: 120px;
+    height: 120px;
   }
 }
 
