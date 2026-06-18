@@ -61,7 +61,7 @@
   position: fixed;
   inset: 0;
   background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(3rem) contrast(1.25);
+  backdrop-filter: blur(1rem) contrast(1.25);
   overflow-y: auto;
 
   opacity: 0;

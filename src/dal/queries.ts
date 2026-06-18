@@ -1,5 +1,5 @@
 import db from "~/db";
-import { Difficulty, GameStatus, IGameRecord, IJigsawGame } from "~/types";
+import { Difficulty, EnduranceLeaderboardEntry, GameStatus, IGameRecord, IJigsawGame } from "~/types";
 import { shufflePieces } from "~/utils/shufflePieces";
 import { generateInitialPieces } from "~/utils/generateInitialPieces";
 import fs from 'node:fs';
@@ -10,6 +10,7 @@ import {
   calculateEnduranceRoundResult,
   ENDURANCE_INITIAL_TIME,
   getEnduranceDifficulty,
+  getEnduranceRank,
 } from "~/utils/endurance";
 
 const imagesFolder = '/boards';
@@ -37,6 +38,14 @@ interface GameStateRow {
 
 interface NextGameStateRow {
   challengeNextGameState: string | null;
+}
+
+interface EnduranceLeaderboardRow {
+  gameId: string;
+  profileId: string;
+  points: number;
+  rounds: number;
+  time: number;
 }
 
 function mapGameRecord(row: GameRecordRow): IGameRecord {
@@ -109,6 +118,28 @@ export async function getShuffledBoardsIds(excludeId?: string): Promise<string[]
   const boardIds = await getAllBoardsIds();
 
   return shuffleArray(boardIds.filter(boardId => boardId !== excludeId));
+}
+
+export async function getEnduranceLeaderboard(limit = 25): Promise<EnduranceLeaderboardEntry[]> {
+  const rows = db.query(`
+    SELECT
+      id AS gameId,
+      profileId,
+      COALESCE(points, 0) AS points,
+      MAX(challengeRound - 1, 0) AS rounds,
+      COALESCE(time, 0) AS time
+    FROM games
+    WHERE challengeMode = 1
+      AND status != 'active'
+      AND COALESCE(points, 0) > 0
+    ORDER BY points DESC, rounds DESC, time ASC
+    LIMIT $limit
+  `).all({ $limit: limit }) as EnduranceLeaderboardRow[];
+
+  return rows.map((row) => ({
+    ...row,
+    rank: getEnduranceRank(row.points),
+  }));
 }
 
 export async function createGameRecord(

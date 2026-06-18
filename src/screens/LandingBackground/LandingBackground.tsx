@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { createContext, PropsWithChildren, Suspense, use, useRef } from "react";
 import { motion } from "motion/react";
 import clsx from "clsx";
-import { LoadingScreen } from "~/components/LoadingScreen";
 import { useImageLoaderManager } from "~/hooks/useImageLoaderManager";
 import { useNextJigsawGame } from "~/hooks/useNextJigsawGame";
 import { IJigsawGame } from "~/types";
@@ -39,7 +38,7 @@ export function useLandingGame() {
 }
 
 export function LandingBackground({ data, children }: LandingBackgroundProps) {
-  const baseRef = useRef<HTMLDivElement>(null);
+  const gameStackRef = useRef<HTMLDivElement>(null);
   const {
     game,
     nextGame,
@@ -48,18 +47,19 @@ export function LandingBackground({ data, children }: LandingBackgroundProps) {
   } = useNextJigsawGame(data, {
     hiddenMountDelayMs: 100,
   });
-  const isLoaded = useImageLoaderManager(baseRef);
+  const isLoaded = useImageLoaderManager(gameStackRef, {
+    minTrackedCount: game.pieces.length,
+  });
 
   return (
     <LandingGameContext.Provider value={{ game }}>
-      <Suspense fallback={<LoadingScreen seed="/" progress={25} progressMax={40} continuous />}>
+      <Suspense fallback={null}>
         <div
-          ref={baseRef}
           className={clsx(styles.base, {
             [styles.loaded]: isLoaded,
           })}
         >
-          <div className={styles.gameStack}>
+          <div ref={gameStackRef} className={styles.gameStack}>
             <motion.div
               key={`${game.id}-${game.imageFileName}-${game.difficulty}`}
               className={styles.gameLayer}

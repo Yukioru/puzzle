@@ -1,8 +1,17 @@
 type Callback = () => void;
 
+interface LoadingStatus {
+  allLoaded: boolean;
+  trackedCount: number;
+}
+
+type StatusCallback = (status: LoadingStatus) => void;
+
 class ScopedImageLoader {
   private pending = 0;
+  private trackedCount = 0;
   private callbacks: Callback[] = [];
+  private statusCallbacks: StatusCallback[] = [];
   private tracked = new WeakMap<
     Element,
     { sig: string; cleanup: () => void; done: boolean }
@@ -18,10 +27,27 @@ class ScopedImageLoader {
     this.callbacks = this.callbacks.filter((c) => c !== cb);
   }
 
+  addStatusListener(cb: StatusCallback) {
+    this.statusCallbacks.push(cb);
+  }
+
+  removeStatusListener(cb: StatusCallback) {
+    this.statusCallbacks = this.statusCallbacks.filter((c) => c !== cb);
+  }
+
+  private notifyStatus() {
+    this.statusCallbacks.forEach((cb) => cb({
+      allLoaded: this.pending === 0,
+      trackedCount: this.trackedCount,
+    }));
+  }
+
   private notify() {
     if (this.pending === 0) {
       this.callbacks.forEach((cb) => cb());
     }
+
+    this.notifyStatus();
   }
 
   private signature(el: HTMLImageElement | SVGImageElement) {
@@ -37,6 +63,45 @@ class ScopedImageLoader {
     }
   }
 
+  private loadImage(src: string) {
+    return new Promise<void>((resolve) => {
+      const img = new Image();
+      let settled = false;
+
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        resolve();
+      };
+
+      const decode = () => {
+        if (typeof img.decode !== "function") {
+          finish();
+          return;
+        }
+
+        img.decode().then(finish).catch(finish);
+      };
+
+      img.decoding = "sync";
+      img.onload = decode;
+      img.onerror = finish;
+      img.src = src;
+
+      if (img.complete) {
+        decode();
+      }
+    });
+  }
+
+  private decodeHtmlImage(el: HTMLImageElement) {
+    if (typeof el.decode !== "function") {
+      return Promise.resolve();
+    }
+
+    return el.decode().catch(() => undefined);
+  }
+
   private track(el: HTMLImageElement | SVGImageElement) {
     const sig = this.signature(el);
     const prev = this.tracked.get(el);
@@ -49,6 +114,8 @@ class ScopedImageLoader {
     }
 
     this.pending++;
+    this.trackedCount++;
+    this.notifyStatus();
 
     let doneCalled = false;
     const done = () => {
@@ -62,8 +129,8 @@ class ScopedImageLoader {
 
     if (el instanceof HTMLImageElement) {
       if (el.complete && el.naturalWidth > 0) {
-        queueMicrotask(done);
         this.tracked.set(el, { sig, cleanup: () => {}, done: true });
+        this.decodeHtmlImage(el).then(done);
         return;
       }
       if (el.complete && el.naturalWidth === 0) {
@@ -74,7 +141,7 @@ class ScopedImageLoader {
 
       const onLoad = () => {
         cleanup();
-        done();
+        this.decodeHtmlImage(el).then(done);
       };
       const onError = () => {
         cleanup();
@@ -101,30 +168,23 @@ class ScopedImageLoader {
         return;
       }
 
-      const img = new Image();
-      const onLoad = () => {
-        cleanup();
-        done();
-      };
-      const onError = () => {
-        cleanup();
-        done();
-      };
+      let cancelled = false;
       const cleanup = () => {
-        img.removeEventListener("load", onLoad);
-        img.removeEventListener("error", onError);
+        cancelled = true;
       };
-
-      img.addEventListener("load", onLoad);
-      img.addEventListener("error", onError);
-      img.src = href;
 
       this.tracked.set(el, { sig, cleanup, done: false });
+      this.loadImage(href).then(() => {
+        if (!cancelled) {
+          done();
+        }
+      });
     }
   }
 
   observe() {
     this.pending = 0;
+    this.trackedCount = 0;
     this.tracked = new WeakMap();
 
     const observer = new MutationObserver((mutations) => {
@@ -168,6 +228,8 @@ class ScopedImageLoader {
     this.root.querySelectorAll?.("img, svg image").forEach((el) => {
       this.track(el as HTMLImageElement | SVGImageElement);
     });
+
+    queueMicrotask(() => this.notify());
 
     return () => observer.disconnect();
   }

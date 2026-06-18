@@ -60,7 +60,9 @@ export function GlobalContextProvider({ children, ...props }: PropsWithChildren<
     if (typeof progress !== 'undefined') {
       setLoadingScreenState(prevState => ({
         ...prevState,
-        progress: progress || (enabled ? 0 : 100),
+        progress: enabled && (!seed || seed === prevState.seed)
+          ? Math.max(prevState.progress ?? 0, progress || 0)
+          : progress || (enabled ? 0 : 100),
       }));
     }
 

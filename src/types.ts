@@ -73,3 +73,12 @@ export interface EnduranceRoundResult {
   timeBonus: number;
   nextDifficulty: Difficulty;
 }
+
+export interface EnduranceLeaderboardEntry {
+  gameId: string;
+  profileId: string;
+  points: number;
+  rounds: number;
+  time: number;
+  rank: string;
+}

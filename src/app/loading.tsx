@@ -1,5 +1,5 @@
-import { LoadingScreen } from "~/components/LoadingScreen";
+import { RouteLoadingBridge } from "~/components/RouteLoadingBridge";
 
-export default async function LoadingHome() {
-  return <LoadingScreen seed="/" progress={10} progressMax={25} continuous />;
+export default function LoadingHome() {
+  return <RouteLoadingBridge seed="/" progress={10} />;
 }

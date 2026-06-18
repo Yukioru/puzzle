@@ -181,7 +181,6 @@ export default function StartScreen() {
               aria-pressed={isSelected}
               onClick={() => setSelectedMode(mode.id)}
             >
-              <span className={styles.radio} />
               <span className={styles.cardIcon}>
                 <FaBolt />
               </span>
