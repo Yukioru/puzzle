@@ -1,6 +1,11 @@
 'use server';
 
-import { finishGameRecord } from "~/dal/queries";
+import {
+  completeEnduranceRound,
+  finishGameRecord,
+  prepareEnduranceNextRound,
+  resumeEnduranceGame,
+} from "~/dal/queries";
 import { GameStatus, IJigsawGame } from "~/types";
 
 interface FinishGameInput {
@@ -15,4 +20,32 @@ export async function finishGameAction({ gameId, status, gameState }: FinishGame
   }
 
   return finishGameRecord(gameId, status, gameState);
+}
+
+export async function completeEnduranceRoundAction(
+  gameId: string,
+  gameState: IJigsawGame,
+  options?: { nextGamePreloaded?: boolean }
+) {
+  if (!gameId) {
+    throw new Error('Game id is required');
+  }
+
+  return completeEnduranceRound(gameId, gameState, options);
+}
+
+export async function prepareEnduranceNextRoundAction(gameId: string) {
+  if (!gameId) {
+    throw new Error('Game id is required');
+  }
+
+  return prepareEnduranceNextRound(gameId);
+}
+
+export async function resumeEnduranceGameAction(gameId: string) {
+  if (!gameId) {
+    throw new Error('Game id is required');
+  }
+
+  return resumeEnduranceGame(gameId);
 }

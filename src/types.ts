@@ -53,6 +53,23 @@ export interface IGameRecord {
   time: number | null;
   points: number | null;
   status: GameStatus;
+  challengeRound: number;
+  challengeTimeLeft: number | null;
+  challengeLastTickAt: number | null;
+  challengePausedAt: number | null;
 }
 
 export type GameMode = Difficulty | 'challenge';
+
+export interface EnduranceRoundResult {
+  round: number;
+  difficulty: Difficulty;
+  roundTime: number;
+  basePoints: number;
+  speedMultiplier: number;
+  speedPoints: number;
+  milestoneBonus: number;
+  totalPoints: number;
+  timeBonus: number;
+  nextDifficulty: Difficulty;
+}

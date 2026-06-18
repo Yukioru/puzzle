@@ -3,44 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { getGameByBoardIdAction, getShuffledBoardsIdsAction } from "~/actions/getGame";
 import { IJigsawGame } from "~/types";
+import { preloadJigsawGameImages } from "~/utils/preloadJigsawGameImages";
 
 interface UseNextJigsawGameOptions {
   delayMs?: number;
   enabled?: boolean;
   hiddenMountDelayMs?: number;
-}
-
-function preloadImage(src: string): Promise<void> {
-  return new Promise((resolve) => {
-    const image = new Image();
-
-    image.onload = () => resolve();
-    image.onerror = () => resolve();
-    image.src = src;
-  });
-}
-
-function getGameImageUrls(game: IJigsawGame) {
-  const imageUrls = new Set<string>();
-  const pieces = [...game.pieces, ...game.initialPieces, ...game.playablePieces];
-
-  pieces.forEach((piece) => {
-    imageUrls.add(piece.imageUrl);
-
-    if (piece.isEmpty) {
-      const imageFile = piece.imageUrl.split('/').pop();
-
-      if (imageFile) {
-        imageUrls.add(`/pieces/outline/${game.imageFileName}/${game.difficulty}/${imageFile}`);
-      }
-    }
-  });
-
-  return Array.from(imageUrls);
-}
-
-async function preloadGameImages(game: IJigsawGame) {
-  await Promise.all(getGameImageUrls(game).map(preloadImage));
 }
 
 export function useNextJigsawGame(
@@ -90,7 +58,7 @@ export function useNextJigsawGame(
         const nextQueue = currentQueue.slice(1);
         const nextGame = await getGameByBoardIdAction(game.id, nextBoardId, game.difficulty);
 
-        await preloadGameImages(nextGame);
+        await preloadJigsawGameImages(nextGame);
 
         if (isActive) {
           nextBoardIdsQueueRef.current = nextQueue;

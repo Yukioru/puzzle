@@ -6,17 +6,20 @@ import { FaPuzzlePiece, FaInfo } from "react-icons/fa6";
 import dynamic from "next/dynamic";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
-import { finishGameAction } from "~/actions/finishGame";
+import { completeEnduranceRoundAction, finishGameAction, resumeEnduranceGameAction } from "~/actions/finishGame";
 import { AccentIconFrame } from "~/components/AccentIconFrame";
 import { Button } from "~/components/Button";
+import { EnduranceHud } from "~/components/EnduranceHud";
 import { GameCompleteModal } from "~/components/GameCompleteModal";
 import { GameTimer } from "~/components/GameTimer";
 import { LoadingScreen } from "~/components/LoadingScreen";
-import { IGameRecord, IJigsawGame, IJigsawGameCompleteInfo } from "~/types";
+import { EnduranceRoundResult, IGameRecord, IJigsawGame, IJigsawGameCompleteInfo } from "~/types";
+import { getEnduranceRank } from "~/utils/endurance";
 
 import styles from './GameScreen.module.css';
 import { Divider } from "~/components/Divider";
 import { IconTextButton } from "~/components/IconTextButton";
+import { usePreparedEnduranceRound } from "~/hooks/endurance/usePreparedEnduranceRound";
 import { useImageLoaderManager } from "~/hooks/useImageLoaderManager";
 import { GlobalContext } from "~/contexts/GlobalContext";
 
@@ -35,15 +38,30 @@ interface GameScreenProps {
 export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   const gameScreenRef = useRef<HTMLDivElement>(null);
   const finishGameRequestRef = useRef(false);
+  const roundCompletionRequestRef = useRef(false);
   const currentGameStateRef = useRef(data);
   const ctx = use(GlobalContext);
   const router = useRouter();
+  const [activeBuffer, setActiveBuffer] = useState<'primary' | 'secondary'>('primary');
+  const [primaryGameState, setPrimaryGameState] = useState<IJigsawGame>(data);
+  const [secondaryGameState, setSecondaryGameState] = useState<IJigsawGame | null>(null);
   const [currentGameRecord, setCurrentGameRecord] = useState(gameRecord);
+  const [lastEnduranceRoundResult, setLastEnduranceRoundResult] = useState<EnduranceRoundResult | null>(null);
   const [showCompletionMessage, setShowCompletionMessage] = useState(gameRecord.status !== 'active');
   const [isPending, startTransition] = useTransition();
   const isLoaded = useImageLoaderManager(gameScreenRef);
 
   const gameIsActive = currentGameRecord.status === 'active';
+  const isEndurance = currentGameRecord.challengeMode;
+  const activeGameState = activeBuffer === 'primary'
+    ? primaryGameState
+    : secondaryGameState ?? primaryGameState;
+  const preparedBuffer = activeBuffer === 'primary' ? 'secondary' : 'primary';
+  const preparedEnduranceRound = usePreparedEnduranceRound({
+    enabled: isEndurance && gameIsActive,
+    gameId: currentGameRecord.id,
+    round: currentGameRecord.challengeRound,
+  });
 
   useEffect(() => {
     if (currentGameRecord.status !== 'active') {
@@ -51,12 +69,80 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
     }
   }, [currentGameRecord.status]);
 
+  useEffect(() => {
+    currentGameStateRef.current = activeGameState;
+  }, [activeGameState]);
+
+  useEffect(() => {
+    if (!isEndurance || !preparedEnduranceRound.preparedGame) return;
+
+    if (preparedBuffer === 'primary') {
+      setPrimaryGameState(preparedEnduranceRound.preparedGame);
+      return;
+    }
+
+    setSecondaryGameState(preparedEnduranceRound.preparedGame);
+  }, [isEndurance, preparedBuffer, preparedEnduranceRound.preparedGame]);
+
   const handleGameStateChange = useCallback((gameState: IJigsawGame) => {
     currentGameStateRef.current = gameState;
   }, []);
 
   const handleCompleteGame = useCallback((gameInfo: IJigsawGameCompleteInfo) => {
     if (!gameIsActive || finishGameRequestRef.current) return;
+
+    if (isEndurance) {
+      if (roundCompletionRequestRef.current) return;
+
+      roundCompletionRequestRef.current = true;
+      startTransition(async () => {
+        const result = await completeEnduranceRoundAction(gameInfo.gameId, gameInfo.gameState, {
+          nextGamePreloaded: preparedEnduranceRound.isPrepared,
+        });
+
+        if (!result) {
+          setShowCompletionMessage(true);
+          roundCompletionRequestRef.current = false;
+          return;
+        }
+
+        if (result.roundResult === null) {
+          setCurrentGameRecord(result.gameRecord);
+          setShowCompletionMessage(true);
+          roundCompletionRequestRef.current = false;
+          return;
+        }
+
+        if (!preparedEnduranceRound.isPrepared) {
+          setCurrentGameRecord(result.gameRecord);
+          if (preparedBuffer === 'primary') {
+            setPrimaryGameState(result.gameState);
+          } else {
+            setSecondaryGameState(result.gameState);
+          }
+          await preparedEnduranceRound.preloadPreparedGame(result.gameState);
+          const resumedGame = await resumeEnduranceGameAction(gameInfo.gameId);
+
+          if (resumedGame) {
+            setCurrentGameRecord(resumedGame);
+          }
+        } else {
+          if (preparedBuffer === 'primary') {
+            setPrimaryGameState(result.gameState);
+          } else {
+            setSecondaryGameState(result.gameState);
+          }
+          setCurrentGameRecord(result.gameRecord);
+        }
+
+        currentGameStateRef.current = result.gameState;
+        setLastEnduranceRoundResult(result.roundResult);
+        setActiveBuffer(preparedBuffer);
+
+        roundCompletionRequestRef.current = false;
+      });
+      return;
+    }
 
     finishGameRequestRef.current = true;
     startTransition(async () => {
@@ -72,7 +158,26 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
 
       setShowCompletionMessage(true);
     });
-  }, [gameIsActive]);
+  }, [gameIsActive, isEndurance, preparedBuffer, preparedEnduranceRound]);
+
+  const handleEnduranceExpire = useCallback(() => {
+    if (!gameIsActive || finishGameRequestRef.current) return;
+
+    finishGameRequestRef.current = true;
+    startTransition(async () => {
+      const finishedGame = await finishGameAction({
+        gameId: currentGameRecord.id,
+        status: 'abandoned',
+        gameState: currentGameStateRef.current,
+      });
+
+      if (finishedGame) {
+        setCurrentGameRecord(finishedGame);
+      }
+
+      setShowCompletionMessage(true);
+    });
+  }, [currentGameRecord.id, gameIsActive]);
 
   const handleExit = useCallback(() => {
 
@@ -121,7 +226,15 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
               <FaPuzzlePiece />
               Мозаика грёз
               <div className={styles.titleStats}>
-                <GameTimer game={currentGameRecord} label="Время: " />
+                {isEndurance ? (
+                  <EnduranceHud
+                    game={currentGameRecord}
+                    lastRoundResult={lastEnduranceRoundResult}
+                    onExpire={handleEnduranceExpire}
+                  />
+                ) : (
+                  <GameTimer game={currentGameRecord} />
+                )}
               </div>
             </div>
             <Divider className={styles.divider} />
@@ -166,7 +279,13 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
           >
             <div className={styles.completionContent}>
               <div className={styles.completionStatus}>
-                {currentGameRecord.status === 'abandoned'
+                {isEndurance
+                  ? (
+                    <div>
+                      Испытание завершено. Ваш рейтинг: <span className={styles.highlightGreen}>{getEnduranceRank(currentGameRecord.points ?? 0)}</span>
+                    </div>
+                  )
+                  : currentGameRecord.status === 'abandoned'
                   ? (
                     <div>
                       Вы <span className={styles.highlightRed}>не собрали</span> мозаику и покинули игру.<br />
@@ -180,24 +299,79 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
                     </div>
                   )}
               </div>
+              {isEndurance && (
+                <>
+                  <div className={styles.completionStat}>
+                    <span>Очки</span>
+                    <strong>{currentGameRecord.points ?? 0}</strong>
+                  </div>
+                  <div className={styles.completionStat}>
+                    <span>Раундов</span>
+                    <strong>{Math.max(0, currentGameRecord.challengeRound - 1)}</strong>
+                  </div>
+                </>
+              )}
               <div className={styles.completionStat}>
                 <span>Затраченное время</span>
                 <strong>
-                  <GameTimer game={currentGameRecord} />
+                  <GameTimer game={currentGameRecord} variant="plain" />
                 </strong>
               </div>
             </div>
           </GameCompleteModal>
         )}
-        <JigsawGame
-          showStock
-          boardClassName={styles.board}
-          stockWrapperClassName={styles.stockWrapper}
-          stockClassName={styles.stockFrame}
-          onComplete={gameIsActive ? handleCompleteGame : undefined}
-          onGameStateChange={handleGameStateChange}
-          {...data}
-        />
+        {isEndurance ? (
+          <div className={styles.gameStage}>
+            <div className={clsx(styles.gameLayer, {
+              [styles.activeGameLayer]: activeBuffer === 'primary',
+              [styles.preparedGameLayer]: activeBuffer !== 'primary',
+            })}>
+              <JigsawGame
+                key={`primary-${primaryGameState.imageFileName}-${primaryGameState.difficulty}`}
+                showStock
+                dndId={`${primaryGameState.id}-primary`}
+                boardClassName={styles.board}
+                stockWrapperClassName={styles.stockWrapper}
+                stockClassName={styles.stockFrame}
+                onComplete={activeBuffer === 'primary' && gameIsActive ? handleCompleteGame : undefined}
+                onGameStateChange={activeBuffer === 'primary' ? handleGameStateChange : undefined}
+                {...primaryGameState}
+              />
+            </div>
+            {secondaryGameState && (
+              <div
+                className={clsx(styles.gameLayer, {
+                  [styles.activeGameLayer]: activeBuffer === 'secondary',
+                  [styles.preparedGameLayer]: activeBuffer !== 'secondary',
+                })}
+                aria-hidden={activeBuffer !== 'secondary'}
+              >
+                <JigsawGame
+                  key={`secondary-${secondaryGameState.imageFileName}-${secondaryGameState.difficulty}`}
+                  showStock
+                  dndId={`${secondaryGameState.id}-secondary`}
+                  boardClassName={styles.board}
+                  stockWrapperClassName={styles.stockWrapper}
+                  stockClassName={styles.stockFrame}
+                  onComplete={activeBuffer === 'secondary' && gameIsActive ? handleCompleteGame : undefined}
+                  onGameStateChange={activeBuffer === 'secondary' ? handleGameStateChange : undefined}
+                  {...secondaryGameState}
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          <JigsawGame
+            key={`${activeGameState.id}-${currentGameRecord.challengeRound}-${activeGameState.imageFileName}`}
+            showStock
+            boardClassName={styles.board}
+            stockWrapperClassName={styles.stockWrapper}
+            stockClassName={styles.stockFrame}
+            onComplete={gameIsActive ? handleCompleteGame : undefined}
+            onGameStateChange={handleGameStateChange}
+            {...activeGameState}
+          />
+        )}
         <div className={styles.footer}>
           <div className={styles.footerMessage}>
             Чтобы повернуть фрагмент, нажмите на него

@@ -17,7 +17,35 @@ function createGamesTable(db: Database) {
       time INTEGER CHECK (time IS NULL OR time >= 0),
       points INTEGER CHECK (points IS NULL OR points >= 0),
       status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'abandoned')),
-      gameState TEXT
+      gameState TEXT,
+      challengeRound INTEGER NOT NULL DEFAULT 1 CHECK (challengeRound >= 1),
+      challengeTimeLeft INTEGER CHECK (challengeTimeLeft IS NULL OR challengeTimeLeft >= 0),
+      challengeLastTickAt INTEGER CHECK (challengeLastTickAt IS NULL OR challengeLastTickAt >= 0),
+      challengePausedAt INTEGER CHECK (challengePausedAt IS NULL OR challengePausedAt >= 0),
+      challengeNextGameState TEXT
+    ) STRICT;
+  `);
+}
+
+function createGameRoundsTable(db: Database) {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS game_rounds (
+      id TEXT PRIMARY KEY,
+      gameId TEXT NOT NULL,
+      round INTEGER NOT NULL CHECK (round >= 1),
+      difficulty TEXT NOT NULL CHECK (difficulty IN ('easy', 'medium', 'hard')),
+      startedAt INTEGER NOT NULL CHECK (startedAt >= 0),
+      finishedAt INTEGER NOT NULL CHECK (finishedAt >= startedAt),
+      roundTime INTEGER NOT NULL CHECK (roundTime >= 0),
+      basePoints INTEGER NOT NULL CHECK (basePoints >= 0),
+      speedMultiplier REAL NOT NULL CHECK (speedMultiplier >= 0),
+      speedPoints INTEGER NOT NULL CHECK (speedPoints >= 0),
+      milestoneBonus INTEGER NOT NULL CHECK (milestoneBonus >= 0),
+      totalPoints INTEGER NOT NULL CHECK (totalPoints >= 0),
+      timeBonus INTEGER NOT NULL CHECK (timeBonus >= 0),
+      createdAt INTEGER NOT NULL CHECK (createdAt >= 0),
+      FOREIGN KEY (gameId) REFERENCES games(id) ON DELETE CASCADE,
+      UNIQUE (gameId, round)
     ) STRICT;
   `);
 }
@@ -108,15 +136,58 @@ function ensureGamesStateColumn(db: Database) {
   `);
 }
 
+function ensureGamesChallengeColumns(db: Database) {
+  if (!hasGamesColumn(db, 'challengeRound')) {
+    db.run(`
+      ALTER TABLE games
+      ADD COLUMN challengeRound INTEGER NOT NULL DEFAULT 1
+      CHECK (challengeRound >= 1)
+    `);
+  }
+
+  if (!hasGamesColumn(db, 'challengeTimeLeft')) {
+    db.run(`
+      ALTER TABLE games
+      ADD COLUMN challengeTimeLeft INTEGER
+      CHECK (challengeTimeLeft IS NULL OR challengeTimeLeft >= 0)
+    `);
+  }
+
+  if (!hasGamesColumn(db, 'challengeLastTickAt')) {
+    db.run(`
+      ALTER TABLE games
+      ADD COLUMN challengeLastTickAt INTEGER
+      CHECK (challengeLastTickAt IS NULL OR challengeLastTickAt >= 0)
+    `);
+  }
+
+  if (!hasGamesColumn(db, 'challengePausedAt')) {
+    db.run(`
+      ALTER TABLE games
+      ADD COLUMN challengePausedAt INTEGER
+      CHECK (challengePausedAt IS NULL OR challengePausedAt >= 0)
+    `);
+  }
+
+  if (!hasGamesColumn(db, 'challengeNextGameState')) {
+    db.run(`
+      ALTER TABLE games
+      ADD COLUMN challengeNextGameState TEXT
+    `);
+  }
+}
+
 export function initializeDatabase(db: Database) {
   const gamesTableExists = tableExists(db, 'games');
 
   createGamesTable(db);
+  createGameRoundsTable(db);
 
   if (gamesTableExists) {
     ensureGamesTimeCanBeEmpty(db);
     ensureGamesStatusColumn(db);
     ensureGamesTimerColumns(db);
     ensureGamesStateColumn(db);
+    ensureGamesChallengeColumns(db);
   }
 }

@@ -6,6 +6,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { attachImageToPieces } from "~/utils/attachImageToPieces";
 import { shuffleArray } from "~/utils/shuffleArray";
+import {
+  calculateEnduranceRoundResult,
+  ENDURANCE_INITIAL_TIME,
+  getEnduranceDifficulty,
+} from "~/utils/endurance";
 
 const imagesFolder = '/boards';
 const boardImageExtensionRegexp = /\.(jpe?g|png|webp)$/i;
@@ -20,10 +25,18 @@ interface GameRecordRow {
   time: number | null;
   points: number | null;
   status: GameStatus;
+  challengeRound: number;
+  challengeTimeLeft: number | null;
+  challengeLastTickAt: number | null;
+  challengePausedAt: number | null;
 }
 
 interface GameStateRow {
   gameState: string | null;
+}
+
+interface NextGameStateRow {
+  challengeNextGameState: string | null;
 }
 
 function mapGameRecord(row: GameRecordRow): IGameRecord {
@@ -99,25 +112,71 @@ export async function getShuffledBoardsIds(excludeId?: string): Promise<string[]
 }
 
 export async function createGameRecord(
-  game: Omit<IGameRecord, 'startedAt' | 'finishedAt' | 'time' | 'points' | 'status'>
+  game: Pick<IGameRecord, 'id' | 'profileId' | 'difficulty' | 'challengeMode'>
 ) {
   const startedAt = Date.now();
+  const challengeTimeLeft = game.challengeMode ? ENDURANCE_INITIAL_TIME : null;
+  const challengeLastTickAt = game.challengeMode ? startedAt : null;
 
   db.query(`
-    INSERT INTO games (id, profileId, difficulty, challengeMode, startedAt, finishedAt, time, points, status)
-    VALUES ($id, $profileId, $difficulty, $challengeMode, $startedAt, NULL, NULL, NULL, 'active')
+    INSERT INTO games (
+      id,
+      profileId,
+      difficulty,
+      challengeMode,
+      startedAt,
+      finishedAt,
+      time,
+      points,
+      status,
+      challengeRound,
+      challengeTimeLeft,
+      challengeLastTickAt,
+      challengePausedAt
+    )
+    VALUES (
+      $id,
+      $profileId,
+      $difficulty,
+      $challengeMode,
+      $startedAt,
+      NULL,
+      NULL,
+      $points,
+      'active',
+      1,
+      $challengeTimeLeft,
+      $challengeLastTickAt,
+      NULL
+    )
   `).run({
     $id: game.id,
     $profileId: game.profileId,
     $difficulty: game.difficulty,
     $challengeMode: game.challengeMode ? 1 : 0,
     $startedAt: startedAt,
+    $points: game.challengeMode ? 0 : null,
+    $challengeTimeLeft: challengeTimeLeft,
+    $challengeLastTickAt: challengeLastTickAt,
   });
 }
 
 export async function getGameRecordById(id: string): Promise<IGameRecord | null> {
   const row = db.query(`
-    SELECT id, profileId, difficulty, challengeMode, startedAt, finishedAt, time, points, status
+    SELECT
+      id,
+      profileId,
+      difficulty,
+      challengeMode,
+      startedAt,
+      finishedAt,
+      time,
+      points,
+      status,
+      challengeRound,
+      challengeTimeLeft,
+      challengeLastTickAt,
+      challengePausedAt
     FROM games
     WHERE id = $id
   `).get({ $id: id }) as GameRecordRow | null;
@@ -129,6 +188,12 @@ function parseGameState(row: GameStateRow | null): IJigsawGame | null {
   if (!row?.gameState) return null;
 
   return JSON.parse(row.gameState) as IJigsawGame;
+}
+
+function parseNextGameState(row: NextGameStateRow | null): IJigsawGame | null {
+  if (!row?.challengeNextGameState) return null;
+
+  return JSON.parse(row.challengeNextGameState) as IJigsawGame;
 }
 
 export async function getOrCreateGameState(game: Pick<IGameRecord, 'id' | 'difficulty'>): Promise<IJigsawGame> {
@@ -177,12 +242,20 @@ export async function finishGameRecord(
 
   const finishedAt = Date.now();
   const time = Math.max(0, finishedAt - game.startedAt);
+  const challengeTimeLeft = game.challengeMode
+    ? game.challengePausedAt
+      ? game.challengeTimeLeft
+      : Math.max(0, (game.challengeTimeLeft ?? 0) - (finishedAt - (game.challengeLastTickAt ?? game.startedAt)))
+    : game.challengeTimeLeft;
 
   db.query(`
     UPDATE games
     SET status = $status,
       finishedAt = $finishedAt,
       time = $time,
+      challengeTimeLeft = $challengeTimeLeft,
+      challengeLastTickAt = $finishedAt,
+      challengePausedAt = NULL,
       gameState = COALESCE($gameState, gameState)
     WHERE id = $id AND status = 'active'
   `).run({
@@ -190,8 +263,205 @@ export async function finishGameRecord(
     $status: status,
     $finishedAt: finishedAt,
     $time: time,
+    $challengeTimeLeft: challengeTimeLeft,
     $gameState: gameState ? JSON.stringify(gameState) : null,
   });
 
   return getGameRecordById(id);
+}
+
+export async function prepareEnduranceNextRound(id: string) {
+  const game = await getGameRecordById(id);
+
+  if (!game || game.status !== 'active' || !game.challengeMode) {
+    return null;
+  }
+
+  const existingNextGameState = parseNextGameState(db.query(`
+    SELECT challengeNextGameState
+    FROM games
+    WHERE id = $id
+  `).get({ $id: id }) as NextGameStateRow | null);
+
+  if (existingNextGameState) {
+    return existingNextGameState;
+  }
+
+  const nextDifficulty = getEnduranceDifficulty(game.challengeRound + 1);
+  const nextGameState = await getGameById(id, nextDifficulty);
+  const result = db.query(`
+    UPDATE games
+    SET challengeNextGameState = $challengeNextGameState
+    WHERE id = $id
+      AND status = 'active'
+      AND challengeNextGameState IS NULL
+  `).run({
+    $id: id,
+    $challengeNextGameState: JSON.stringify(nextGameState),
+  });
+
+  if (result.changes > 0) {
+    return nextGameState;
+  }
+
+  return parseNextGameState(db.query(`
+    SELECT challengeNextGameState
+    FROM games
+    WHERE id = $id
+  `).get({ $id: id }) as NextGameStateRow | null) ?? nextGameState;
+}
+
+export async function resumeEnduranceGame(id: string) {
+  const game = await getGameRecordById(id);
+
+  if (!game || game.status !== 'active' || !game.challengeMode || !game.challengePausedAt) {
+    return game;
+  }
+
+  db.query(`
+    UPDATE games
+    SET challengePausedAt = NULL,
+      challengeLastTickAt = $now
+    WHERE id = $id AND status = 'active'
+  `).run({
+    $id: id,
+    $now: Date.now(),
+  });
+
+  return getGameRecordById(id);
+}
+
+export async function completeEnduranceRound(
+  id: string,
+  gameState: IJigsawGame,
+  { nextGamePreloaded = false }: { nextGamePreloaded?: boolean } = {}
+) {
+  const game = await getGameRecordById(id);
+
+  if (!game || game.status !== 'active' || !game.challengeMode) {
+    return null;
+  }
+
+  const now = Date.now();
+  const lastTickAt = game.challengeLastTickAt ?? game.startedAt;
+  const currentTimeLeft = game.challengePausedAt
+    ? (game.challengeTimeLeft ?? 0)
+    : Math.max(0, (game.challengeTimeLeft ?? 0) - (now - lastTickAt));
+
+  if (currentTimeLeft <= 0) {
+    const finishedGame = await finishGameRecord(id, 'abandoned', gameState);
+
+    return finishedGame
+      ? {
+        gameRecord: finishedGame,
+        gameState,
+        roundResult: null,
+      }
+      : null;
+  }
+
+  const roundStartedAt = game.challengeLastTickAt ?? game.startedAt;
+  const roundTime = Math.max(0, now - roundStartedAt);
+  const roundResult = calculateEnduranceRoundResult({
+    round: game.challengeRound,
+    difficulty: game.difficulty,
+    roundTime,
+  });
+  const nextRound = game.challengeRound + 1;
+  const nextDifficulty = getEnduranceDifficulty(nextRound);
+  const preparedNextGameState = parseNextGameState(db.query(`
+    SELECT challengeNextGameState
+    FROM games
+    WHERE id = $id
+  `).get({ $id: id }) as NextGameStateRow | null);
+  const nextGameState = preparedNextGameState ?? await getGameById(id, nextDifficulty);
+  const nextTimeLeft = currentTimeLeft + roundResult.timeBonus;
+  const nextPoints = (game.points ?? 0) + roundResult.totalPoints;
+  const shouldPause = !nextGamePreloaded;
+
+  const completeRound = db.transaction(() => {
+    db.query(`
+      INSERT INTO game_rounds (
+        id,
+        gameId,
+        round,
+        difficulty,
+        startedAt,
+        finishedAt,
+        roundTime,
+        basePoints,
+        speedMultiplier,
+        speedPoints,
+        milestoneBonus,
+        totalPoints,
+        timeBonus,
+        createdAt
+      )
+      VALUES (
+        $id,
+        $gameId,
+        $round,
+        $difficulty,
+        $startedAt,
+        $finishedAt,
+        $roundTime,
+        $basePoints,
+        $speedMultiplier,
+        $speedPoints,
+        $milestoneBonus,
+        $totalPoints,
+        $timeBonus,
+        $createdAt
+      )
+    `).run({
+      $id: crypto.randomUUID(),
+      $gameId: id,
+      $round: game.challengeRound,
+      $difficulty: game.difficulty,
+      $startedAt: roundStartedAt,
+      $finishedAt: now,
+      $roundTime: roundTime,
+      $basePoints: roundResult.basePoints,
+      $speedMultiplier: roundResult.speedMultiplier,
+      $speedPoints: roundResult.speedPoints,
+      $milestoneBonus: roundResult.milestoneBonus,
+      $totalPoints: roundResult.totalPoints,
+      $timeBonus: roundResult.timeBonus,
+      $createdAt: now,
+    });
+
+    db.query(`
+      UPDATE games
+      SET difficulty = $difficulty,
+        points = $points,
+        challengeRound = $challengeRound,
+        challengeTimeLeft = $challengeTimeLeft,
+        challengeLastTickAt = $challengeLastTickAt,
+        challengePausedAt = $challengePausedAt,
+        challengeNextGameState = NULL,
+        gameState = $gameState
+      WHERE id = $id AND status = 'active'
+    `).run({
+      $id: id,
+      $difficulty: nextDifficulty,
+      $points: nextPoints,
+      $challengeRound: nextRound,
+      $challengeTimeLeft: nextTimeLeft,
+      $challengeLastTickAt: shouldPause ? null : now,
+      $challengePausedAt: shouldPause ? now : null,
+      $gameState: JSON.stringify(nextGameState),
+    });
+  });
+
+  completeRound();
+
+  const updatedGame = await getGameRecordById(id);
+
+  if (!updatedGame) return null;
+
+  return {
+    gameRecord: updatedGame,
+    gameState: nextGameState,
+    roundResult,
+  };
 }

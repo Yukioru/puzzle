@@ -22,6 +22,7 @@ type JigsawGameProps = IJigsawGame & HTMLProps<HTMLDivElement> & {
   stockWrapperClassName?: string;
   boardClassName?: string;
   boardFrameClassName?: string;
+  dndId?: string;
   onComplete?: (gameInfo: IJigsawGameCompleteInfo) => void;
   onGameStateChange?: (gameState: IJigsawGame) => void;
 }
@@ -66,6 +67,7 @@ export default function JigsawGame({
   boardClassName,
   boardFrameClassName,
   className,
+  dndId,
   initialPieces,
   shuffledBoardsIds,
   onComplete,
@@ -363,7 +365,7 @@ export default function JigsawGame({
   return (
     <div ref={baseRef} className={clsx(styles.base, className)} {...props}>
       <DndContext
-        id={id}
+        id={dndId ?? id}
         sensors={sensors}
         onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}

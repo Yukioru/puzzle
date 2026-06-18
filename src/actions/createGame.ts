@@ -24,7 +24,7 @@ export async function createGameAction({ profileId, mode }: CreateGameInput) {
 
   const id = crypto.randomUUID();
   const challengeMode = mode === 'challenge';
-  const difficulty = challengeMode ? 'hard' : mode;
+  const difficulty = challengeMode ? 'easy' : mode;
 
   await createGameRecord({
     id,
