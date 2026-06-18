@@ -34,6 +34,12 @@ Production build:
 bun run build
 ```
 
+Standalone build в папку `build` без Docker:
+
+```bash
+bun run build:export
+```
+
 Запуск production-сервера:
 
 ```bash
@@ -43,10 +49,11 @@ bun run start
 ## Скрипты
 
 ```bash
-bun dev          # predev + Next dev server через Bun/Turbopack
-bun run build    # prebuild + production build через Bun/Turbopack
-bun run start    # Next production server
-bun run lint     # ESLint
+bun dev              # predev + Next dev server через Bun/Turbopack
+bun run build        # prebuild + production build через Bun/Turbopack
+bun run build:export # build + экспорт standalone runtime в ./build
+bun run start        # Next production server
+bun run lint         # ESLint
 ```
 
 Перед `dev` и `build` автоматически запускается:
@@ -63,6 +70,52 @@ bun run scripts/prepareBoardImages.ts
 - нарезает контуры в `public/pieces/outline`.
 
 `sharp` используется только в scripts pipeline, а не в runtime-коде Next.
+
+## Standalone Без Docker
+
+Если Docker не нужен, можно собрать такой же runtime-артефакт, какой используется в runner stage Dockerfile:
+
+```bash
+bun run build:export
+```
+
+Команда создаёт директорию:
+
+```text
+build
+```
+
+В неё попадают:
+
+- standalone-сервер из `.next/standalone`;
+- статические Next-ассеты из `.next/static`;
+- публичные файлы из `public`;
+- директория `build/data` для SQLite-файла.
+
+Запуск из корня проекта:
+
+```bash
+bun build/server.js
+```
+
+По умолчанию приложение использует `data/puzzle.sqlite` относительно текущей рабочей директории. Чтобы хранить базу внутри exported build:
+
+```bash
+DATABASE_PATH=build/data/puzzle.sqlite bun build/server.js
+```
+
+Порт и hostname можно переопределить стандартными переменными standalone Next-сервера:
+
+```bash
+PORT=3000 HOSTNAME=0.0.0.0 bun build/server.js
+```
+
+Если запускать из самой папки `build`, путь к базе можно упростить:
+
+```bash
+cd build
+DATABASE_PATH=data/puzzle.sqlite bun server.js
+```
 
 ## Ассеты
 
@@ -201,6 +254,7 @@ src/
 
 scripts/
 ├── prepareBoardImages.ts
+├── exportStandaloneBuild.ts
 ├── extractBoardPalette.ts
 ├── convertToOutline.ts
 └── sliceImageBySize.ts

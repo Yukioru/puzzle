@@ -7,6 +7,7 @@
     "dev": "NEXT_TELEMETRY_DISABLED=1 bun -b next dev --turbopack",
     "prebuild": "bun run scripts/prepareBoardImages.ts",
     "build": "NEXT_TELEMETRY_DISABLED=1 bun -b next build --turbopack",
+    "build:export": "DATABASE_PATH=build/data/puzzle.sqlite bun run build && bun run scripts/exportStandaloneBuild.ts",
     "start": "NEXT_TELEMETRY_DISABLED=1 bun -b next start",
     "lint": "eslint"
   },
