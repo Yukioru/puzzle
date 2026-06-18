@@ -1,14 +1,14 @@
 import { Difficulty, EnduranceRoundResult } from "~/types";
 
-export const ENDURANCE_INITIAL_TIME = 40_000;
-export const ENDURANCE_MIN_TIME_BONUS = 5_000;
-export const ENDURANCE_TIME_BONUS_STEP = 3_000;
+export const ENDURANCE_INITIAL_TIME = 60_000;
+export const ENDURANCE_MIN_TIME_BONUS = 10_000;
+export const ENDURANCE_TIME_BONUS_STEP = 5_000;
 export const ENDURANCE_MILESTONE_ROUNDS = 5;
 
 const basePointsByDifficulty: Record<Difficulty, number> = {
-  easy: 100,
-  medium: 180,
-  hard: 300,
+  easy: 150,
+  medium: 240,
+  hard: 360,
 };
 
 const roundTargetTimeByDifficulty: Record<Difficulty, number> = {

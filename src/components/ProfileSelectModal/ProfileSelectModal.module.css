@@ -143,8 +143,22 @@
 }
 
 @media screen and (min-width: 992px) {
+  .profile,
+  .profile img {
+    width: 120px;
+    height: 120px;
+  }
   .profiles {
     justify-content: flex-start;
+  }
+}
+
+
+@media screen and (min-width: 1200px) {
+  .profile,
+  .profile img {
+    width: 130px;
+    height: 130px;
   }
 }
 

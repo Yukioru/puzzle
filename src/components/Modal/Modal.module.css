@@ -11,7 +11,7 @@
 
 .modal.variant-content {
   --_offset-padding: 0.75rem;
-  --_offset-margin: clamp(1rem, 6vh, 10rem);
+  --_offset-margin: clamp(1rem, 4vh, 10rem);
   top: var(--_offset-margin);
   transform: translateY(20%);
   max-width: calc(1360px + var(--_offset-padding) * 2);
@@ -23,7 +23,7 @@
 }
 
 .modal.variant-guide {
-  --_offset-margin: clamp(1rem, 6vh, 10rem);
+  --_offset-margin: clamp(1rem, 4vh, 10rem);
   top: 50%;
   transform: translateY(-50%);
   clip-path: inset(50% 0 50% 0);

@@ -298,10 +298,9 @@
   }
 
   .subtitle {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     padding-left: 3.25rem;
     line-height: 2.5rem;
-    padding-left: 3.25rem;
   }
 
   .subtitle::before {
@@ -330,7 +329,7 @@
   }
   
   .board {
-    padding-inline: max(1rem, min(6vw, 6rem));
+    padding-inline: max(1rem, min(2vw, 6rem));
   }
 }
 
