@@ -2,9 +2,11 @@ import path from "node:path";
 import fs from "node:fs";
 import { sliceImageBySize } from "./sliceImageBySize";
 import { convertToOutline } from "./convertToOutline";
+import { extractBoardPalette } from "./extractBoardPalette";
 
 const boardsDir = path.join(process.cwd(), "public", "boards");
 const outlineDir = path.join(process.cwd(), "public", "boards", "outline");
+const palettesPath = path.join(boardsDir, "palettes.json");
 const difficulties = ["easy", "medium", "hard"] as const;
 
 function ensureDirExists(dir: string) {
@@ -70,7 +72,32 @@ async function generatePieces(inputDir: string, piecesDir: string) {
   console.log("✅ Фрагменты пазлов успешно сгенерированы!");
 }
 
+async function generatePalettes() {
+  console.log("🎨 Подготовка палитр досок...");
+  const files = fs.readdirSync(boardsDir).filter(f => /\.(jpe?g|png|webp)$/i.test(f));
+
+  if (files.length === 0) {
+    console.log("❌ Нет изображений в public/boards");
+    return;
+  }
+
+  const entries = await Promise.all(files.map(async file => {
+    const imagePath = path.join(boardsDir, file);
+    const boardId = path.basename(file, path.extname(file));
+
+    return [
+      boardId,
+      await extractBoardPalette(imagePath),
+    ] as const;
+  }));
+
+  fs.writeFileSync(palettesPath, JSON.stringify(Object.fromEntries(entries), null, 2));
+  console.log("✅ Палитры досок успешно подготовлены!");
+}
+
 async function run() {
+  await generatePalettes();
+
   await generateOutline();
 
   await generatePieces(boardsDir, path.join(process.cwd(), "public", "pieces"));

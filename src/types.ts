@@ -25,11 +25,17 @@ export interface IJigsawPieceWithRender extends IJigsawPiece {
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
+export interface IJigsawPalette {
+  base: string;
+  accents: [string, string, string];
+}
+
 export interface IJigsawGame {
   id: string;
   imageFileName: string;
   shuffledBoardsIds: string[];
   difficulty: Difficulty;
+  palette?: IJigsawPalette;
   pieces: IJigsawPiece[];
   initialPieces: IJigsawPiece[];
   playablePieces: IJigsawPiece[];

@@ -3,6 +3,7 @@
 import {
   completeEnduranceRound,
   finishGameRecord,
+  pauseEnduranceGame,
   prepareEnduranceNextRound,
   resumeEnduranceGame,
 } from "~/dal/queries";
@@ -40,6 +41,14 @@ export async function prepareEnduranceNextRoundAction(gameId: string) {
   }
 
   return prepareEnduranceNextRound(gameId);
+}
+
+export async function pauseEnduranceGameAction(gameId: string) {
+  if (!gameId) {
+    throw new Error('Game id is required');
+  }
+
+  return pauseEnduranceGame(gameId);
 }
 
 export async function resumeEnduranceGameAction(gameId: string) {

@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { attachImageToPieces } from "~/utils/attachImageToPieces";
 import { shuffleArray } from "~/utils/shuffleArray";
+import { getBoardPalette } from "~/utils/boardPalettes";
 import {
   calculateEnduranceRoundResult,
   ENDURANCE_INITIAL_TIME,
@@ -65,6 +66,27 @@ function getBoardIdsFromFiles(files: string[]) {
   return files.map(file => path.basename(file, path.extname(file)));
 }
 
+function getBoardImageFileById(boardId: string) {
+  return getBoardImageFiles().find(file => path.basename(file, path.extname(file)) === boardId);
+}
+
+async function addMissingBoardPalette(gameState: IJigsawGame): Promise<IJigsawGame> {
+  if (gameState.palette) {
+    return gameState;
+  }
+
+  const imageFile = getBoardImageFileById(gameState.imageFileName);
+
+  if (!imageFile) {
+    return gameState;
+  }
+
+  return {
+    ...gameState,
+    palette: getBoardPalette(gameState.imageFileName),
+  };
+}
+
 async function getGameByImageFile(gameId: string, imageFile: string, difficulty: Difficulty): Promise<IJigsawGame> {
   const image = path.join(imagesFolder, imageFile);
   const initialPieces = generateInitialPieces(difficulty);
@@ -73,12 +95,14 @@ async function getGameByImageFile(gameId: string, imageFile: string, difficulty:
   const { pieces, playablePieces } = await shufflePieces(piecesWithImages, difficulty);
   const imageFileName = path.basename(image, path.extname(image));
   const shuffledBoardsIds = await getShuffledBoardsIds(imageFileName);
+  const palette = getBoardPalette(imageFileName);
 
   return {
     id: gameId,
     imageFileName,
     shuffledBoardsIds,
     difficulty,
+    palette,
     pieces,
     initialPieces: piecesWithImages,
     playablePieces,
@@ -261,7 +285,7 @@ export async function getOrCreateGameState(game: Pick<IGameRecord, 'id' | 'diffi
   `).get({ $id: game.id }) as GameStateRow | null);
 
   if (existingGameState) {
-    return existingGameState;
+    return addMissingBoardPalette(existingGameState);
   }
 
   const gameState = await getGameById(game.id, game.difficulty);
@@ -284,7 +308,9 @@ export async function getOrCreateGameState(game: Pick<IGameRecord, 'id' | 'diffi
     WHERE id = $id
   `).get({ $id: game.id }) as GameStateRow | null);
 
-  return createdGameState ?? gameState;
+  return createdGameState
+    ? addMissingBoardPalette(createdGameState)
+    : gameState;
 }
 
 export async function finishGameRecord(
@@ -341,7 +367,7 @@ export async function prepareEnduranceNextRound(id: string) {
   `).get({ $id: id }) as NextGameStateRow | null);
 
   if (existingNextGameState) {
-    return existingNextGameState;
+    return addMissingBoardPalette(existingNextGameState);
   }
 
   const nextDifficulty = getEnduranceDifficulty(game.challengeRound + 1);
@@ -366,11 +392,41 @@ export async function prepareEnduranceNextRound(id: string) {
     return nextGameState;
   }
 
-  return parseNextGameState(db.query(`
+  const currentNextGameState = parseNextGameState(db.query(`
     SELECT challengeNextGameState
     FROM games
     WHERE id = $id
-  `).get({ $id: id }) as NextGameStateRow | null) ?? nextGameState;
+  `).get({ $id: id }) as NextGameStateRow | null);
+
+  return currentNextGameState
+    ? addMissingBoardPalette(currentNextGameState)
+    : nextGameState;
+}
+
+export async function pauseEnduranceGame(id: string) {
+  const game = await getGameRecordById(id);
+
+  if (!game || game.status !== 'active' || !game.challengeMode || game.challengePausedAt) {
+    return game;
+  }
+
+  const now = Date.now();
+  const lastTickAt = game.challengeLastTickAt ?? game.startedAt;
+  const challengeTimeLeft = Math.max(0, (game.challengeTimeLeft ?? 0) - (now - lastTickAt));
+
+  db.query(`
+    UPDATE games
+    SET challengePausedAt = $now,
+      challengeLastTickAt = NULL,
+      challengeTimeLeft = $challengeTimeLeft
+    WHERE id = $id AND status = 'active'
+  `).run({
+    $id: id,
+    $now: now,
+    $challengeTimeLeft: challengeTimeLeft,
+  });
+
+  return getGameRecordById(id);
 }
 
 export async function resumeEnduranceGame(id: string) {
@@ -436,11 +492,13 @@ export async function completeEnduranceRound(
     FROM games
     WHERE id = $id
   `).get({ $id: id }) as NextGameStateRow | null);
-  const nextGameState = preparedNextGameState ?? await getEnduranceNextGameState({
-    gameId: id,
-    currentGameState: gameState,
-    nextDifficulty,
-  });
+  const nextGameState = preparedNextGameState
+    ? await addMissingBoardPalette(preparedNextGameState)
+    : await getEnduranceNextGameState({
+      gameId: id,
+      currentGameState: gameState,
+      nextDifficulty,
+    });
   const nextTimeLeft = currentTimeLeft + roundResult.timeBonus;
   const nextPoints = (game.points ?? 0) + roundResult.totalPoints;
   const shouldPause = !nextGamePreloaded;

@@ -5,7 +5,7 @@ import styles from './Modal.module.css';
 import { GlobalContext } from "~/contexts/GlobalContext";
 import clsx from "clsx";
 
-interface ModalProps extends ReactModal.Props {
+export interface ModalProps extends ReactModal.Props {
   variant?: 'content' | 'guide';
   extra?: ReactNode;
 }

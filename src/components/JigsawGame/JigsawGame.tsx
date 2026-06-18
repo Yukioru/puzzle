@@ -69,6 +69,7 @@ export default function JigsawGame({
   className,
   dndId,
   initialPieces,
+  palette,
   shuffledBoardsIds,
   onComplete,
   onGameStateChange,
@@ -86,6 +87,7 @@ export default function JigsawGame({
     imageFileName,
     shuffledBoardsIds,
     difficulty,
+    palette,
     pieces: boardPieces.map(serializePiece),
     initialPieces: initialPieces.map(serializePiece),
     playablePieces: playablePieces.map(serializePiece),
@@ -95,6 +97,7 @@ export default function JigsawGame({
     id,
     imageFileName,
     initialPieces,
+    palette,
     playablePieces,
     shuffledBoardsIds,
   ]);

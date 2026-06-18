@@ -1,16 +1,17 @@
 'use client';
 
-import { Suspense, use, useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { CSSProperties, Suspense, use, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { FaDoorOpen } from "react-icons/fa";
 import { FaPuzzlePiece, FaInfo } from "react-icons/fa6";
 import dynamic from "next/dynamic";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
-import { completeEnduranceRoundAction, finishGameAction, resumeEnduranceGameAction } from "~/actions/finishGame";
+import { completeEnduranceRoundAction, finishGameAction, pauseEnduranceGameAction, resumeEnduranceGameAction } from "~/actions/finishGame";
 import { AccentIconFrame } from "~/components/AccentIconFrame";
 import { Button } from "~/components/Button";
 import { EnduranceHud } from "~/components/EnduranceHud";
 import { GameCompleteModal } from "~/components/GameCompleteModal";
+import { GameInfoModal } from "~/components/GameInfoModal";
 import { GameTimer } from "~/components/GameTimer";
 import { LoadingScreen } from "~/components/LoadingScreen";
 import { EnduranceRoundResult, IGameRecord, IJigsawGame, IJigsawGameCompleteInfo } from "~/types";
@@ -38,6 +39,9 @@ interface GameScreenProps {
 export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   const gameScreenRef = useRef<HTMLDivElement>(null);
   const finishGameRequestRef = useRef(false);
+  const gameInfoOpenRef = useRef(false);
+  const gameInfoPauseRequestRef = useRef<Promise<IGameRecord | null> | null>(null);
+  const gameInfoShouldResumeRef = useRef(false);
   const roundCompletionRequestRef = useRef(false);
   const currentGameStateRef = useRef(data);
   const ctx = use(GlobalContext);
@@ -48,6 +52,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   const [currentGameRecord, setCurrentGameRecord] = useState(gameRecord);
   const [lastEnduranceRoundResult, setLastEnduranceRoundResult] = useState<EnduranceRoundResult | null>(null);
   const [showCompletionMessage, setShowCompletionMessage] = useState(gameRecord.status !== 'active');
+  const [showGameInfo, setShowGameInfo] = useState(false);
   const [isPending, startTransition] = useTransition();
   const isLoaded = useImageLoaderManager(gameScreenRef);
 
@@ -56,6 +61,18 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   const activeGameState = activeBuffer === 'primary'
     ? primaryGameState
     : secondaryGameState ?? primaryGameState;
+  const gameBackgroundStyle = useMemo(() => {
+    const palette = activeGameState.palette;
+
+    if (!palette) return undefined;
+
+    return {
+      '--game-bg-base': palette.base,
+      '--game-bg-accent-1': palette.accents[0],
+      '--game-bg-accent-2': palette.accents[1],
+      '--game-bg-accent-3': palette.accents[2],
+    } as CSSProperties;
+  }, [activeGameState.palette]);
   const preparedBuffer = activeBuffer === 'primary' ? 'secondary' : 'primary';
   const preparedEnduranceRound = usePreparedEnduranceRound({
     enabled: isEndurance && gameIsActive,
@@ -72,6 +89,10 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   useEffect(() => {
     currentGameStateRef.current = activeGameState;
   }, [activeGameState]);
+
+  useEffect(() => {
+    gameInfoOpenRef.current = showGameInfo;
+  }, [showGameInfo]);
 
   useEffect(() => {
     if (!isEndurance || !preparedEnduranceRound.preparedGame) return;
@@ -179,6 +200,49 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
     });
   }, [currentGameRecord.id, gameIsActive]);
 
+  const handleOpenGameInfo = useCallback(() => {
+    setShowGameInfo(true);
+
+    if (!isEndurance || !gameIsActive || currentGameRecord.challengePausedAt) return;
+
+    const pauseRequest = pauseEnduranceGameAction(currentGameRecord.id);
+    gameInfoPauseRequestRef.current = pauseRequest;
+    gameInfoShouldResumeRef.current = true;
+
+    startTransition(async () => {
+      const pausedGame = await pauseRequest;
+
+      if (gameInfoPauseRequestRef.current === pauseRequest) {
+        gameInfoPauseRequestRef.current = null;
+      }
+
+      if (pausedGame && gameInfoOpenRef.current) {
+        setCurrentGameRecord(pausedGame);
+      }
+    });
+  }, [currentGameRecord.challengePausedAt, currentGameRecord.id, gameIsActive, isEndurance]);
+
+  const handleCloseGameInfo = useCallback(() => {
+    setShowGameInfo(false);
+
+    if (!isEndurance || !gameIsActive || !gameInfoShouldResumeRef.current) return;
+
+    const pauseRequest = gameInfoPauseRequestRef.current;
+    gameInfoShouldResumeRef.current = false;
+
+    startTransition(async () => {
+      if (pauseRequest) {
+        await pauseRequest;
+      }
+
+      const resumedGame = await resumeEnduranceGameAction(currentGameRecord.id);
+
+      if (resumedGame) {
+        setCurrentGameRecord(resumedGame);
+      }
+    });
+  }, [currentGameRecord.id, gameIsActive, isEndurance]);
+
   const handleExit = useCallback(() => {
 
     startTransition(async () => {
@@ -216,6 +280,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
     >
       <div
         ref={gameScreenRef}
+        style={gameBackgroundStyle}
         className={clsx(styles.base, {
           [styles.loaded]: isLoaded,
         })}
@@ -243,7 +308,12 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
             </div>
           </div>
           <div className={styles.actions}>
-            <IconTextButton icon={<FaInfo />} className={styles.button}>
+            <IconTextButton
+              icon={<FaInfo />}
+              className={styles.button}
+              onClick={handleOpenGameInfo}
+              disabled={isPending}
+            >
               Правила
             </IconTextButton>
             <IconTextButton
@@ -256,6 +326,10 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
             </IconTextButton>
           </div>
         </div>
+        <GameInfoModal
+          isOpen={showGameInfo}
+          onClose={handleCloseGameInfo}
+        />
         {isLoaded && (
           <GameCompleteModal
             isOpen={showCompletionMessage}
