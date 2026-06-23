@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Difficulty, GameMode } from "~/types";
 
 interface CreateGameInput {
+  id: string;
   profileId: string;
   mode: GameMode;
 }
@@ -12,7 +13,7 @@ function isDifficulty(value: string): value is Difficulty {
   return value === 'easy' || value === 'medium' || value === 'hard';
 }
 
-export async function createGameAction({ profileId, mode }: CreateGameInput) {
+export async function createGameAction({ id, profileId, mode }: CreateGameInput) {
   if (!profileId) {
     throw new Error('Profile is required');
   }
@@ -21,7 +22,6 @@ export async function createGameAction({ profileId, mode }: CreateGameInput) {
     throw new Error('Unknown game mode');
   }
 
-  const id = crypto.randomUUID();
   const challengeMode = mode === 'challenge';
   const difficulty = challengeMode ? 'easy' : mode;
   const { createGameRecord } = await import("~/dal/queries");

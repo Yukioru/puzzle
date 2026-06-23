@@ -132,6 +132,10 @@
   flex: 1;
 }
 
+.game {
+  max-height: calc(100vh - var(--headerHeight, 173px) - var(--footerHeight, 0px) - var(--_paddingVertical) * 3);
+}
+
 .gameStage {
   position: relative;
 }
@@ -214,11 +218,7 @@
   padding-right: 420px;
   flex-direction: column;
   align-items: center;
-
-  position: absolute;
-  bottom: 3vh;
-  left: 0;
-  right: 0;
+  margin-top: var(--_paddingVertical);
 }
 
 .footerMessage {
@@ -376,9 +376,6 @@
     gap: 1rem;
   }
 
-  .footer {
-    margin-top: -2vh;
-  }
   .footerMessage {
     --_width: 80px;
     font-size: 1.4rem;

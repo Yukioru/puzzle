@@ -73,6 +73,7 @@
   line-height: 1.35;
   letter-spacing: 0;
   color: rgba(255, 247, 237, 0.78);
+  min-height: calc(3 * 1.35em);
 }
 
 .navButton,

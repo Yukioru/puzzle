@@ -150,30 +150,35 @@ export default function JigsawGame({
   );
 
   useEffect(() => {
-    if (!boardRef.current) return;
+    if (!boardRef.current || !baseRef.current) return;
 
-    const el = boardRef.current;
+    const board = boardRef.current;
+    const base = baseRef.current;
 
     const compute = () => {
-      const cs = getComputedStyle(el);
-      const gapX = parseFloat(cs.columnGap) || 0;
-      const width = el.clientWidth;
+      const boardStyles = getComputedStyle(board);
+      const baseStyles = getComputedStyle(base);
+      const gapX = parseFloat(boardStyles.columnGap) || 0;
+      const gapY = parseFloat(boardStyles.rowGap) || 0;
+      const width = board.clientWidth;
       const pieceByWidth = (width - gapX * (cols - 1)) / cols;
-      const cornerSize = parseFloat(cs.getPropertyValue('--corner')) || 0;
-      const cornerInPx = cornerSize * parseFloat(getComputedStyle(document.documentElement).fontSize) || 0;
-      const maxTotalHeight = window.innerHeight - (cornerInPx * 2);
-      const pieceByHeight = maxTotalHeight / rows;
+      const maxHeight = parseFloat(baseStyles.maxHeight);
+      const availableHeight = Number.isFinite(maxHeight) && maxHeight > 0
+        ? maxHeight
+        : window.innerHeight;
+      const pieceByHeight = (availableHeight - gapY * (rows - 1)) / rows;
       const piece = Math.floor(Math.min(pieceByWidth, pieceByHeight));
       
-      if (baseRef.current && Number.isFinite(piece) && piece > 0) {
-        baseRef.current.style.setProperty('--piece-size', `${piece - 1}px`);
+      if (Number.isFinite(piece) && piece > 0) {
+        base.style.setProperty('--piece-size', `${piece - 1}px`);
       }
     };
 
     compute();
 
     const ro = new ResizeObserver(() => compute());
-    ro.observe(el);
+    ro.observe(board);
+    ro.observe(base);
 
     const mq = window.matchMedia("(resolution: 1dppx)");
     mq.addEventListener?.("change", compute);

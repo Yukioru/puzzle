@@ -21,6 +21,7 @@ import styles from './GameScreen.module.css';
 import { Divider } from "~/components/Divider";
 import { IconTextButton } from "~/components/IconTextButton";
 import { usePreparedEnduranceRound } from "~/hooks/endurance/usePreparedEnduranceRound";
+import { useElementHeight } from "~/hooks/useElementHeight";
 import { useImageLoaderManager } from "~/hooks/useImageLoaderManager";
 import { GlobalContext } from "~/contexts/GlobalContext";
 
@@ -53,6 +54,8 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   const [lastEnduranceRoundResult, setLastEnduranceRoundResult] = useState<EnduranceRoundResult | null>(null);
   const [showCompletionMessage, setShowCompletionMessage] = useState(gameRecord.status !== 'active');
   const [showGameInfo, setShowGameInfo] = useState(false);
+  const [headerRef, headerHeight] = useElementHeight<HTMLDivElement>(173);
+  const [footerRef, footerHeight] = useElementHeight<HTMLDivElement>();
   const [isPending, startTransition] = useTransition();
   const isLoaded = useImageLoaderManager(gameScreenRef);
 
@@ -61,18 +64,23 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   const activeGameState = activeBuffer === 'primary'
     ? primaryGameState
     : secondaryGameState ?? primaryGameState;
-  const gameBackgroundStyle = useMemo(() => {
+  const gameScreenStyle = useMemo(() => {
     const palette = activeGameState.palette;
+    const style = {
+      '--headerHeight': `${headerHeight}px`,
+      '--footerHeight': `${footerHeight}px`,
+    } as CSSProperties;
 
-    if (!palette) return undefined;
+    if (!palette) return style;
 
     return {
+      ...style,
       '--game-bg-base': palette.base,
       '--game-bg-accent-1': palette.accents[0],
       '--game-bg-accent-2': palette.accents[1],
       '--game-bg-accent-3': palette.accents[2],
     } as CSSProperties;
-  }, [activeGameState.palette]);
+  }, [activeGameState.palette, footerHeight, headerHeight]);
   const preparedBuffer = activeBuffer === 'primary' ? 'secondary' : 'primary';
   const preparedEnduranceRound = usePreparedEnduranceRound({
     enabled: isEndurance && gameIsActive,
@@ -280,12 +288,12 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
     >
       <div
         ref={gameScreenRef}
-        style={gameBackgroundStyle}
+        style={gameScreenStyle}
         className={clsx(styles.base, {
           [styles.loaded]: isLoaded,
         })}
       >
-        <div className={styles.header}>
+        <div ref={headerRef} className={styles.header}>
           <div className={styles.heading}>
             <div className={styles.title}>
               <FaPuzzlePiece />
@@ -404,6 +412,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
                 key={`primary-${primaryGameState.imageFileName}-${primaryGameState.difficulty}`}
                 showStock
                 dndId={`${primaryGameState.id}-primary`}
+                className={styles.game}
                 boardClassName={styles.board}
                 stockWrapperClassName={styles.stockWrapper}
                 stockClassName={styles.stockFrame}
@@ -424,6 +433,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
                   key={`secondary-${secondaryGameState.imageFileName}-${secondaryGameState.difficulty}`}
                   showStock
                   dndId={`${secondaryGameState.id}-secondary`}
+                  className={styles.game}
                   boardClassName={styles.board}
                   stockWrapperClassName={styles.stockWrapper}
                   stockClassName={styles.stockFrame}
@@ -438,6 +448,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
           <JigsawGame
             key={`${activeGameState.id}-${currentGameRecord.challengeRound}-${activeGameState.imageFileName}`}
             showStock
+            className={styles.game}
             boardClassName={styles.board}
             stockWrapperClassName={styles.stockWrapper}
             stockClassName={styles.stockFrame}
@@ -446,7 +457,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
             {...activeGameState}
           />
         )}
-        <div className={styles.footer}>
+        <div ref={footerRef} className={styles.footer}>
           <div className={styles.footerMessage}>
             Чтобы повернуть фрагмент, нажмите на него
           </div>
