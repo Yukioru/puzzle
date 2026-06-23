@@ -88,3 +88,130 @@ export interface EnduranceLeaderboardEntry {
   time: number;
   rank: string;
 }
+
+export interface AdminStatsMetric {
+  label: string;
+  value: string;
+  hint?: string;
+}
+
+export interface AdminStatsStatusRow {
+  status: GameStatus;
+  count: number;
+  percent: number;
+}
+
+export interface AdminStatsModeRow {
+  mode: 'classic' | 'endurance';
+  count: number;
+  active: number;
+  completed: number;
+  abandoned: number;
+  avgTime: number | null;
+  longestTime: number | null;
+  avgPoints: number | null;
+}
+
+export interface AdminStatsDifficultyRow {
+  difficulty: Difficulty;
+  count: number;
+  completed: number;
+  abandoned: number;
+  active: number;
+  avgTime: number | null;
+  longestTime: number | null;
+  avgPoints: number | null;
+}
+
+export interface AdminStatsDailyRow {
+  date: string;
+  total: number;
+  active: number;
+  completed: number;
+  abandoned: number;
+  classic: number;
+  endurance: number;
+  avgTime: number | null;
+  points: number;
+  rounds: number;
+}
+
+export interface AdminStatsProfileRow {
+  profileId: string;
+  games: number;
+  completed: number;
+  abandoned: number;
+  active: number;
+  enduranceGames: number;
+  rounds: number;
+  points: number;
+  avgTime: number | null;
+  bestTime: number | null;
+  bestPoints: number | null;
+}
+
+export interface AdminStatsEnduranceGameRow {
+  gameId: string;
+  profileId: string;
+  status: GameStatus;
+  startedAt: number;
+  finishedAt: number | null;
+  time: number | null;
+  points: number;
+  rounds: number;
+  avgRoundTime: number | null;
+  bestRoundTime: number | null;
+  timeLeft: number | null;
+}
+
+export interface AdminStatsEnduranceRoundRow {
+  round: number;
+  games: number;
+  avgTime: number | null;
+  bestTime: number | null;
+  avgBasePoints: number | null;
+  avgSpeedMultiplier: number | null;
+  avgSpeedPoints: number | null;
+  avgMilestoneBonus: number | null;
+  avgPoints: number | null;
+  totalPoints: number;
+  avgTimeBonus: number | null;
+}
+
+export interface AdminStatsBoardRow {
+  boardId: string;
+  games: number;
+  completed: number;
+  abandoned: number;
+  active: number;
+  avgTime: number | null;
+  bestTime: number | null;
+}
+
+export interface AdminStatsRecentGameRow {
+  gameId: string;
+  profileId: string;
+  difficulty: Difficulty;
+  mode: 'classic' | 'endurance';
+  status: GameStatus;
+  startedAt: number;
+  finishedAt: number | null;
+  time: number | null;
+  points: number | null;
+  rounds: number;
+  boardId: string | null;
+}
+
+export interface AdminStats {
+  generatedAt: number;
+  metrics: AdminStatsMetric[];
+  statusRows: AdminStatsStatusRow[];
+  modeRows: AdminStatsModeRow[];
+  difficultyRows: AdminStatsDifficultyRow[];
+  dailyRows: AdminStatsDailyRow[];
+  profileRows: AdminStatsProfileRow[];
+  enduranceGames: AdminStatsEnduranceGameRow[];
+  enduranceRounds: AdminStatsEnduranceRoundRow[];
+  boardRows: AdminStatsBoardRow[];
+  recentGames: AdminStatsRecentGameRow[];
+}
