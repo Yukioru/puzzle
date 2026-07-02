@@ -1,13 +1,81 @@
-name: Build and Push Docker Images
+name: Build and Release
 
 on:
   push:
     branches:
       - dev
       - prod
+    tags:
+      - "*"
 
 jobs:
-  build-and-push:
+  prepare:
+    if: ${{ github.ref_type != 'tag' || !startsWith(github.ref_name, 'prerelease-') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      image-base: ${{ steps.vars.outputs.image-base }}
+      tag-latest: ${{ steps.vars.outputs.tag-latest }}
+      tag-time: ${{ steps.vars.outputs.tag-time }}
+      build-env: ${{ steps.vars.outputs.build-env }}
+      release-tag: ${{ steps.vars.outputs.release-tag }}
+      release-name: ${{ steps.vars.outputs.release-name }}
+      release-prerelease: ${{ steps.vars.outputs.release-prerelease }}
+      zip-name: ${{ steps.vars.outputs.zip-name }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set variables
+        id: vars
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
+          REPO_LC=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
+          REF_SAFE=$(echo "${GITHUB_REF_NAME}" | tr '/[:upper:]' '-[:lower:]' | sed -E 's/[^a-z0-9_.-]+/-/g')
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          BUILD_ENV=development
+          RELEASE_PRERELEASE=true
+          RELEASE_TAG="prerelease-${REF_SAFE}-${TIMESTAMP}"
+          RELEASE_NAME="Pre-release ${REF_SAFE} ${TIMESTAMP}"
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            RELEASE_TAG="${GITHUB_REF_NAME}"
+            RELEASE_NAME="Pre-release ${GITHUB_REF_NAME}"
+            TAG_LATEST="pre-latest"
+            TAG_TIME="${REF_SAFE}"
+
+            if git branch -r --contains "$GITHUB_SHA" | grep -Eq 'origin/prod$'; then
+              RELEASE_NAME="Release ${GITHUB_REF_NAME}"
+              TAG_LATEST="prod-latest"
+              BUILD_ENV=production
+              RELEASE_PRERELEASE=false
+            fi
+          elif [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
+            TAG_LATEST=dev-latest
+            TAG_TIME=dev-${TIMESTAMP}
+          elif [[ "${GITHUB_REF_NAME}" == "prod" ]]; then
+            TAG_LATEST=prod-latest
+            TAG_TIME=prod-${TIMESTAMP}
+            BUILD_ENV=production
+          fi
+
+          {
+            echo "image-base=ghcr.io/${REPO_LC}/hsr-puzzle"
+            echo "tag-latest=${TAG_LATEST}"
+            echo "tag-time=${TAG_TIME}"
+            echo "build-env=${BUILD_ENV}"
+            echo "release-tag=${RELEASE_TAG}"
+            echo "release-name=${RELEASE_NAME}"
+            echo "release-prerelease=${RELEASE_PRERELEASE}"
+            echo "zip-name=hsr-puzzle-${REF_SAFE}-${SHORT_SHA}.zip"
+          } >> $GITHUB_OUTPUT
+
+  docker-image:
+    needs: prepare
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -15,44 +83,103 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set variables
-        id: vars
-        run: |
-          TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
-          REPO_LC=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
-      
-          if [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
-            echo "TAG_LATEST=dev-latest" >> $GITHUB_ENV
-            echo "TAG_TIME=dev-${TIMESTAMP}" >> $GITHUB_ENV
-            echo "BUILD_ENV=development" >> $GITHUB_ENV
-          elif [[ "${GITHUB_REF_NAME}" == "prod" ]]; then
-            echo "TAG_LATEST=prod-latest" >> $GITHUB_ENV
-            echo "TAG_TIME=prod-${TIMESTAMP}" >> $GITHUB_ENV
-            echo "BUILD_ENV=production" >> $GITHUB_ENV
-          fi
-      
-          echo "IMAGE_BASE=ghcr.io/${REPO_LC}/hsr-puzzle" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: |
           docker build \
             --pull \
             -f docker/Dockerfile \
-            --build-arg APP_ENV=$BUILD_ENV \
-            -t $IMAGE_BASE:$TAG_LATEST \
-            -t $IMAGE_BASE:$TAG_TIME \
+            --build-arg APP_ENV=${{ needs.prepare.outputs.build-env }} \
+            -t ${{ needs.prepare.outputs.image-base }}:${{ needs.prepare.outputs.tag-latest }} \
+            -t ${{ needs.prepare.outputs.image-base }}:${{ needs.prepare.outputs.tag-time }} \
             .
 
       - name: Push Docker image
         run: |
-          docker push $IMAGE_BASE:$TAG_LATEST
-          docker push $IMAGE_BASE:$TAG_TIME
+          docker push ${{ needs.prepare.outputs.image-base }}:${{ needs.prepare.outputs.tag-latest }}
+          docker push ${{ needs.prepare.outputs.image-base }}:${{ needs.prepare.outputs.tag-time }}
+
+  zip-build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2.2.0
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build export
+        run: bun run build:export
+
+      - name: Create zip build
+        run: |
+          mkdir -p dist
+          zip -r "dist/${{ needs.prepare.outputs.zip-name }}" build
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ needs.prepare.outputs.zip-name }}
+          path: dist/${{ needs.prepare.outputs.zip-name }}
+          if-no-files-found: error
+
+  release:
+    needs:
+      - prepare
+      - docker-image
+      - zip-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download zip artifact
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: ${{ needs.prepare.outputs.zip-name }}
+          path: dist
+
+      - name: Write release notes
+        run: |
+          cat > release-notes.md <<EOF
+          Docker image:
+          - \`${{ needs.prepare.outputs.image-base }}:${{ needs.prepare.outputs.tag-latest }}\`
+          - \`${{ needs.prepare.outputs.image-base }}:${{ needs.prepare.outputs.tag-time }}\`
+
+          Zip build:
+          - \`${{ needs.prepare.outputs.zip-name }}\`
+
+          Commit:
+          - \`${GITHUB_SHA}\`
+          EOF
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          args=()
+          if [[ "${{ needs.prepare.outputs.release-prerelease }}" == "true" ]]; then
+            args+=(--prerelease)
+          fi
+
+          gh release create "${{ needs.prepare.outputs.release-tag }}" \
+            "dist/${{ needs.prepare.outputs.zip-name }}" \
+            --title "${{ needs.prepare.outputs.release-name }}" \
+            --notes-file release-notes.md \
+            --target "${GITHUB_SHA}" \
+            "${args[@]}"
