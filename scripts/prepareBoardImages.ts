@@ -107,15 +107,18 @@ function generateBoardsManifest() {
 }
 
 async function run() {
-  generateProfilesJson();
-  generateBoardsManifest();
-
-  await generatePalettes();
+  await Promise.all([
+    Promise.resolve().then(generateProfilesJson),
+    Promise.resolve().then(generateBoardsManifest),
+    generatePalettes(),
+  ]);
 
   await generateOutline();
 
-  await generatePieces(boardsDir, path.join(process.cwd(), "public", "pieces"));
-  await generatePieces(outlineDir, path.join(process.cwd(), "public", "pieces", "outline"));
+  await Promise.all([
+    generatePieces(boardsDir, path.join(process.cwd(), "public", "pieces")),
+    generatePieces(outlineDir, path.join(process.cwd(), "public", "pieces", "outline")),
+  ]);
 }
 
 run();
