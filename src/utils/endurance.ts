@@ -91,11 +91,11 @@ function getEnduranceRawTimeBonus(round: number, settings: EnduranceSettings) {
   );
   const decayedBonus = firstRoundBonus * (decay ** (round - 1));
 
-  return Math.max(settings.minTimeBonus, decayedBonus);
+  return Math.round(Math.max(settings.minTimeBonus, decayedBonus));
 }
 
 export function getEnduranceTimeBonus(round: number, settings = DEFAULT_ENDURANCE_SETTINGS) {
-  const maxBonusBudget = settings.initialTime * Math.max(0, settings.maxTimeMultiplier - 1);
+  const maxBonusBudget = Math.round(settings.initialTime * Math.max(0, settings.maxTimeMultiplier - 1));
   const rawBonus = getEnduranceRawTimeBonus(round, settings);
   let spentBonusBudget = 0;
 
