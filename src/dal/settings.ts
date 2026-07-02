@@ -3,6 +3,7 @@ import { notifyLeaderboardsChanged } from "~/dal/leaderboardEvents";
 import type { EnduranceSettings, InfinitySettings } from "~/types";
 import { DEFAULT_ENDURANCE_SETTINGS, ENDURANCE_SETTINGS_KEYS } from "~/utils/endurance";
 import { DEFAULT_INFINITY_SETTINGS, INFINITY_SETTINGS_KEYS } from "~/utils/infinity";
+import { numberToSetting, settingToNumber } from "~/utils/numberSettings";
 
 interface SettingRow {
   key: string;
@@ -18,18 +19,6 @@ function settingToBoolean(value: string | undefined, fallback: boolean) {
   if (value === '0') return false;
 
   return fallback;
-}
-
-function numberToSetting(value: number) {
-  return String(value);
-}
-
-function settingToNumber(value: string | undefined, fallback: number) {
-  if (typeof value === 'undefined') return fallback;
-
-  const parsedValue = Number(value);
-
-  return Number.isFinite(parsedValue) ? parsedValue : fallback;
 }
 
 export function getEnduranceSettings(): EnduranceSettings {

@@ -8,6 +8,7 @@ import { updateGameSettingsAction } from "~/actions/updateGameSettings";
 import { IconTextButton } from "~/components/IconTextButton";
 import { GlobalContext } from "~/contexts/GlobalContext";
 import type { EnduranceSettings, InfinitySettings } from "~/types";
+import { coerceNumber } from "~/utils/numberSettings";
 
 import styles from './AdminSettingsScreen.module.css';
 
@@ -190,10 +191,6 @@ function AdminLoadingDismiss() {
   return null;
 }
 
-function coerceNumberInput(value: number, fallback: number) {
-  return Number.isFinite(value) ? value : fallback;
-}
-
 export default function AdminSettingsScreen({
   enduranceSettings,
   infinitySettings,
@@ -358,7 +355,7 @@ export default function AdminSettingsScreen({
                                   disabled={settingsDisabled}
                                   onBlur={field.handleBlur}
                                   onChange={(event) => {
-                                    field.handleChange(coerceNumberInput(
+                                    field.handleChange(coerceNumber(
                                       event.target.valueAsNumber,
                                       setting.min
                                     ));
