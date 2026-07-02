@@ -1,9 +1,10 @@
 import { Difficulty, EnduranceRoundResult, EnduranceSettings } from "~/types";
 
 export const ENDURANCE_INITIAL_TIME = 60_000;
-export const ENDURANCE_MIN_TIME_BONUS = 10_000;
-export const ENDURANCE_TIME_BONUS_STEP = 5_000;
-export const ENDURANCE_MILESTONE_ROUNDS = 5;
+export const ENDURANCE_MIN_TIME_BONUS = 1_300;
+export const ENDURANCE_TIME_BONUS_STEP = 650;
+export const ENDURANCE_MILESTONE_ROUNDS = 3;
+export const ENDURANCE_MILESTONE_BASE_BONUS = 350;
 
 export const ENDURANCE_SETTINGS_KEYS = {
   enabled: 'endurance.enabled',
@@ -12,6 +13,7 @@ export const ENDURANCE_SETTINGS_KEYS = {
   minTimeBonus: 'endurance.minTimeBonus',
   timeBonusStep: 'endurance.timeBonusStep',
   milestoneRounds: 'endurance.milestoneRounds',
+  milestoneBaseBonus: 'endurance.milestoneBaseBonus',
   easyBasePoints: 'endurance.easyBasePoints',
   mediumBasePoints: 'endurance.mediumBasePoints',
   hardBasePoints: 'endurance.hardBasePoints',
@@ -22,14 +24,14 @@ export const ENDURANCE_SETTINGS_KEYS = {
 
 export const ENDURANCE_BASE_POINTS_BY_DIFFICULTY: Record<Difficulty, number> = {
   easy: 150,
-  medium: 240,
-  hard: 360,
+  medium: 250,
+  hard: 400,
 };
 
 export const ENDURANCE_ROUND_TARGET_TIME_BY_DIFFICULTY: Record<Difficulty, number> = {
-  easy: 18_000,
-  medium: 32_000,
-  hard: 48_000,
+  easy: 15_000,
+  medium: 28_000,
+  hard: 35_000,
 };
 
 export const DEFAULT_ENDURANCE_SETTINGS: EnduranceSettings = {
@@ -39,6 +41,7 @@ export const DEFAULT_ENDURANCE_SETTINGS: EnduranceSettings = {
   minTimeBonus: ENDURANCE_MIN_TIME_BONUS,
   timeBonusStep: ENDURANCE_TIME_BONUS_STEP,
   milestoneRounds: ENDURANCE_MILESTONE_ROUNDS,
+  milestoneBaseBonus: ENDURANCE_MILESTONE_BASE_BONUS,
   easyBasePoints: ENDURANCE_BASE_POINTS_BY_DIFFICULTY.easy,
   mediumBasePoints: ENDURANCE_BASE_POINTS_BY_DIFFICULTY.medium,
   hardBasePoints: ENDURANCE_BASE_POINTS_BY_DIFFICULTY.hard,
@@ -48,8 +51,8 @@ export const DEFAULT_ENDURANCE_SETTINGS: EnduranceSettings = {
 };
 
 export function getEnduranceDifficulty(round: number): Difficulty {
-  if (round <= 5) return 'easy';
-  if (round <= 10) return 'medium';
+  if (round <= 3) return 'easy';
+  if (round <= 6) return 'medium';
 
   return 'hard';
 }
@@ -77,11 +80,11 @@ export function getEnduranceTimeBonus(round: number, settings = DEFAULT_ENDURANC
 }
 
 export function getEnduranceRank(points: number) {
-  if (points >= 10_000) return 'SS';
-  if (points >= 6_000) return 'S';
-  if (points >= 4_500) return 'A';
-  if (points >= 3_000) return 'B';
-  if (points >= 1_500) return 'C';
+  if (points >= 4_500) return 'SS';
+  if (points >= 3_200) return 'S';
+  if (points >= 2_000) return 'A';
+  if (points >= 1_200) return 'B';
+  if (points >= 800) return 'C';
 
   return 'D';
 }
@@ -102,7 +105,7 @@ export function calculateEnduranceRoundResult({
   const speedMultiplier = Math.max(0.5, Math.min(2, targetTime / Math.max(roundTime, 1)));
   const speedPoints = Math.round(basePoints * speedMultiplier);
   const milestoneBonus = round % settings.milestoneRounds === 0
-    ? 500 + (round * 50)
+    ? settings.milestoneBaseBonus + (round * 50)
     : 0;
   const totalPoints = speedPoints + milestoneBonus;
   const timeBonus = getEnduranceTimeBonus(round, settings);

@@ -1,4 +1,5 @@
 import db from "~/db";
+import { notifyLeaderboardsChanged } from "~/dal/leaderboardEvents";
 import type { EnduranceSettings } from "~/types";
 import { DEFAULT_ENDURANCE_SETTINGS, ENDURANCE_SETTINGS_KEYS } from "~/utils/endurance";
 
@@ -65,6 +66,10 @@ export function getEnduranceSettings(): EnduranceSettings {
       settings.get(ENDURANCE_SETTINGS_KEYS.milestoneRounds),
       DEFAULT_ENDURANCE_SETTINGS.milestoneRounds
     ),
+    milestoneBaseBonus: settingToNumber(
+      settings.get(ENDURANCE_SETTINGS_KEYS.milestoneBaseBonus),
+      DEFAULT_ENDURANCE_SETTINGS.milestoneBaseBonus
+    ),
     easyBasePoints: settingToNumber(
       settings.get(ENDURANCE_SETTINGS_KEYS.easyBasePoints),
       DEFAULT_ENDURANCE_SETTINGS.easyBasePoints
@@ -101,6 +106,7 @@ export function updateEnduranceSettings(settings: EnduranceSettings) {
     [ENDURANCE_SETTINGS_KEYS.minTimeBonus, numberToSetting(settings.minTimeBonus)],
     [ENDURANCE_SETTINGS_KEYS.timeBonusStep, numberToSetting(settings.timeBonusStep)],
     [ENDURANCE_SETTINGS_KEYS.milestoneRounds, numberToSetting(settings.milestoneRounds)],
+    [ENDURANCE_SETTINGS_KEYS.milestoneBaseBonus, numberToSetting(settings.milestoneBaseBonus)],
     [ENDURANCE_SETTINGS_KEYS.easyBasePoints, numberToSetting(settings.easyBasePoints)],
     [ENDURANCE_SETTINGS_KEYS.mediumBasePoints, numberToSetting(settings.mediumBasePoints)],
     [ENDURANCE_SETTINGS_KEYS.hardBasePoints, numberToSetting(settings.hardBasePoints)],
@@ -128,4 +134,5 @@ export function updateEnduranceSettings(settings: EnduranceSettings) {
   });
 
   update();
+  notifyLeaderboardsChanged();
 }

@@ -71,12 +71,6 @@ export function ProfileModalLayout({
                 autoHeightMin={400}
                 renderThumbHorizontal={() => <div />}
                 renderTrackHorizontal={() => <div />}
-                renderTrackVertical={() => (
-                  <div className={styles.scrollbarTrack} />
-                )}
-                renderThumbVertical={() => (
-                  <div className={styles.scrollbarThumb} />
-                )}
               >
                 {children}
               </Scrollbars>

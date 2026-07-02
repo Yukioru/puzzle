@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 6vh 8vw;
+  padding: var(--_screen-padding);
   background-color: rgba(0, 0, 0, 0.6);
   color: white;
   overflow-x: hidden;
@@ -16,11 +16,15 @@
 }
 
 .panel {
-  width: min(100%, 920px);
+  width: min(100%, 68rem);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .header {
-  margin-bottom: 5rem;
+  width: min(100%, 68rem);
   text-align: left;
 }
 

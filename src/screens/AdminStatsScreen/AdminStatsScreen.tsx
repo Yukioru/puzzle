@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useCallback, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   Bar,
   BarChart,
@@ -112,13 +112,12 @@ function EmptyChart() {
 
 function AdminLoadingDismiss() {
   const ctx = use(GlobalContext);
-  const pathname = usePathname();
 
   useEffect(() => {
-    if (!ctx.loadingScreen.isEnabled || ctx.loadingScreen.seed !== pathname) return;
+    if (!ctx.loadingScreen.isEnabled) return;
 
     ctx.loadingScreen.toggle(false, { progress: 100 });
-  }, [ctx, pathname]);
+  }, [ctx]);
 
   return null;
 }

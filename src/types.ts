@@ -74,6 +74,7 @@ export interface EnduranceSettings {
   minTimeBonus: number;
   timeBonusStep: number;
   milestoneRounds: number;
+  milestoneBaseBonus: number;
   easyBasePoints: number;
   mediumBasePoints: number;
   hardBasePoints: number;
@@ -102,6 +103,19 @@ export interface EnduranceLeaderboardEntry {
   rounds: number;
   time: number;
   rank: string;
+}
+
+export interface DifficultyLeaderboardEntry {
+  gameId: string;
+  profileId: string;
+  difficulty: Difficulty;
+  time: number;
+}
+
+export interface LeaderboardsSnapshot {
+  enduranceLeaderboard: EnduranceLeaderboardEntry[];
+  difficultyLeaderboards: Record<Difficulty, DifficultyLeaderboardEntry[]>;
+  enduranceSettings: EnduranceSettings;
 }
 
 export interface AdminStatsMetric {

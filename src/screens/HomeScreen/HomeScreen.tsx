@@ -2,31 +2,43 @@
 
 import Link from "next/link";
 import { Button } from "~/components/Button";
-import { EnduranceLeaderboard } from "~/components/EnduranceLeaderboard";
-import { EnduranceLeaderboardEntry, EnduranceSettings } from "~/types";
+import { HomeScreenAdminTrigger } from "~/components/HomeScreenAdminTrigger";
+import { Leaderboards } from "~/components/Leaderboards";
+import { useLeaderboardsStream } from "~/hooks/useLeaderboardsStream";
+import { LeaderboardsSnapshot } from "~/types";
 
 import styles from './HomeScreen.module.css';
 
-interface HomeScreenProps {
-  leaderboard: EnduranceLeaderboardEntry[];
-  enduranceSettings: EnduranceSettings;
-}
+type HomeScreenProps = LeaderboardsSnapshot;
 
-export default function HomeScreen({ leaderboard, enduranceSettings }: HomeScreenProps) {
+export default function HomeScreen({
+  enduranceLeaderboard,
+  difficultyLeaderboards,
+  enduranceSettings,
+}: HomeScreenProps) {
+  const snapshot = useLeaderboardsStream({
+    enduranceLeaderboard,
+    difficultyLeaderboards,
+    enduranceSettings,
+  });
+
   return (
     <div className={styles.overlay}>
+      <HomeScreenAdminTrigger />
+
       <header className={styles.header}>
         <h1>
-          Honkai: Star Rail<br/>
-          Мозаика грёз
+          Honkai: Star Rail — Мозаика грёз
         </h1>
       </header>
 
-      {enduranceSettings.enabled && (
-        <div className={styles.leaderboard}>
-          <EnduranceLeaderboard entries={leaderboard} />
-        </div>
-      )}
+      <div className={styles.leaderboard}>
+        <Leaderboards
+          enduranceEntries={snapshot.enduranceLeaderboard}
+          difficultyEntries={snapshot.difficultyLeaderboards}
+          showEndurance={snapshot.enduranceSettings.enabled}
+        />
+      </div>
 
       <div className={styles.footer}>
         <Button

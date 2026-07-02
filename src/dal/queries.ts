@@ -1,5 +1,5 @@
 import db from "~/db";
-import { Difficulty, EnduranceLeaderboardEntry, GameStatus, IGameRecord, IJigsawGame } from "~/types";
+import { Difficulty, DifficultyLeaderboardEntry, EnduranceLeaderboardEntry, GameStatus, IGameRecord, IJigsawGame } from "~/types";
 import { shufflePieces } from "~/utils/shufflePieces";
 import { generateInitialPieces } from "~/utils/generateInitialPieces";
 import fs from 'node:fs';
@@ -13,6 +13,7 @@ import {
   getEnduranceRank,
 } from "~/utils/endurance";
 import { getEnduranceSettings } from "~/dal/settings";
+import { notifyLeaderboardsChanged } from "~/dal/leaderboardEvents";
 
 const imagesFolder = '/boards';
 const boardImageExtensionRegexp = /\.(jpe?g|png|webp)$/i;
@@ -46,6 +47,13 @@ interface EnduranceLeaderboardRow {
   profileId: string;
   points: number;
   rounds: number;
+  time: number;
+}
+
+interface DifficultyLeaderboardRow {
+  gameId: string;
+  profileId: string;
+  difficulty: Difficulty;
   time: number;
 }
 
@@ -164,6 +172,43 @@ export async function getEnduranceLeaderboard(limit = 25): Promise<EnduranceLead
     ...row,
     rank: getEnduranceRank(row.points),
   }));
+}
+
+export async function getDifficultyLeaderboard(
+  difficulty: Difficulty,
+  limit = 10
+): Promise<DifficultyLeaderboardEntry[]> {
+  return db.query(`
+    SELECT
+      id AS gameId,
+      profileId,
+      difficulty,
+      time
+    FROM games
+    WHERE challengeMode = 0
+      AND status = 'completed'
+      AND difficulty = $difficulty
+      AND time IS NOT NULL
+    ORDER BY time ASC, finishedAt ASC
+    LIMIT $limit
+  `).all({
+    $difficulty: difficulty,
+    $limit: limit,
+  }) as DifficultyLeaderboardRow[];
+}
+
+export async function getDifficultyLeaderboards(limit = 10): Promise<Record<Difficulty, DifficultyLeaderboardEntry[]>> {
+  const [easy, medium, hard] = await Promise.all([
+    getDifficultyLeaderboard('easy', limit),
+    getDifficultyLeaderboard('medium', limit),
+    getDifficultyLeaderboard('hard', limit),
+  ]);
+
+  return {
+    easy,
+    medium,
+    hard,
+  };
 }
 
 export async function createGameRecord(
@@ -332,7 +377,7 @@ export async function finishGameRecord(
       : Math.max(0, (game.challengeTimeLeft ?? 0) - (finishedAt - (game.challengeLastTickAt ?? game.startedAt)))
     : game.challengeTimeLeft;
 
-  db.query(`
+  const result = db.query(`
     UPDATE games
     SET status = $status,
       finishedAt = $finishedAt,
@@ -350,6 +395,10 @@ export async function finishGameRecord(
     $challengeTimeLeft: challengeTimeLeft,
     $gameState: gameState ? JSON.stringify(gameState) : null,
   });
+
+  if (result.changes > 0) {
+    notifyLeaderboardsChanged();
+  }
 
   return getGameRecordById(id);
 }

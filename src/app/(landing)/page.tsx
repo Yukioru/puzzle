@@ -1,10 +1,8 @@
 import HomeScreen from "~/screens/HomeScreen";
-import { getEnduranceLeaderboard } from "~/dal/queries";
-import { getEnduranceSettings } from "~/dal/settings";
+import { getLeaderboardsSnapshot } from "~/dal/leaderboards";
 
 export default async function Home() {
-  const leaderboard = await getEnduranceLeaderboard();
-  const enduranceSettings = getEnduranceSettings();
+  const snapshot = await getLeaderboardsSnapshot();
 
-  return <HomeScreen leaderboard={leaderboard} enduranceSettings={enduranceSettings} />;
+  return <HomeScreen {...snapshot} />;
 }

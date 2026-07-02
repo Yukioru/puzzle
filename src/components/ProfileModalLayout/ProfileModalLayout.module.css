@@ -87,23 +87,6 @@
   background: linear-gradient(to bottom, transparent 0%, var(--_modal-background) 90%);
 }
 
-.scrollbarTrack {
-  position: absolute;
-  width: 6px;
-  right: 2px;
-  bottom: 36px;
-  top: 24px;
-  background-color: #cdc2c1;
-}
-
-.scrollbarThumb {
-  position: relative;
-  display: block;
-  width: 100%;
-  cursor: pointer;
-  background-color: #575353
-}
-
 .footer {
   background-color: #262626;
   display: flex;

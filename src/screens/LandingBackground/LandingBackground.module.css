@@ -1,4 +1,5 @@
 .base {
+  --_screen-padding: clamp(1.5rem, 4vh, 3rem) 8vw;
   position: relative;
   height: 100%;
   overflow: hidden;

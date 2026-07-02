@@ -18,6 +18,7 @@ function normalizeEnduranceSettings(settings: EnduranceSettings): EnduranceSetti
     minTimeBonus: toInteger(settings.minTimeBonus, DEFAULT_ENDURANCE_SETTINGS.minTimeBonus, 1),
     timeBonusStep: toInteger(settings.timeBonusStep, DEFAULT_ENDURANCE_SETTINGS.timeBonusStep, 0),
     milestoneRounds: toInteger(settings.milestoneRounds, DEFAULT_ENDURANCE_SETTINGS.milestoneRounds, 1),
+    milestoneBaseBonus: toInteger(settings.milestoneBaseBonus, DEFAULT_ENDURANCE_SETTINGS.milestoneBaseBonus, 0),
     easyBasePoints: toInteger(settings.easyBasePoints, DEFAULT_ENDURANCE_SETTINGS.easyBasePoints, 0),
     mediumBasePoints: toInteger(settings.mediumBasePoints, DEFAULT_ENDURANCE_SETTINGS.mediumBasePoints, 0),
     hardBasePoints: toInteger(settings.hardBasePoints, DEFAULT_ENDURANCE_SETTINGS.hardBasePoints, 0),

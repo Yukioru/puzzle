@@ -1,0 +1,41 @@
+.layer {
+  --_zone-size: clamp(11rem, 36vw, 17rem);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.zone {
+  position: absolute;
+  width: var(--_zone-size);
+  height: var(--_zone-size);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.topLeft {
+  top: 0;
+  left: 0;
+}
+
+.topRight {
+  top: 0;
+  right: 0;
+}
+
+.bottomRight {
+  right: 0;
+  bottom: 0;
+}
+
+.bottomLeft {
+  left: 0;
+  bottom: 0;
+}
+
+@media screen and (min-width: 768px) {
+  .zone {
+    --_zone-size: clamp(12rem, 28vw, 18rem);
+  }
+}

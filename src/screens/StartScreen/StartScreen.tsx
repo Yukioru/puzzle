@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { use, useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -14,48 +14,55 @@ import { GlobalContext } from "~/contexts/GlobalContext";
 import { Difficulty, EnduranceSettings, GameMode } from "~/types";
 import { getDimensions } from "~/utils/getDimentions";
 
-import styles from './StartScreen.module.css';
+import styles from "./StartScreen.module.css";
 
 const gameModes: Array<{
   id: GameMode;
   title: string;
   description: string;
-  layout: 'vertical' | 'horizontal';
+  layout: "vertical" | "horizontal";
 }> = [
   {
-    id: 'easy',
-    title: 'Легкая',
-    description: 'Увеличенный размер доски и меньше фрагментов для комфортной игры',
-    layout: 'vertical',
+    id: "easy",
+    title: "Легкая",
+    description:
+      "Увеличенный размер доски и меньше фрагментов для комфортной игры",
+    layout: "vertical",
   },
   {
-    id: 'medium',
-    title: 'Нормальная',
-    description: 'Стандартная доска и больше фрагментов для тех, кто уже освоился с механикой.',
-    layout: 'vertical',
+    id: "medium",
+    title: "Нормальная",
+    description:
+      "Стандартная доска и больше фрагментов для тех, кто уже освоился с механикой.",
+    layout: "vertical",
   },
   {
-    id: 'hard',
-    title: 'Сложная',
-    description: 'Плотная доска и максимальное количество фрагментов для настоящих мастеров мозаики.',
-    layout: 'vertical',
+    id: "hard",
+    title: "Сложная",
+    description:
+      "Плотная доска и максимальное количество фрагментов для настоящих мастеров мозаики.",
+    layout: "vertical",
   },
   {
-    id: 'challenge',
-    title: 'Испытание',
-    description: 'Бесконечный режим с постоянно увеличивающейся сложностью.\nРейтинговая таблица для самых упорных игроков.',
-    layout: 'horizontal',
+    id: "challenge",
+    title: "Испытание",
+    description:
+      "Бесконечный режим с постоянно увеличивающейся сложностью.\nРейтинговая таблица для самых упорных игроков.",
+    layout: "horizontal",
   },
 ];
 
 function isDifficulty(mode: GameMode): mode is Difficulty {
-  return mode !== 'challenge';
+  return mode !== "challenge";
 }
 
-const phantomPiecesByDifficulty: Record<Difficulty, Array<{
-  sides: [number, number, number, number];
-  className: string;
-}>> = {
+const phantomPiecesByDifficulty: Record<
+  Difficulty,
+  Array<{
+    sides: [number, number, number, number];
+    className: string;
+  }>
+> = {
   easy: [
     {
       sides: [1, -1, 1, -1],
@@ -99,111 +106,134 @@ export default function StartScreen({ enduranceSettings }: StartScreenProps) {
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
 
   const handleBack = useCallback(() => {
-    router.push('/');
+    router.push("/");
   }, [router]);
 
-  const handleStartGame = useCallback((profileId: string) => {
-    if (!selectedMode) return;
+  const handleStartGame = useCallback(
+    (profileId: string) => {
+      if (!selectedMode) return;
 
-    const id = `${Date.now()}${Math.random()}`;
-    const gameUrl = `/game/${id}`;
+      const id = `${Date.now()}${Math.random()}`;
+      const gameUrl = `/game/${id}`;
 
-    ctx.loadingScreen.toggle(true, { seed: gameUrl, progress: 20 });
-    startTransition(async () => {
-      await createGameAction({
-        id,
-        profileId,
-        mode: selectedMode,
+      ctx.loadingScreen.toggle(true, { seed: gameUrl, progress: 20 });
+      startTransition(async () => {
+        await createGameAction({
+          id,
+          profileId,
+          mode: selectedMode,
+        });
       });
-    });
-  }, [ctx, selectedMode]);
+    },
+    [ctx, selectedMode],
+  );
 
   return (
     <div className={styles.overlay}>
+      <div className={styles.header}>
+        <div className={styles.titleRow}>
+          <IconTextButton
+            className={styles.backButton}
+            icon={<FaArrowLeft />}
+            onClick={handleBack}
+          />
+          <h1 className={styles.title}>Выберите сложность</h1>
+        </div>
+      </div>
       <div className={styles.panel}>
-        <div className={styles.header}>
-          <div className={styles.titleRow}>
-            <IconTextButton
-              className={styles.backButton}
-              icon={<FaArrowLeft />}
-              onClick={handleBack}
-            />
-            <h1 className={styles.title}>Выберите сложность</h1>
-          </div>
-        </div>
-
         <div className={styles.difficultyGrid}>
-          {gameModes.filter(mode => mode.layout === 'vertical').map((mode) => {
-            const isSelected = selectedMode === mode.id;
-            const difficulty = isDifficulty(mode.id) ? mode.id : undefined;
-            const piecesCount = difficulty ? getDimensions(difficulty).initialMissing : 0;
-            const phantomPieces = difficulty ? phantomPiecesByDifficulty[difficulty] : [];
+          {gameModes
+            .filter((mode) => mode.layout === "vertical")
+            .map((mode) => {
+              const isSelected = selectedMode === mode.id;
+              const difficulty = isDifficulty(mode.id) ? mode.id : undefined;
+              const piecesCount = difficulty
+                ? getDimensions(difficulty).initialMissing
+                : 0;
+              const phantomPieces = difficulty
+                ? phantomPiecesByDifficulty[difficulty]
+                : [];
 
-            return (
-              <button
-                key={mode.id}
-                className={clsx(styles.modeCard, styles.verticalCard, {
-                  [styles.selected]: isSelected,
-                })}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => setSelectedMode(mode.id)}
-              >
-                <span className={styles.radio} />
-                <span className={styles.pieceCounter}>
-                  {phantomPieces.map((piece, pieceIndex) => (
-                    <span
-                      key={`${mode.id}-${pieceIndex}`}
-                      className={clsx(styles.phantomPiece, piece.className)}
-                      style={{
-                        '--piece-layer': pieceIndex,
-                      } as CSSProperties}
-                    >
-                      <JigsawPiece
-                        image=""
-                        initialSides={piece.sides}
-                        isShadow
-                        className={styles.phantomPieceShape}
-                      />
-                    </span>
-                  ))}
-                  <span className={styles.pieceCount}>x{piecesCount}</span>
-                </span>
-                <span className={styles.cardTitle}>{mode.title}</span>
-                <span className={styles.cardDescription}>{mode.description}</span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={mode.id}
+                  className={clsx(styles.modeCard, styles.verticalCard, {
+                    [styles.selected]: isSelected,
+                  })}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => setSelectedMode(mode.id)}
+                >
+                  <span className={styles.radio} />
+                  <span className={styles.pieceCounter}>
+                    {phantomPieces.map((piece, pieceIndex) => (
+                      <span
+                        key={`${mode.id}-${pieceIndex}`}
+                        className={clsx(styles.phantomPiece, piece.className)}
+                        style={
+                          {
+                            "--piece-layer": pieceIndex,
+                          } as CSSProperties
+                        }
+                      >
+                        <JigsawPiece
+                          image=""
+                          initialSides={piece.sides}
+                          isShadow
+                          className={styles.phantomPieceShape}
+                        />
+                      </span>
+                    ))}
+                    <span className={styles.pieceCount}>x{piecesCount}</span>
+                  </span>
+                  <span className={styles.cardTitle}>{mode.title}</span>
+                  <span className={styles.cardDescription}>
+                    {mode.description}
+                  </span>
+                </button>
+              );
+            })}
         </div>
 
-        {enduranceSettings.enabled && gameModes.filter(mode => mode.layout === 'horizontal').map((mode) => {
-          const isSelected = selectedMode === mode.id;
+        {enduranceSettings.enabled &&
+          gameModes
+            .filter((mode) => mode.layout === "horizontal")
+            .map((mode) => {
+              const isSelected = selectedMode === mode.id;
 
-          return (
-            <button
-              key={mode.id}
-              className={clsx(styles.modeCard, styles.challengeCard, {
-                [styles.selected]: isSelected,
-              })}
-              type="button"
-              aria-pressed={isSelected}
-              onClick={() => setSelectedMode(mode.id)}
-            >
-              <span className={styles.cardIcon}>
-                <FaBolt />
-              </span>
-              <span className={styles.challengeContent}>
-                <span className={styles.cardTitle}>{mode.title}</span>
-                <span className={styles.cardDescription}>{mode.description}</span>
-              </span>
-            </button>
-          );
-        })}
+              return (
+                <button
+                  key={mode.id}
+                  className={clsx(styles.modeCard, styles.challengeCard, {
+                    [styles.selected]: isSelected,
+                  })}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => setSelectedMode(mode.id)}
+                >
+                  <span className={styles.cardIcon}>
+                    <FaBolt />
+                  </span>
+                  <span className={styles.challengeContent}>
+                    <span className={styles.cardTitle}>{mode.title}</span>
+                    <span className={styles.cardDescription}>
+                      {mode.description}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
       </div>
 
       <div className={styles.footer}>
-        <ProfileSelectModal disabled={!selectedMode || isPending} onConfirm={handleStartGame}>
-          <Button className={styles.button} disabled={!selectedMode || isPending}>
+        <ProfileSelectModal
+          disabled={!selectedMode || isPending}
+          onConfirm={handleStartGame}
+        >
+          <Button
+            className={styles.button}
+            disabled={!selectedMode || isPending}
+          >
             Выбрать персонажа
           </Button>
         </ProfileSelectModal>
