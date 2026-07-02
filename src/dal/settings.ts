@@ -59,6 +59,10 @@ export function getEnduranceSettings(): EnduranceSettings {
       settings.get(ENDURANCE_SETTINGS_KEYS.timeBonusStep),
       DEFAULT_ENDURANCE_SETTINGS.timeBonusStep
     ),
+    maxTimeMultiplier: settingToNumber(
+      settings.get(ENDURANCE_SETTINGS_KEYS.maxTimeMultiplier),
+      DEFAULT_ENDURANCE_SETTINGS.maxTimeMultiplier
+    ),
     milestoneRounds: settingToNumber(
       settings.get(ENDURANCE_SETTINGS_KEYS.milestoneRounds),
       DEFAULT_ENDURANCE_SETTINGS.milestoneRounds
@@ -119,6 +123,7 @@ export function updateEnduranceSettings(settings: EnduranceSettings) {
     [ENDURANCE_SETTINGS_KEYS.initialTime, numberToSetting(settings.initialTime)],
     [ENDURANCE_SETTINGS_KEYS.minTimeBonus, numberToSetting(settings.minTimeBonus)],
     [ENDURANCE_SETTINGS_KEYS.timeBonusStep, numberToSetting(settings.timeBonusStep)],
+    [ENDURANCE_SETTINGS_KEYS.maxTimeMultiplier, numberToSetting(settings.maxTimeMultiplier)],
     [ENDURANCE_SETTINGS_KEYS.milestoneRounds, numberToSetting(settings.milestoneRounds)],
     [ENDURANCE_SETTINGS_KEYS.milestoneBaseBonus, numberToSetting(settings.milestoneBaseBonus)],
     [ENDURANCE_SETTINGS_KEYS.easyBasePoints, numberToSetting(settings.easyBasePoints)],

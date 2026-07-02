@@ -1,8 +1,10 @@
 import { Difficulty, EnduranceRoundResult, EnduranceSettings } from "~/types";
 
 export const ENDURANCE_INITIAL_TIME = 60_000;
-export const ENDURANCE_MIN_TIME_BONUS = 1_300;
-export const ENDURANCE_TIME_BONUS_STEP = 650;
+export const ENDURANCE_MIN_TIME_BONUS = 1_000;
+export const ENDURANCE_TIME_BONUS_STEP = 20_000;
+export const ENDURANCE_MAX_TIME_MULTIPLIER = 3;
+export const ENDURANCE_FIRST_TIME_BONUS_RATIO = 0.5;
 export const ENDURANCE_MILESTONE_ROUNDS = 3;
 export const ENDURANCE_MILESTONE_BASE_BONUS = 350;
 
@@ -11,6 +13,7 @@ export const ENDURANCE_SETTINGS_KEYS = {
   initialTime: 'endurance.initialTime',
   minTimeBonus: 'endurance.minTimeBonus',
   timeBonusStep: 'endurance.timeBonusStep',
+  maxTimeMultiplier: 'endurance.maxTimeMultiplier',
   milestoneRounds: 'endurance.milestoneRounds',
   milestoneBaseBonus: 'endurance.milestoneBaseBonus',
   easyBasePoints: 'endurance.easyBasePoints',
@@ -38,6 +41,7 @@ export const DEFAULT_ENDURANCE_SETTINGS: EnduranceSettings = {
   initialTime: ENDURANCE_INITIAL_TIME,
   minTimeBonus: ENDURANCE_MIN_TIME_BONUS,
   timeBonusStep: ENDURANCE_TIME_BONUS_STEP,
+  maxTimeMultiplier: ENDURANCE_MAX_TIME_MULTIPLIER,
   milestoneRounds: ENDURANCE_MILESTONE_ROUNDS,
   milestoneBaseBonus: ENDURANCE_MILESTONE_BASE_BONUS,
   easyBasePoints: ENDURANCE_BASE_POINTS_BY_DIFFICULTY.easy,
@@ -71,10 +75,40 @@ function getRoundTargetTimeByDifficulty(settings: EnduranceSettings): Record<Dif
   };
 }
 
-export function getEnduranceTimeBonus(round: number, settings = DEFAULT_ENDURANCE_SETTINGS) {
-  const bonus = settings.initialTime - ((round - 1) * settings.timeBonusStep);
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
 
-  return Math.max(settings.minTimeBonus, bonus);
+function getEnduranceRawTimeBonus(round: number, settings: EnduranceSettings) {
+  const firstRoundBonus = Math.max(
+    settings.minTimeBonus,
+    settings.initialTime * ENDURANCE_FIRST_TIME_BONUS_RATIO
+  );
+  const decay = clamp(
+    1 - (settings.timeBonusStep / Math.max(settings.initialTime, 1)),
+    0.5,
+    0.9
+  );
+  const decayedBonus = firstRoundBonus * (decay ** (round - 1));
+
+  return Math.max(settings.minTimeBonus, decayedBonus);
+}
+
+export function getEnduranceTimeBonus(round: number, settings = DEFAULT_ENDURANCE_SETTINGS) {
+  const maxBonusBudget = settings.initialTime * Math.max(0, settings.maxTimeMultiplier - 1);
+  const rawBonus = getEnduranceRawTimeBonus(round, settings);
+  let spentBonusBudget = 0;
+
+  for (let previousRound = 1; previousRound < round; previousRound += 1) {
+    const previousRawBonus = getEnduranceRawTimeBonus(previousRound, settings);
+    const remainingBonusBudget = Math.max(0, maxBonusBudget - spentBonusBudget);
+
+    spentBonusBudget += Math.min(previousRawBonus, remainingBonusBudget);
+  }
+
+  const remainingBonusBudget = Math.max(0, maxBonusBudget - spentBonusBudget);
+
+  return Math.min(rawBonus, remainingBonusBudget);
 }
 
 export function getEnduranceRank(points: number) {

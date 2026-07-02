@@ -32,6 +32,7 @@ interface NumberSetting {
   label: string;
   description: string;
   min: number;
+  step?: number;
   unit: string;
 }
 
@@ -57,15 +58,23 @@ const settingsSections: SettingsSection[] = [
         name: 'minTimeBonus',
         label: 'Минимальный бонус времени',
         description: 'Нижняя граница бонуса за завершённый раунд.',
-        min: 1,
+        min: 0,
         unit: 'мс',
       },
       {
         name: 'timeBonusStep',
-        label: 'Шаг уменьшения бонуса',
-        description: 'На сколько уменьшается бонус времени с каждым следующим раундом.',
+        label: 'Сила затухания бонуса',
+        description: 'Чем выше значение, тем быстрее бонус времени уменьшается по кривой.',
         min: 0,
         unit: 'мс',
+      },
+      {
+        name: 'maxTimeMultiplier',
+        label: 'Максимум времени',
+        description: 'Потолок активной игры как множитель стартового времени.',
+        min: 1,
+        step: 0.1,
+        unit: 'x',
       },
     ],
   },
@@ -343,7 +352,7 @@ export default function AdminSettingsScreen({
                                   className={styles.input}
                                   type="number"
                                   min={setting.min}
-                                  step="1"
+                                  step={setting.step ?? 1}
                                   name={field.name}
                                   value={field.state.value}
                                   disabled={settingsDisabled}

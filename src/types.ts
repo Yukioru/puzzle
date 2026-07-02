@@ -74,6 +74,7 @@ export interface EnduranceSettings {
   initialTime: number;
   minTimeBonus: number;
   timeBonusStep: number;
+  maxTimeMultiplier: number;
   milestoneRounds: number;
   milestoneBaseBonus: number;
   easyBasePoints: number;
