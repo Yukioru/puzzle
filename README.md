@@ -72,6 +72,7 @@ bun run scripts/prepareBoardImages.ts
 
 - генерирует `public/palettes.json` для фона игрового экрана;
 - генерирует `public/profiles.json` со связями профилей и досок;
+- генерирует `public/boards.json` со списком доступных досок;
 - создаёт контурные версии досок в `public/boards/outline`;
 - нарезает доски на фрагменты в `public/pieces`;
 - нарезает контуры в `public/pieces/outline`.
@@ -96,7 +97,7 @@ build
 
 - standalone-сервер из `.next/standalone`;
 - статические Next-ассеты из `.next/static`;
-- публичные файлы из `public`;
+- публичные runtime-файлы из `public`, кроме оригинальных изображений `public/boards`;
 - директория `build/data` для SQLite-файла.
 
 Запуск из корня проекта:
@@ -209,10 +210,12 @@ src/assets/help/help-3.png
 ```text
 public/boards/outline
 public/pieces
+public/boards.json
 ```
 
 `public/palettes.json` хранит готовые палитры для досок и используется приложением при рендере игрового фона.
 `public/profiles.json` хранит сгенерированные связи профилей и досок.
+`public/boards.json` хранит список досок для runtime, чтобы standalone-билду не нужны были оригинальные изображения из `public/boards`.
 
 ## SQLite
 
@@ -267,9 +270,12 @@ docker/compose.development.yml
 docker/compose.production.yml
 ```
 
+Dockerfile упаковывает уже готовый exported runtime из директории `build` и не запускает Next build внутри образа.
+
 Локальная проверка Docker-образа:
 
 ```bash
+bun run build:export
 docker compose -f docker/compose.local.yml up --build
 ```
 
@@ -301,18 +307,11 @@ prod
 Workflow состоит из четырёх jobs:
 
 - `prepare` - вычисляет Docker-теги, имя zip-файла и параметры релиза.
-- `docker-image` - собирает и публикует Docker image в GHCR.
-- `zip-build` - выполняет `bun run build:export`, пакует директорию `build` в zip и сохраняет artifact.
+- `build` - выполняет `bun run build:export`, пакует директорию `build` в zip и сохраняет artifact.
+- `docker-image` - скачивает zip artifact, распаковывает `build` и публикует Docker image в GHCR.
 - `release` - создаёт GitHub Release или Pre-release и прикрепляет zip build.
 
-`docker-image` и `zip-build` выполняются параллельно после `prepare`.
-
-Для Docker-сборки используется `docker/Dockerfile` и build arg:
-
-```bash
-APP_ENV=development
-APP_ENV=production
-```
+`build` является единственным build-шагом для runtime-артефакта. Docker image и zip build используют одну и ту же директорию `build`.
 
 Docker image публикуется в GHCR:
 

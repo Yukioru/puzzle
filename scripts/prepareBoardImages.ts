@@ -7,8 +7,10 @@ import { generateProfilesJson } from "./generateProfilesJson";
 
 const boardsDir = path.join(process.cwd(), "public", "boards");
 const outlineDir = path.join(process.cwd(), "public", "boards", "outline");
+const boardsManifestPath = path.join(process.cwd(), "public", "boards.json");
 const palettesPath = path.join(process.cwd(), "public", "palettes.json");
 const difficulties = ["easy", "medium", "hard"] as const;
+const boardImageExtensionRegexp = /\.(jpe?g|png|webp)$/i;
 
 function ensureDirExists(dir: string) {
   if (!fs.existsSync(dir)) {
@@ -22,7 +24,7 @@ async function generateOutline() {
     return;
   }
   console.log("🧩 Генерация контуров изображений...");
-  const allFiles = fs.readdirSync(boardsDir).filter(f => /\.(jpe?g|png|webp)$/i.test(f));
+  const allFiles = fs.readdirSync(boardsDir).filter(f => boardImageExtensionRegexp.test(f));
   const files = allFiles.filter(file => !file.includes("/"));
 
   if (files.length === 0) {
@@ -55,7 +57,7 @@ async function generatePieces(inputDir: string, piecesDir: string) {
     return;
   }
   console.log(`🧩 Генерация фрагментов пазлов для ${inputDir}...`);
-  const files = fs.readdirSync(inputDir).filter(f => /\.(jpe?g|png|webp)$/i.test(f));
+  const files = fs.readdirSync(inputDir).filter(f => boardImageExtensionRegexp.test(f));
   if (files.length === 0) {
     console.log(`❌ Нет изображений в ${inputDir}`);
     return;
@@ -74,8 +76,7 @@ async function generatePieces(inputDir: string, piecesDir: string) {
 }
 
 async function generatePalettes() {
-  console.log("🎨 Подготовка палитр досок...");
-  const files = fs.readdirSync(boardsDir).filter(f => /\.(jpe?g|png|webp)$/i.test(f));
+  const files = fs.readdirSync(boardsDir).filter(f => boardImageExtensionRegexp.test(f));
 
   if (files.length === 0) {
     console.log("❌ Нет изображений в public/boards");
@@ -96,8 +97,18 @@ async function generatePalettes() {
   console.log("✅ Палитры досок успешно подготовлены!");
 }
 
+function generateBoardsManifest() {
+  const boardIds = fs.readdirSync(boardsDir)
+    .filter(file => boardImageExtensionRegexp.test(file))
+    .map(file => path.basename(file, path.extname(file)));
+
+  fs.writeFileSync(boardsManifestPath, `${JSON.stringify(boardIds, null, 2)}\n`);
+  console.log("✅ Список досок успешно подготовлен!");
+}
+
 async function run() {
   generateProfilesJson();
+  generateBoardsManifest();
 
   await generatePalettes();
 

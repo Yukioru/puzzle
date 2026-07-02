@@ -15,8 +15,7 @@ import {
 import { getBoardSettings, getEnduranceSettings } from "~/dal/settings";
 import { notifyLeaderboardsChanged } from "~/dal/leaderboardEvents";
 
-const imagesFolder = '/boards';
-const boardImageExtensionRegexp = /\.(jpe?g|png|webp)$/i;
+const boardsManifestPath = path.join(process.cwd(), 'public', 'boards.json');
 const profilesBoardsPath = path.join(process.cwd(), 'public', 'profiles.json');
 
 interface ProfileBoardsEntry {
@@ -73,18 +72,12 @@ function mapGameRecord(row: GameRecordRow): IGameRecord {
   };
 }
 
-function getBoardImageFiles() {
-  const imagesPath = path.join(process.cwd(), 'public', imagesFolder);
-
-  return fs.readdirSync(imagesPath).filter(file => boardImageExtensionRegexp.test(file));
-}
-
-function getBoardIdsFromFiles(files: string[]) {
-  return files.map(file => path.basename(file, path.extname(file)));
-}
-
-function getBoardImageFileById(boardId: string) {
-  return getBoardImageFiles().find(file => path.basename(file, path.extname(file)) === boardId);
+function getBoardIdsFromManifest() {
+  try {
+    return JSON.parse(fs.readFileSync(boardsManifestPath, 'utf8')) as string[];
+  } catch {
+    return [];
+  }
 }
 
 function getProfileBoardsMap(): ProfileBoardsMap {
@@ -123,31 +116,22 @@ async function addMissingBoardPalette(gameState: IJigsawGame): Promise<IJigsawGa
     return gameState;
   }
 
-  const imageFile = getBoardImageFileById(gameState.imageFileName);
-
-  if (!imageFile) {
-    return gameState;
-  }
-
   return {
     ...gameState,
     palette: getBoardPalette(gameState.imageFileName),
   };
 }
 
-async function getGameByImageFile(gameId: string, imageFile: string, difficulty: Difficulty): Promise<IJigsawGame> {
-  const image = path.join(imagesFolder, imageFile);
+async function getGameByBoardIdUnchecked(gameId: string, boardId: string, difficulty: Difficulty): Promise<IJigsawGame> {
   const initialPieces = generateInitialPieces(difficulty);
-  const filePath = path.join(process.cwd(), 'public', image);
-  const piecesWithImages = await attachImageToPieces(filePath, initialPieces, difficulty);
+  const piecesWithImages = await attachImageToPieces(boardId, initialPieces, difficulty);
   const { pieces, playablePieces } = await shufflePieces(piecesWithImages, difficulty);
-  const imageFileName = path.basename(image, path.extname(image));
-  const shuffledBoardsIds = await getShuffledBoardsIds(imageFileName);
-  const palette = getBoardPalette(imageFileName);
+  const shuffledBoardsIds = await getShuffledBoardsIds(boardId);
+  const palette = getBoardPalette(boardId);
 
   return {
     id: gameId,
-    imageFileName,
+    imageFileName: boardId,
     shuffledBoardsIds,
     difficulty,
     palette,
@@ -158,13 +142,13 @@ async function getGameByImageFile(gameId: string, imageFile: string, difficulty:
 }
 
 export async function getGameById(id: string, difficulty: Difficulty = 'easy'): Promise<IJigsawGame> {
-  const imageFiles = getBoardImageFiles();
-  if (imageFiles.length === 0) {
-    throw new Error('No images found in the images folder');
+  const boardIds = await getAllBoardsIds();
+  if (boardIds.length === 0) {
+    throw new Error('No boards found in the boards manifest');
   }
-  const randomImage = imageFiles[Math.floor(Math.random() * imageFiles.length)];
+  const randomBoardId = boardIds[Math.floor(Math.random() * boardIds.length)];
 
-  return getGameByImageFile(id, randomImage, difficulty);
+  return getGameByBoardIdUnchecked(id, randomBoardId, difficulty);
 }
 
 export async function getGameByProfileBoardMatching(
@@ -192,18 +176,17 @@ export async function getGameByBoardId(
   boardId: string,
   difficulty: Difficulty = 'easy'
 ): Promise<IJigsawGame> {
-  const imageFiles = getBoardImageFiles();
-  const imageFile = imageFiles.find(file => path.basename(file, path.extname(file)) === boardId);
+  const boardIds = await getAllBoardsIds();
 
-  if (!imageFile) {
+  if (!boardIds.includes(boardId)) {
     throw new Error(`Board "${boardId}" not found`);
   }
 
-  return getGameByImageFile(gameId, imageFile, difficulty);
+  return getGameByBoardIdUnchecked(gameId, boardId, difficulty);
 }
 
 export async function getAllBoardsIds(): Promise<string[]> {
-  return getBoardIdsFromFiles(getBoardImageFiles());
+  return getBoardIdsFromManifest();
 }
 
 export async function getShuffledBoardsIds(excludeId?: string): Promise<string[]> {

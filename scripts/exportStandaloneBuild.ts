@@ -6,6 +6,7 @@ const outputDir = path.join(root, "build");
 const standaloneDir = path.join(root, ".next", "standalone");
 const staticDir = path.join(root, ".next", "static");
 const publicDir = path.join(root, "public");
+const publicBoardsDir = path.join(publicDir, "boards");
 
 function copyRequired(source: string, destination: string) {
   if (!existsSync(source)) {
@@ -22,7 +23,10 @@ copyRequired(standaloneDir, outputDir);
 copyRequired(staticDir, path.join(outputDir, ".next", "static"));
 
 if (existsSync(publicDir)) {
-  cpSync(publicDir, path.join(outputDir, "public"), { recursive: true });
+  cpSync(publicDir, path.join(outputDir, "public"), {
+    recursive: true,
+    filter: (source) => source !== publicBoardsDir && !source.startsWith(`${publicBoardsDir}${path.sep}`),
+  });
 }
 
 mkdirSync(path.join(outputDir, "data"), { recursive: true });

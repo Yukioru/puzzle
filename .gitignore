@@ -43,6 +43,7 @@ next-env.d.ts
 
 /public/palettes.json
 /public/profiles.json
+/public/boards.json
 /public/boards/outline
 /public/pieces
 
