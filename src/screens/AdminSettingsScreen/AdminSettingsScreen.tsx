@@ -147,6 +147,47 @@ const settingsSections: SettingsSection[] = [
       },
     ],
   },
+  {
+    title: 'Пороги рангов',
+    description: 'Сколько очков нужно набрать для каждого ранга endurance.',
+    settings: [
+      {
+        name: 'cRankPoints',
+        label: 'Ранг C',
+        description: 'Минимум очков для ранга C.',
+        min: 0,
+        unit: 'очк.',
+      },
+      {
+        name: 'bRankPoints',
+        label: 'Ранг B',
+        description: 'Минимум очков для ранга B.',
+        min: 0,
+        unit: 'очк.',
+      },
+      {
+        name: 'aRankPoints',
+        label: 'Ранг A',
+        description: 'Минимум очков для ранга A.',
+        min: 0,
+        unit: 'очк.',
+      },
+      {
+        name: 'sRankPoints',
+        label: 'Ранг S',
+        description: 'Минимум очков для ранга S.',
+        min: 0,
+        unit: 'очк.',
+      },
+      {
+        name: 'ssRankPoints',
+        label: 'Ранг SS',
+        description: 'Минимум очков для ранга SS.',
+        min: 0,
+        unit: 'очк.',
+      },
+    ],
+  },
 ];
 
 function SettingSwitch({

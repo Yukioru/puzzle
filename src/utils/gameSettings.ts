@@ -17,6 +17,11 @@ export function normalizeEnduranceSettings(settings: EnduranceSettings): Enduran
     easyTargetTime: normalizeInteger(settings.easyTargetTime, DEFAULT_ENDURANCE_SETTINGS.easyTargetTime, 1),
     mediumTargetTime: normalizeInteger(settings.mediumTargetTime, DEFAULT_ENDURANCE_SETTINGS.mediumTargetTime, 1),
     hardTargetTime: normalizeInteger(settings.hardTargetTime, DEFAULT_ENDURANCE_SETTINGS.hardTargetTime, 1),
+    cRankPoints: normalizeInteger(settings.cRankPoints, DEFAULT_ENDURANCE_SETTINGS.cRankPoints, 0),
+    bRankPoints: normalizeInteger(settings.bRankPoints, DEFAULT_ENDURANCE_SETTINGS.bRankPoints, 0),
+    aRankPoints: normalizeInteger(settings.aRankPoints, DEFAULT_ENDURANCE_SETTINGS.aRankPoints, 0),
+    sRankPoints: normalizeInteger(settings.sRankPoints, DEFAULT_ENDURANCE_SETTINGS.sRankPoints, 0),
+    ssRankPoints: normalizeInteger(settings.ssRankPoints, DEFAULT_ENDURANCE_SETTINGS.ssRankPoints, 0),
   };
 }
 

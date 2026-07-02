@@ -154,6 +154,7 @@ export async function getShuffledBoardsIds(excludeId?: string): Promise<string[]
 }
 
 export async function getEnduranceLeaderboard(limit = 25): Promise<EnduranceLeaderboardEntry[]> {
+  const enduranceSettings = getEnduranceSettings();
   const rows = db.query(`
     SELECT
       id AS gameId,
@@ -171,7 +172,7 @@ export async function getEnduranceLeaderboard(limit = 25): Promise<EnduranceLead
 
   return rows.map((row) => ({
     ...row,
-    rank: getEnduranceRank(row.points),
+    rank: getEnduranceRank(row.points, enduranceSettings),
   }));
 }
 

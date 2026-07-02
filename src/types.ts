@@ -83,6 +83,11 @@ export interface EnduranceSettings {
   easyTargetTime: number;
   mediumTargetTime: number;
   hardTargetTime: number;
+  cRankPoints: number;
+  bRankPoints: number;
+  aRankPoints: number;
+  sRankPoints: number;
+  ssRankPoints: number;
 }
 
 export interface InfinitySettings {

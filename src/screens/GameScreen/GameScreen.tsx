@@ -14,7 +14,7 @@ import { GameCompleteModal } from "~/components/GameCompleteModal";
 import { GameInfoModal } from "~/components/GameInfoModal";
 import { GameTimer } from "~/components/GameTimer";
 import { LoadingScreen } from "~/components/LoadingScreen";
-import { EnduranceRoundResult, IGameRecord, IJigsawGame, IJigsawGameCompleteInfo } from "~/types";
+import { EnduranceRoundResult, EnduranceSettings, IGameRecord, IJigsawGame, IJigsawGameCompleteInfo } from "~/types";
 import { getEnduranceRank } from "~/utils/endurance";
 
 import styles from './GameScreen.module.css';
@@ -34,10 +34,11 @@ const JigsawGame = dynamic(
 
 interface GameScreenProps {
   data: IJigsawGame;
+  enduranceSettings: EnduranceSettings;
   gameRecord: IGameRecord;
 }
 
-export default function GameScreen({ data, gameRecord }: GameScreenProps) {
+export default function GameScreen({ data, enduranceSettings, gameRecord }: GameScreenProps) {
   const gameScreenRef = useRef<HTMLDivElement>(null);
   const finishGameRequestRef = useRef(false);
   const gameInfoOpenRef = useRef(false);
@@ -368,7 +369,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
                 {isEndurance
                   ? (
                     <div>
-                      Испытание завершено. Ваш рейтинг: <span className={styles.highlightGreen}>{getEnduranceRank(currentGameRecord.points ?? 0)}</span>
+                      Испытание завершено. Ваш рейтинг: <span className={styles.highlightGreen}>{getEnduranceRank(currentGameRecord.points ?? 0, enduranceSettings)}</span>
                     </div>
                   )
                   : isInfinity

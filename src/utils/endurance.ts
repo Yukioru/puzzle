@@ -6,7 +6,14 @@ export const ENDURANCE_TIME_BONUS_STEP = 20_000;
 export const ENDURANCE_MAX_TIME_MULTIPLIER = 3;
 export const ENDURANCE_FIRST_TIME_BONUS_RATIO = 0.5;
 export const ENDURANCE_MILESTONE_ROUNDS = 3;
-export const ENDURANCE_MILESTONE_BASE_BONUS = 350;
+export const ENDURANCE_MILESTONE_BASE_BONUS = 750;
+export const ENDURANCE_RANK_POINTS = {
+  c: 1_500,
+  b: 2_300,
+  a: 3_500,
+  s: 4_800,
+  ss: 7_000,
+};
 
 export const ENDURANCE_SETTINGS_KEYS = {
   enabled: 'endurance.enabled',
@@ -22,12 +29,17 @@ export const ENDURANCE_SETTINGS_KEYS = {
   easyTargetTime: 'endurance.easyTargetTime',
   mediumTargetTime: 'endurance.mediumTargetTime',
   hardTargetTime: 'endurance.hardTargetTime',
+  cRankPoints: 'endurance.cRankPoints',
+  bRankPoints: 'endurance.bRankPoints',
+  aRankPoints: 'endurance.aRankPoints',
+  sRankPoints: 'endurance.sRankPoints',
+  ssRankPoints: 'endurance.ssRankPoints',
 } as const;
 
 export const ENDURANCE_BASE_POINTS_BY_DIFFICULTY: Record<Difficulty, number> = {
-  easy: 150,
-  medium: 250,
-  hard: 400,
+  easy: 220,
+  medium: 360,
+  hard: 580,
 };
 
 export const ENDURANCE_ROUND_TARGET_TIME_BY_DIFFICULTY: Record<Difficulty, number> = {
@@ -50,6 +62,11 @@ export const DEFAULT_ENDURANCE_SETTINGS: EnduranceSettings = {
   easyTargetTime: ENDURANCE_ROUND_TARGET_TIME_BY_DIFFICULTY.easy,
   mediumTargetTime: ENDURANCE_ROUND_TARGET_TIME_BY_DIFFICULTY.medium,
   hardTargetTime: ENDURANCE_ROUND_TARGET_TIME_BY_DIFFICULTY.hard,
+  cRankPoints: ENDURANCE_RANK_POINTS.c,
+  bRankPoints: ENDURANCE_RANK_POINTS.b,
+  aRankPoints: ENDURANCE_RANK_POINTS.a,
+  sRankPoints: ENDURANCE_RANK_POINTS.s,
+  ssRankPoints: ENDURANCE_RANK_POINTS.ss,
 };
 
 export function getEnduranceDifficulty(round: number): Difficulty {
@@ -111,12 +128,12 @@ export function getEnduranceTimeBonus(round: number, settings = DEFAULT_ENDURANC
   return Math.min(rawBonus, remainingBonusBudget);
 }
 
-export function getEnduranceRank(points: number) {
-  if (points >= 4_500) return 'SS';
-  if (points >= 3_200) return 'S';
-  if (points >= 2_000) return 'A';
-  if (points >= 1_200) return 'B';
-  if (points >= 800) return 'C';
+export function getEnduranceRank(points: number, settings = DEFAULT_ENDURANCE_SETTINGS) {
+  if (points >= settings.ssRankPoints) return 'SS';
+  if (points >= settings.sRankPoints) return 'S';
+  if (points >= settings.aRankPoints) return 'A';
+  if (points >= settings.bRankPoints) return 'B';
+  if (points >= settings.cRankPoints) return 'C';
 
   return 'D';
 }

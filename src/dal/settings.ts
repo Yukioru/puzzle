@@ -84,6 +84,26 @@ export function getEnduranceSettings(): EnduranceSettings {
       settings.get(ENDURANCE_SETTINGS_KEYS.hardTargetTime),
       DEFAULT_ENDURANCE_SETTINGS.hardTargetTime
     ),
+    cRankPoints: settingToNumber(
+      settings.get(ENDURANCE_SETTINGS_KEYS.cRankPoints),
+      DEFAULT_ENDURANCE_SETTINGS.cRankPoints
+    ),
+    bRankPoints: settingToNumber(
+      settings.get(ENDURANCE_SETTINGS_KEYS.bRankPoints),
+      DEFAULT_ENDURANCE_SETTINGS.bRankPoints
+    ),
+    aRankPoints: settingToNumber(
+      settings.get(ENDURANCE_SETTINGS_KEYS.aRankPoints),
+      DEFAULT_ENDURANCE_SETTINGS.aRankPoints
+    ),
+    sRankPoints: settingToNumber(
+      settings.get(ENDURANCE_SETTINGS_KEYS.sRankPoints),
+      DEFAULT_ENDURANCE_SETTINGS.sRankPoints
+    ),
+    ssRankPoints: settingToNumber(
+      settings.get(ENDURANCE_SETTINGS_KEYS.ssRankPoints),
+      DEFAULT_ENDURANCE_SETTINGS.ssRankPoints
+    ),
   };
 }
 
@@ -121,6 +141,11 @@ export function updateEnduranceSettings(settings: EnduranceSettings) {
     [ENDURANCE_SETTINGS_KEYS.easyTargetTime, numberToSetting(settings.easyTargetTime)],
     [ENDURANCE_SETTINGS_KEYS.mediumTargetTime, numberToSetting(settings.mediumTargetTime)],
     [ENDURANCE_SETTINGS_KEYS.hardTargetTime, numberToSetting(settings.hardTargetTime)],
+    [ENDURANCE_SETTINGS_KEYS.cRankPoints, numberToSetting(settings.cRankPoints)],
+    [ENDURANCE_SETTINGS_KEYS.bRankPoints, numberToSetting(settings.bRankPoints)],
+    [ENDURANCE_SETTINGS_KEYS.aRankPoints, numberToSetting(settings.aRankPoints)],
+    [ENDURANCE_SETTINGS_KEYS.sRankPoints, numberToSetting(settings.sRankPoints)],
+    [ENDURANCE_SETTINGS_KEYS.ssRankPoints, numberToSetting(settings.ssRankPoints)],
   ];
 
   const update = db.transaction(() => {

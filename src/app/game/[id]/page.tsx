@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getGameRecordById, getOrCreateGameState } from "~/dal/queries";
+import { getEnduranceSettings } from "~/dal/settings";
 import GameScreen from "~/screens/GameScreen";
 
 interface GameProps {
@@ -16,5 +17,5 @@ export default async function Game({ params }: Readonly<GameProps>) {
 
   const data = await getOrCreateGameState(gameRecord);
 
-  return <GameScreen data={data} gameRecord={gameRecord} />;
+  return <GameScreen data={data} gameRecord={gameRecord} enduranceSettings={getEnduranceSettings()} />;
 }
