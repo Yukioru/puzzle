@@ -3,7 +3,7 @@
 import { CSSProperties, MouseEvent, PointerEvent, PropsWithChildren, useCallback, useRef, useState } from "react";
 import styles from './SmartJigsawPiece.module.css';
 import { IJigsawPiece } from "~/types";
-import { useDraggable, useDndMonitor } from "@dnd-kit/core";
+import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import clsx from "clsx";
 
@@ -13,6 +13,7 @@ interface SmartJigsawPieceProps {
   onClick?: (newSides: IJigsawPiece['initialSides'], event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => void;
   isInteractable?: boolean;
   isMatches?: boolean;
+  isDragging?: boolean;
   coords?: {
     x: number;
     y: number;
@@ -30,6 +31,7 @@ export function SmartJigsawPiece({
   coords,
   isInteractable = false,
   isMatches = false,
+  isDragging = false,
   className
 }: PropsWithChildren<SmartJigsawPieceProps>) {
   const [rotation, setRotation] = useState(0);
@@ -38,21 +40,6 @@ export function SmartJigsawPiece({
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ 
     id,
     disabled: !isInteractable
-  });
-  const [isDragging, setIsDragging] = useState(false);
-
-  useDndMonitor({
-    onDragStart(event) {
-      if (event.active.id === id) {
-        setIsDragging(true);
-      }
-    },
-    onDragEnd() {
-      setIsDragging(false);
-    },
-    onDragCancel() {
-      setIsDragging(false);
-    },
   });
 
   const rotatePiece = useCallback((event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>) => {
@@ -120,7 +107,7 @@ export function SmartJigsawPiece({
   }, []);
  
   const coordsStyle: CSSProperties = {};
-  if (coords?.x && coords?.y) {
+  if (coords) {
     coordsStyle.left = coords.x;
     coordsStyle.top = coords.y;
   }

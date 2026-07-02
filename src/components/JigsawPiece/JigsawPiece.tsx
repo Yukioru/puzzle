@@ -1,5 +1,5 @@
 import type { CSSProperties, ForwardedRef, HTMLProps } from 'react';
-import { forwardRef, useId } from 'react';
+import { forwardRef, memo, useId, useMemo } from 'react';
 import { AspectRatio } from '../AspectRatio';
 import { puzzlePolygon } from './utils';
 
@@ -36,17 +36,19 @@ function JigsawPiece({
 }: JigsawPieceProps, ref: ForwardedRef<HTMLDivElement>) {
   const clipId = useId();
   const shapeId = useId();
-  const svgPath = puzzlePolygon(initialSides, {
-    depth: DEPTH,
-    headWidth: 25,
-    neckWidth: 18,
-    neckLength: 50,
-    edgeCurve: 3,
-    samplesNeck: 32,
-    samplesCap: 48,
-    samplesEdge: 4,
-    returnSvgPath: true,
-  });
+  const svgPath = useMemo(() => (
+    puzzlePolygon(initialSides, {
+      depth: DEPTH,
+      headWidth: 25,
+      neckWidth: 18,
+      neckLength: 50,
+      edgeCurve: 3,
+      samplesNeck: 32,
+      samplesCap: 48,
+      samplesEdge: 4,
+      returnSvgPath: true,
+    })
+  ), [initialSides]);
 
   return (
     <AspectRatio
@@ -101,4 +103,4 @@ function JigsawPiece({
   );
 }
 
-export default forwardRef(JigsawPiece);
+export default memo(forwardRef(JigsawPiece));
