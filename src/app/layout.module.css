@@ -2,3 +2,12 @@
   height: 100%;
   min-height: 100%;
 }
+
+@media screen and (max-width: 991px) and (orientation: portrait) {
+  .base {
+    height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
