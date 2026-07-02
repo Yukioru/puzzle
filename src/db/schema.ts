@@ -50,6 +50,16 @@ function createGameRoundsTable(db: Database) {
   `);
 }
 
+function createAppSettingsTable(db: Database) {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updatedAt INTEGER NOT NULL CHECK (updatedAt >= 0)
+    ) STRICT;
+  `);
+}
+
 function tableExists(db: Database, tableName: string) {
   const row = db.query(`
     SELECT name
@@ -182,6 +192,7 @@ export function initializeDatabase(db: Database) {
 
   createGamesTable(db);
   createGameRoundsTable(db);
+  createAppSettingsTable(db);
 
   if (gamesTableExists) {
     ensureGamesTimeCanBeEmpty(db);

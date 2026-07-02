@@ -24,6 +24,12 @@ export async function createGameAction({ id, profileId, mode }: CreateGameInput)
 
   const challengeMode = mode === 'challenge';
   const difficulty = challengeMode ? 'easy' : mode;
+  const { getEnduranceSettings } = await import("~/dal/settings");
+
+  if (challengeMode && !getEnduranceSettings().enabled) {
+    throw new Error('Challenge mode is disabled');
+  }
+
   const { createGameRecord } = await import("~/dal/queries");
 
   await createGameRecord({

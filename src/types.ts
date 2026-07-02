@@ -67,6 +67,21 @@ export interface IGameRecord {
 
 export type GameMode = Difficulty | 'challenge';
 
+export interface EnduranceSettings {
+  enabled: boolean;
+  infinityEnabled: boolean;
+  initialTime: number;
+  minTimeBonus: number;
+  timeBonusStep: number;
+  milestoneRounds: number;
+  easyBasePoints: number;
+  mediumBasePoints: number;
+  hardBasePoints: number;
+  easyTargetTime: number;
+  mediumTargetTime: number;
+  hardTargetTime: number;
+}
+
 export interface EnduranceRoundResult {
   round: number;
   difficulty: Difficulty;

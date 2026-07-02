@@ -11,7 +11,7 @@ import { IconTextButton } from "~/components/IconTextButton";
 import { JigsawPiece } from "~/components/JigsawPiece";
 import { ProfileSelectModal } from "~/components/ProfileSelectModal";
 import { GlobalContext } from "~/contexts/GlobalContext";
-import { Difficulty, GameMode } from "~/types";
+import { Difficulty, EnduranceSettings, GameMode } from "~/types";
 import { getDimensions } from "~/utils/getDimentions";
 
 import styles from './StartScreen.module.css';
@@ -88,7 +88,11 @@ const phantomPiecesByDifficulty: Record<Difficulty, Array<{
   ],
 };
 
-export default function StartScreen() {
+interface StartScreenProps {
+  enduranceSettings: EnduranceSettings;
+}
+
+export default function StartScreen({ enduranceSettings }: StartScreenProps) {
   const ctx = use(GlobalContext);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -172,7 +176,7 @@ export default function StartScreen() {
           })}
         </div>
 
-        {gameModes.filter(mode => mode.layout === 'horizontal').map((mode) => {
+        {enduranceSettings.enabled && gameModes.filter(mode => mode.layout === 'horizontal').map((mode) => {
           const isSelected = selectedMode === mode.id;
 
           return (

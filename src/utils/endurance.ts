@@ -1,20 +1,50 @@
-import { Difficulty, EnduranceRoundResult } from "~/types";
+import { Difficulty, EnduranceRoundResult, EnduranceSettings } from "~/types";
 
 export const ENDURANCE_INITIAL_TIME = 60_000;
 export const ENDURANCE_MIN_TIME_BONUS = 10_000;
 export const ENDURANCE_TIME_BONUS_STEP = 5_000;
 export const ENDURANCE_MILESTONE_ROUNDS = 5;
 
-const basePointsByDifficulty: Record<Difficulty, number> = {
+export const ENDURANCE_SETTINGS_KEYS = {
+  enabled: 'endurance.enabled',
+  infinityEnabled: 'endurance.infinityEnabled',
+  initialTime: 'endurance.initialTime',
+  minTimeBonus: 'endurance.minTimeBonus',
+  timeBonusStep: 'endurance.timeBonusStep',
+  milestoneRounds: 'endurance.milestoneRounds',
+  easyBasePoints: 'endurance.easyBasePoints',
+  mediumBasePoints: 'endurance.mediumBasePoints',
+  hardBasePoints: 'endurance.hardBasePoints',
+  easyTargetTime: 'endurance.easyTargetTime',
+  mediumTargetTime: 'endurance.mediumTargetTime',
+  hardTargetTime: 'endurance.hardTargetTime',
+} as const;
+
+export const ENDURANCE_BASE_POINTS_BY_DIFFICULTY: Record<Difficulty, number> = {
   easy: 150,
   medium: 240,
   hard: 360,
 };
 
-const roundTargetTimeByDifficulty: Record<Difficulty, number> = {
+export const ENDURANCE_ROUND_TARGET_TIME_BY_DIFFICULTY: Record<Difficulty, number> = {
   easy: 18_000,
   medium: 32_000,
   hard: 48_000,
+};
+
+export const DEFAULT_ENDURANCE_SETTINGS: EnduranceSettings = {
+  enabled: true,
+  infinityEnabled: false,
+  initialTime: ENDURANCE_INITIAL_TIME,
+  minTimeBonus: ENDURANCE_MIN_TIME_BONUS,
+  timeBonusStep: ENDURANCE_TIME_BONUS_STEP,
+  milestoneRounds: ENDURANCE_MILESTONE_ROUNDS,
+  easyBasePoints: ENDURANCE_BASE_POINTS_BY_DIFFICULTY.easy,
+  mediumBasePoints: ENDURANCE_BASE_POINTS_BY_DIFFICULTY.medium,
+  hardBasePoints: ENDURANCE_BASE_POINTS_BY_DIFFICULTY.hard,
+  easyTargetTime: ENDURANCE_ROUND_TARGET_TIME_BY_DIFFICULTY.easy,
+  mediumTargetTime: ENDURANCE_ROUND_TARGET_TIME_BY_DIFFICULTY.medium,
+  hardTargetTime: ENDURANCE_ROUND_TARGET_TIME_BY_DIFFICULTY.hard,
 };
 
 export function getEnduranceDifficulty(round: number): Difficulty {
@@ -24,10 +54,26 @@ export function getEnduranceDifficulty(round: number): Difficulty {
   return 'hard';
 }
 
-export function getEnduranceTimeBonus(round: number) {
-  const bonus = ENDURANCE_INITIAL_TIME - ((round - 1) * ENDURANCE_TIME_BONUS_STEP);
+function getBasePointsByDifficulty(settings: EnduranceSettings): Record<Difficulty, number> {
+  return {
+    easy: settings.easyBasePoints,
+    medium: settings.mediumBasePoints,
+    hard: settings.hardBasePoints,
+  };
+}
 
-  return Math.max(ENDURANCE_MIN_TIME_BONUS, bonus);
+function getRoundTargetTimeByDifficulty(settings: EnduranceSettings): Record<Difficulty, number> {
+  return {
+    easy: settings.easyTargetTime,
+    medium: settings.mediumTargetTime,
+    hard: settings.hardTargetTime,
+  };
+}
+
+export function getEnduranceTimeBonus(round: number, settings = DEFAULT_ENDURANCE_SETTINGS) {
+  const bonus = settings.initialTime - ((round - 1) * settings.timeBonusStep);
+
+  return Math.max(settings.minTimeBonus, bonus);
 }
 
 export function getEnduranceRank(points: number) {
@@ -44,20 +90,22 @@ export function calculateEnduranceRoundResult({
   round,
   difficulty,
   roundTime,
+  settings = DEFAULT_ENDURANCE_SETTINGS,
 }: {
   round: number;
   difficulty: Difficulty;
   roundTime: number;
+  settings?: EnduranceSettings;
 }): EnduranceRoundResult {
-  const basePoints = basePointsByDifficulty[difficulty];
-  const targetTime = roundTargetTimeByDifficulty[difficulty];
+  const basePoints = getBasePointsByDifficulty(settings)[difficulty];
+  const targetTime = getRoundTargetTimeByDifficulty(settings)[difficulty];
   const speedMultiplier = Math.max(0.5, Math.min(2, targetTime / Math.max(roundTime, 1)));
   const speedPoints = Math.round(basePoints * speedMultiplier);
-  const milestoneBonus = round % ENDURANCE_MILESTONE_ROUNDS === 0
+  const milestoneBonus = round % settings.milestoneRounds === 0
     ? 500 + (round * 50)
     : 0;
   const totalPoints = speedPoints + milestoneBonus;
-  const timeBonus = getEnduranceTimeBonus(round);
+  const timeBonus = getEnduranceTimeBonus(round, settings);
 
   return {
     round,

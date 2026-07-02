@@ -3,15 +3,16 @@
 import Link from "next/link";
 import { Button } from "~/components/Button";
 import { EnduranceLeaderboard } from "~/components/EnduranceLeaderboard";
-import { EnduranceLeaderboardEntry } from "~/types";
+import { EnduranceLeaderboardEntry, EnduranceSettings } from "~/types";
 
 import styles from './HomeScreen.module.css';
 
 interface HomeScreenProps {
   leaderboard: EnduranceLeaderboardEntry[];
+  enduranceSettings: EnduranceSettings;
 }
 
-export default function HomeScreen({ leaderboard }: HomeScreenProps) {
+export default function HomeScreen({ leaderboard, enduranceSettings }: HomeScreenProps) {
   return (
     <div className={styles.overlay}>
       <header className={styles.header}>
@@ -21,9 +22,11 @@ export default function HomeScreen({ leaderboard }: HomeScreenProps) {
         </h1>
       </header>
 
-      <div className={styles.leaderboard}>
-        <EnduranceLeaderboard entries={leaderboard} />
-      </div>
+      {enduranceSettings.enabled && (
+        <div className={styles.leaderboard}>
+          <EnduranceLeaderboard entries={leaderboard} />
+        </div>
+      )}
 
       <div className={styles.footer}>
         <Button

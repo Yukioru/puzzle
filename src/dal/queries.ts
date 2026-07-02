@@ -9,10 +9,10 @@ import { shuffleArray } from "~/utils/shuffleArray";
 import { getBoardPalette } from "~/utils/boardPalettes";
 import {
   calculateEnduranceRoundResult,
-  ENDURANCE_INITIAL_TIME,
   getEnduranceDifficulty,
   getEnduranceRank,
 } from "~/utils/endurance";
+import { getEnduranceSettings } from "~/dal/settings";
 
 const imagesFolder = '/boards';
 const boardImageExtensionRegexp = /\.(jpe?g|png|webp)$/i;
@@ -170,7 +170,8 @@ export async function createGameRecord(
   game: Pick<IGameRecord, 'id' | 'profileId' | 'difficulty' | 'challengeMode'>
 ) {
   const startedAt = Date.now();
-  const challengeTimeLeft = game.challengeMode ? ENDURANCE_INITIAL_TIME : null;
+  const enduranceSettings = getEnduranceSettings();
+  const challengeTimeLeft = game.challengeMode ? enduranceSettings.initialTime : null;
   const challengeLastTickAt = game.challengeMode ? startedAt : null;
 
   db.query(`
@@ -480,10 +481,12 @@ export async function completeEnduranceRound(
 
   const roundStartedAt = game.challengeLastTickAt ?? game.startedAt;
   const roundTime = Math.max(0, now - roundStartedAt);
+  const enduranceSettings = getEnduranceSettings();
   const roundResult = calculateEnduranceRoundResult({
     round: game.challengeRound,
     difficulty: game.difficulty,
     roundTime,
+    settings: enduranceSettings,
   });
   const nextRound = game.challengeRound + 1;
   const nextDifficulty = getEnduranceDifficulty(nextRound);
