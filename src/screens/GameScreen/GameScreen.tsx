@@ -199,7 +199,7 @@ export default function GameScreen({ data, enduranceSettings, gameRecord }: Game
     startTransition(async () => {
       const finishedGame = await finishGameAction({
         gameId: currentGameRecord.id,
-        status: 'abandoned',
+        status: 'completed',
         gameState: currentGameStateRef.current,
       });
 

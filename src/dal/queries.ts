@@ -565,7 +565,7 @@ export async function completeEnduranceRound(
     : Math.max(0, (game.challengeTimeLeft ?? 0) - (now - lastTickAt));
 
   if (currentTimeLeft <= 0) {
-    const finishedGame = await finishGameRecord(id, 'abandoned', gameState);
+    const finishedGame = await finishGameRecord(id, 'completed', gameState);
 
     return finishedGame
       ? {
