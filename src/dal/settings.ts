@@ -1,6 +1,7 @@
 import db from "~/db";
 import { notifyLeaderboardsChanged } from "~/dal/leaderboardEvents";
-import type { EnduranceSettings, InfinitySettings } from "~/types";
+import type { BoardSettings, EnduranceSettings, InfinitySettings } from "~/types";
+import { BOARD_SETTINGS_KEYS, DEFAULT_BOARD_SETTINGS } from "~/utils/boardSettings";
 import { DEFAULT_ENDURANCE_SETTINGS, ENDURANCE_SETTINGS_KEYS } from "~/utils/endurance";
 import { DEFAULT_INFINITY_SETTINGS, INFINITY_SETTINGS_KEYS } from "~/utils/infinity";
 import { numberToSetting, settingToNumber } from "~/utils/numberSettings";
@@ -125,6 +126,21 @@ export function getInfinitySettings(): InfinitySettings {
   };
 }
 
+export function getBoardSettings(): BoardSettings {
+  const row = db.query(`
+    SELECT value
+    FROM app_settings
+    WHERE key = $key
+  `).get({ $key: BOARD_SETTINGS_KEYS.matchProfileBoards }) as Pick<SettingRow, 'value'> | null;
+
+  return {
+    matchProfileBoards: settingToBoolean(
+      row?.value,
+      DEFAULT_BOARD_SETTINGS.matchProfileBoards
+    ),
+  };
+}
+
 export function updateEnduranceSettings(settings: EnduranceSettings) {
   const now = Date.now();
   const entries = [
@@ -182,6 +198,22 @@ export function updateInfinitySettings(settings: InfinitySettings) {
   `).run({
     $key: INFINITY_SETTINGS_KEYS.enabled,
     $value: booleanToSetting(settings.enabled),
+    $updatedAt: now,
+  });
+}
+
+export function updateBoardSettings(settings: BoardSettings) {
+  const now = Date.now();
+
+  db.query(`
+    INSERT INTO app_settings (key, value, updatedAt)
+    VALUES ($key, $value, $updatedAt)
+    ON CONFLICT(key) DO UPDATE SET
+      value = excluded.value,
+      updatedAt = excluded.updatedAt
+  `).run({
+    $key: BOARD_SETTINGS_KEYS.matchProfileBoards,
+    $value: booleanToSetting(settings.matchProfileBoards),
     $updatedAt: now,
   });
 }

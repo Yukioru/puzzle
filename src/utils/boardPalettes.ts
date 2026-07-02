@@ -11,7 +11,7 @@ let cachedPalettes: Record<string, IJigsawPalette> | null = null;
 let cachedMtimeMs: number | null = null;
 
 function readBoardPalettes() {
-  const palettesPath = path.join(process.cwd(), "public", "boards", "palettes.json");
+  const palettesPath = path.join(process.cwd(), "public", "palettes.json");
 
   try {
     const mtimeMs = fs.statSync(palettesPath).mtimeMs;

@@ -1,4 +1,5 @@
-import type { EnduranceSettings, InfinitySettings } from "~/types";
+import type { BoardSettings, EnduranceSettings, InfinitySettings } from "~/types";
+import { DEFAULT_BOARD_SETTINGS } from "~/utils/boardSettings";
 import { DEFAULT_ENDURANCE_SETTINGS } from "~/utils/endurance";
 import { normalizeInteger, normalizeNumber } from "~/utils/numberSettings";
 
@@ -28,5 +29,11 @@ export function normalizeEnduranceSettings(settings: EnduranceSettings): Enduran
 export function normalizeInfinitySettings(settings: InfinitySettings): InfinitySettings {
   return {
     enabled: Boolean(settings.enabled),
+  };
+}
+
+export function normalizeBoardSettings(settings: BoardSettings): BoardSettings {
+  return {
+    matchProfileBoards: Boolean(settings.matchProfileBoards ?? DEFAULT_BOARD_SETTINGS.matchProfileBoards),
   };
 }

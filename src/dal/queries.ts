@@ -12,11 +12,19 @@ import {
   getEnduranceDifficulty,
   getEnduranceRank,
 } from "~/utils/endurance";
-import { getEnduranceSettings } from "~/dal/settings";
+import { getBoardSettings, getEnduranceSettings } from "~/dal/settings";
 import { notifyLeaderboardsChanged } from "~/dal/leaderboardEvents";
 
 const imagesFolder = '/boards';
 const boardImageExtensionRegexp = /\.(jpe?g|png|webp)$/i;
+const profilesBoardsPath = path.join(process.cwd(), 'public', 'profiles.json');
+
+interface ProfileBoardsEntry {
+  faction?: string;
+  boards?: string[];
+}
+
+type ProfileBoardsMap = Record<string, ProfileBoardsEntry | undefined>;
 
 interface GameRecordRow {
   id: string;
@@ -79,6 +87,37 @@ function getBoardImageFileById(boardId: string) {
   return getBoardImageFiles().find(file => path.basename(file, path.extname(file)) === boardId);
 }
 
+function getProfileBoardsMap(): ProfileBoardsMap {
+  if (!fs.existsSync(profilesBoardsPath)) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(fs.readFileSync(profilesBoardsPath, 'utf8')) as ProfileBoardsMap;
+  } catch {
+    return {};
+  }
+}
+
+async function getProfileMatchedBoardQueue(profileId: string): Promise<string[]> {
+  const boardIds = await getAllBoardsIds();
+  const availableBoardIds = new Set(boardIds);
+  const matchedBoardIds = (getProfileBoardsMap()[profileId]?.boards ?? [])
+    .filter((boardId) => availableBoardIds.has(boardId));
+
+  if (matchedBoardIds.length === 0) {
+    return [];
+  }
+
+  const matchedBoardIdsSet = new Set(matchedBoardIds);
+  const remainingBoardIds = boardIds.filter((boardId) => !matchedBoardIdsSet.has(boardId));
+
+  return [
+    ...shuffleArray(matchedBoardIds),
+    ...shuffleArray(remainingBoardIds),
+  ];
+}
+
 async function addMissingBoardPalette(gameState: IJigsawGame): Promise<IJigsawGame> {
   if (gameState.palette) {
     return gameState;
@@ -126,6 +165,26 @@ export async function getGameById(id: string, difficulty: Difficulty = 'easy'): 
   const randomImage = imageFiles[Math.floor(Math.random() * imageFiles.length)];
 
   return getGameByImageFile(id, randomImage, difficulty);
+}
+
+export async function getGameByProfileBoardMatching(
+  gameId: string,
+  profileId: string,
+  difficulty: Difficulty = 'easy'
+): Promise<IJigsawGame> {
+  const boardQueue = await getProfileMatchedBoardQueue(profileId);
+  const firstBoardId = boardQueue[0];
+
+  if (!firstBoardId) {
+    return getGameById(gameId, difficulty);
+  }
+
+  const gameState = await getGameByBoardId(gameId, firstBoardId, difficulty);
+
+  return {
+    ...gameState,
+    shuffledBoardsIds: boardQueue.slice(1),
+  };
 }
 
 export async function getGameByBoardId(
@@ -330,7 +389,7 @@ async function getEnduranceNextGameState({
   };
 }
 
-export async function getOrCreateGameState(game: Pick<IGameRecord, 'id' | 'difficulty'>): Promise<IJigsawGame> {
+export async function getOrCreateGameState(game: Pick<IGameRecord, 'id' | 'difficulty' | 'profileId'>): Promise<IJigsawGame> {
   const existingGameState = parseGameState(db.query(`
     SELECT gameState
     FROM games
@@ -341,7 +400,10 @@ export async function getOrCreateGameState(game: Pick<IGameRecord, 'id' | 'diffi
     return addMissingBoardPalette(existingGameState);
   }
 
-  const gameState = await getGameById(game.id, game.difficulty);
+  const boardSettings = getBoardSettings();
+  const gameState = boardSettings.matchProfileBoards
+    ? await getGameByProfileBoardMatching(game.id, game.profileId, game.difficulty)
+    : await getGameById(game.id, game.difficulty);
   const result = db.query(`
     UPDATE games
     SET gameState = $gameState

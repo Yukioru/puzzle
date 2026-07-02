@@ -3,10 +3,11 @@ import fs from "node:fs";
 import { sliceImageBySize } from "./sliceImageBySize";
 import { convertToOutline } from "./convertToOutline";
 import { extractBoardPalette } from "./extractBoardPalette";
+import { generateProfilesJson } from "./generateProfilesJson";
 
 const boardsDir = path.join(process.cwd(), "public", "boards");
 const outlineDir = path.join(process.cwd(), "public", "boards", "outline");
-const palettesPath = path.join(boardsDir, "palettes.json");
+const palettesPath = path.join(process.cwd(), "public", "palettes.json");
 const difficulties = ["easy", "medium", "hard"] as const;
 
 function ensureDirExists(dir: string) {
@@ -96,6 +97,8 @@ async function generatePalettes() {
 }
 
 async function run() {
+  generateProfilesJson();
+
   await generatePalettes();
 
   await generateOutline();

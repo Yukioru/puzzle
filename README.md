@@ -70,7 +70,8 @@ bun run scripts/prepareBoardImages.ts
 
 Этот скрипт:
 
-- генерирует `public/boards/palettes.json` для фона игрового экрана;
+- генерирует `public/palettes.json` для фона игрового экрана;
+- генерирует `public/profiles.json` со связями профилей и досок;
 - создаёт контурные версии досок в `public/boards/outline`;
 - нарезает доски на фрагменты в `public/pieces`;
 - нарезает контуры в `public/pieces/outline`.
@@ -210,7 +211,8 @@ public/boards/outline
 public/pieces
 ```
 
-`public/boards/palettes.json` хранит готовые палитры для досок и используется приложением при рендере игрового фона.
+`public/palettes.json` хранит готовые палитры для досок и используется приложением при рендере игрового фона.
+`public/profiles.json` хранит сгенерированные связи профилей и досок.
 
 ## SQLite
 

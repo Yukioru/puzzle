@@ -94,6 +94,10 @@ export interface InfinitySettings {
   enabled: boolean;
 }
 
+export interface BoardSettings {
+  matchProfileBoards: boolean;
+}
+
 export interface EnduranceRoundResult {
   round: number;
   difficulty: Difficulty;

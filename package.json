@@ -8,6 +8,9 @@
     "prebuild": "bun run scripts/prepareBoardImages.ts",
     "build": "NEXT_TELEMETRY_DISABLED=1 bun -b next build --turbopack",
     "build:export": "DATABASE_PATH=build/data/puzzle.sqlite bun run build && bun run scripts/exportStandaloneBuild.ts",
+    "debug:game": "bun run scripts/createDebugGame.ts",
+    "generate:profiles-json": "bun run scripts/generateProfilesJson.ts",
+    "report:profile-boards": "bun run scripts/reportProfileBoards.ts",
     "start": "NEXT_TELEMETRY_DISABLED=1 bun -b next start",
     "lint": "eslint"
   },

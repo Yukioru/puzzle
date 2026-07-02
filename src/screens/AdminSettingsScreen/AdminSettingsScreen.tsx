@@ -7,12 +7,13 @@ import { FaArrowLeft } from "react-icons/fa6";
 import { updateGameSettingsAction } from "~/actions/updateGameSettings";
 import { IconTextButton } from "~/components/IconTextButton";
 import { GlobalContext } from "~/contexts/GlobalContext";
-import type { EnduranceSettings, InfinitySettings } from "~/types";
+import type { BoardSettings, EnduranceSettings, InfinitySettings } from "~/types";
 import { coerceNumber } from "~/utils/numberSettings";
 
 import styles from './AdminSettingsScreen.module.css';
 
 interface AdminSettingsScreenProps {
+  boardSettings: BoardSettings;
   enduranceSettings: EnduranceSettings;
   infinitySettings: InfinitySettings;
 }
@@ -233,6 +234,7 @@ function AdminLoadingDismiss() {
 }
 
 export default function AdminSettingsScreen({
+  boardSettings,
   enduranceSettings,
   infinitySettings,
 }: AdminSettingsScreenProps) {
@@ -240,6 +242,7 @@ export default function AdminSettingsScreen({
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const form = useForm({
     defaultValues: {
+      boards: boardSettings,
       endurance: enduranceSettings,
       infinity: infinitySettings,
     },
@@ -308,6 +311,18 @@ export default function AdminSettingsScreen({
             </div>
           </div>
           <div className={styles.settingsList}>
+            <form.Field name="boards.matchProfileBoards">
+              {(field) => (
+                <SettingSwitch
+                  name={field.name}
+                  label="Подбирать доски под персонажа"
+                  description="Если включено, новые игры сначала используют перемешанные доски выбранного профиля, а потом переходят к остальным доскам."
+                  checked={field.state.value}
+                  disabled={form.state.isSubmitting}
+                  onChange={field.handleChange}
+                />
+              )}
+            </form.Field>
             <form.Field name="endurance.enabled">
               {(field) => (
                 <SettingSwitch

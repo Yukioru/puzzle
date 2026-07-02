@@ -49,7 +49,7 @@ import clara from '~/assets/profiles/clara.webp';
 import cyrene from '~/assets/profiles/cyrene.webp';
 import danHeng from '~/assets/profiles/dan-heng.webp';
 import danHengImbibitorLunae from '~/assets/profiles/dan-heng_imbibitor-lunae.webp';
-import danHengPermansorTerrae from '~/assets/profiles/dan_heng_permansor-terrae.webp';
+import danHengPermansorTerrae from '~/assets/profiles/dan-heng_permansor-terrae.webp';
 import drRatio from '~/assets/profiles/dr-ratio.webp';
 import evanescia from '~/assets/profiles/evanescia.webp';
 import evernight from '~/assets/profiles/evernight.webp';

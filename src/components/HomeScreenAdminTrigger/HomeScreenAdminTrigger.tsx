@@ -5,7 +5,7 @@ import { AdminMenuModal } from "~/components/AdminMenuModal";
 
 import styles from "./HomeScreenAdminTrigger.module.css";
 
-const HOLD_DURATION_MS = 5000;
+const HOLD_DURATION_MS = 2000;
 const SEQUENCE = ["topLeft", "topRight", "bottomRight", "bottomLeft"] as const;
 
 type ZoneId = (typeof SEQUENCE)[number];
