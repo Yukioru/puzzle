@@ -127,9 +127,15 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: 2rem;
   padding: 1.25rem;
   width: 100%;
+}
+
+.extraModeGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
 }
 
 .pieceCounter {
@@ -271,6 +277,14 @@
 @media screen and (min-width: 768px) {
   .difficultyGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .extraModeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .extraModeGrid > .challengeCard:only-child {
+    grid-column: 1 / -1;
   }
 
   .verticalCard {

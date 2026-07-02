@@ -8,7 +8,6 @@ export const ENDURANCE_MILESTONE_BASE_BONUS = 350;
 
 export const ENDURANCE_SETTINGS_KEYS = {
   enabled: 'endurance.enabled',
-  infinityEnabled: 'endurance.infinityEnabled',
   initialTime: 'endurance.initialTime',
   minTimeBonus: 'endurance.minTimeBonus',
   timeBonusStep: 'endurance.timeBonusStep',
@@ -36,7 +35,6 @@ export const ENDURANCE_ROUND_TARGET_TIME_BY_DIFFICULTY: Record<Difficulty, numbe
 
 export const DEFAULT_ENDURANCE_SETTINGS: EnduranceSettings = {
   enabled: true,
-  infinityEnabled: false,
   initialTime: ENDURANCE_INITIAL_TIME,
   minTimeBonus: ENDURANCE_MIN_TIME_BONUS,
   timeBonusStep: ENDURANCE_TIME_BONUS_STEP,

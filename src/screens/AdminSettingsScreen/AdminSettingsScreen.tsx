@@ -4,15 +4,16 @@ import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
 import { FaArrowLeft } from "react-icons/fa6";
-import { updateEnduranceSettingsAction } from "~/actions/updateEnduranceSettings";
+import { updateGameSettingsAction } from "~/actions/updateGameSettings";
 import { IconTextButton } from "~/components/IconTextButton";
 import { GlobalContext } from "~/contexts/GlobalContext";
-import type { EnduranceSettings } from "~/types";
+import type { EnduranceSettings, InfinitySettings } from "~/types";
 
 import styles from './AdminSettingsScreen.module.css';
 
 interface AdminSettingsScreenProps {
   enduranceSettings: EnduranceSettings;
+  infinitySettings: InfinitySettings;
 }
 
 interface SettingSwitchProps {
@@ -24,7 +25,7 @@ interface SettingSwitchProps {
   onChange: (checked: boolean) => void;
 }
 
-type NumberSettingName = Exclude<keyof EnduranceSettings, 'enabled' | 'infinityEnabled'>;
+type NumberSettingName = Exclude<keyof EnduranceSettings, 'enabled'>;
 
 interface NumberSetting {
   name: NumberSettingName;
@@ -184,13 +185,19 @@ function coerceNumberInput(value: number, fallback: number) {
   return Number.isFinite(value) ? value : fallback;
 }
 
-export default function AdminSettingsScreen({ enduranceSettings }: AdminSettingsScreenProps) {
+export default function AdminSettingsScreen({
+  enduranceSettings,
+  infinitySettings,
+}: AdminSettingsScreenProps) {
   const router = useRouter();
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const form = useForm({
-    defaultValues: enduranceSettings,
+    defaultValues: {
+      endurance: enduranceSettings,
+      infinity: infinitySettings,
+    },
     onSubmit: async ({ value }) => {
-      const savedSettings = await updateEnduranceSettingsAction(value);
+      const savedSettings = await updateGameSettingsAction(value);
 
       form.reset(savedSettings);
       setLastSavedAt(Date.now());
@@ -254,7 +261,7 @@ export default function AdminSettingsScreen({ enduranceSettings }: AdminSettings
             </div>
           </div>
           <div className={styles.settingsList}>
-            <form.Field name="enabled">
+            <form.Field name="endurance.enabled">
               {(field) => (
                 <SettingSwitch
                   name={field.name}
@@ -266,7 +273,7 @@ export default function AdminSettingsScreen({ enduranceSettings }: AdminSettings
                 />
               )}
             </form.Field>
-            <form.Field name="infinityEnabled">
+            <form.Field name="infinity.enabled">
               {(field) => (
                 <SettingSwitch
                   name={field.name}
@@ -283,7 +290,7 @@ export default function AdminSettingsScreen({ enduranceSettings }: AdminSettings
 
         <form.Subscribe
           selector={(state) => ({
-            enduranceEnabled: state.values.enabled,
+            enduranceEnabled: state.values.endurance.enabled,
             isSubmitting: state.isSubmitting,
           })}
         >
@@ -318,7 +325,7 @@ export default function AdminSettingsScreen({ enduranceSettings }: AdminSettings
                       {section.settings.map((setting) => (
                         <form.Field
                           key={setting.name}
-                          name={setting.name}
+                          name={`endurance.${setting.name}`}
                           validators={{
                             onChange: ({ value }) => value < setting.min
                               ? `Минимум: ${setting.min}`

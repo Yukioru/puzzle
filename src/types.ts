@@ -48,11 +48,13 @@ export interface IJigsawGameCompleteInfo {
 }
 
 export type GameStatus = 'active' | 'completed' | 'abandoned';
+export type StoredGameMode = 'classic' | 'endurance' | 'infinity';
 
 export interface IGameRecord {
   id: string;
   profileId: string;
   difficulty: Difficulty;
+  gameMode: StoredGameMode;
   challengeMode: boolean;
   startedAt: number;
   finishedAt: number | null;
@@ -65,11 +67,10 @@ export interface IGameRecord {
   challengePausedAt: number | null;
 }
 
-export type GameMode = Difficulty | 'challenge';
+export type GameMode = Difficulty | 'challenge' | 'infinity';
 
 export interface EnduranceSettings {
   enabled: boolean;
-  infinityEnabled: boolean;
   initialTime: number;
   minTimeBonus: number;
   timeBonusStep: number;
@@ -81,6 +82,10 @@ export interface EnduranceSettings {
   easyTargetTime: number;
   mediumTargetTime: number;
   hardTargetTime: number;
+}
+
+export interface InfinitySettings {
+  enabled: boolean;
 }
 
 export interface EnduranceRoundResult {

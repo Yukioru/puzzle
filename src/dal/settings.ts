@@ -1,7 +1,8 @@
 import db from "~/db";
 import { notifyLeaderboardsChanged } from "~/dal/leaderboardEvents";
-import type { EnduranceSettings } from "~/types";
+import type { EnduranceSettings, InfinitySettings } from "~/types";
 import { DEFAULT_ENDURANCE_SETTINGS, ENDURANCE_SETTINGS_KEYS } from "~/utils/endurance";
+import { DEFAULT_INFINITY_SETTINGS, INFINITY_SETTINGS_KEYS } from "~/utils/infinity";
 
 interface SettingRow {
   key: string;
@@ -45,10 +46,6 @@ export function getEnduranceSettings(): EnduranceSettings {
     enabled: settingToBoolean(
       settings.get(ENDURANCE_SETTINGS_KEYS.enabled),
       DEFAULT_ENDURANCE_SETTINGS.enabled
-    ),
-    infinityEnabled: settingToBoolean(
-      settings.get(ENDURANCE_SETTINGS_KEYS.infinityEnabled),
-      DEFAULT_ENDURANCE_SETTINGS.infinityEnabled
     ),
     initialTime: settingToNumber(
       settings.get(ENDURANCE_SETTINGS_KEYS.initialTime),
@@ -97,11 +94,28 @@ export function getEnduranceSettings(): EnduranceSettings {
   };
 }
 
+export function getInfinitySettings(): InfinitySettings {
+  const keys = Object.values(INFINITY_SETTINGS_KEYS);
+  const rows = db.query(`
+    SELECT key, value
+    FROM app_settings
+    WHERE key IN (${keys.map(() => '?').join(', ')})
+  `).all(...keys) as SettingRow[];
+
+  const settings = new Map(rows.map((row) => [row.key, row.value]));
+
+  return {
+    enabled: settingToBoolean(
+      settings.get(INFINITY_SETTINGS_KEYS.enabled),
+      DEFAULT_INFINITY_SETTINGS.enabled
+    ),
+  };
+}
+
 export function updateEnduranceSettings(settings: EnduranceSettings) {
   const now = Date.now();
   const entries = [
     [ENDURANCE_SETTINGS_KEYS.enabled, booleanToSetting(settings.enabled)],
-    [ENDURANCE_SETTINGS_KEYS.infinityEnabled, booleanToSetting(settings.infinityEnabled)],
     [ENDURANCE_SETTINGS_KEYS.initialTime, numberToSetting(settings.initialTime)],
     [ENDURANCE_SETTINGS_KEYS.minTimeBonus, numberToSetting(settings.minTimeBonus)],
     [ENDURANCE_SETTINGS_KEYS.timeBonusStep, numberToSetting(settings.timeBonusStep)],
@@ -135,4 +149,20 @@ export function updateEnduranceSettings(settings: EnduranceSettings) {
 
   update();
   notifyLeaderboardsChanged();
+}
+
+export function updateInfinitySettings(settings: InfinitySettings) {
+  const now = Date.now();
+
+  db.query(`
+    INSERT INTO app_settings (key, value, updatedAt)
+    VALUES ($key, $value, $updatedAt)
+    ON CONFLICT(key) DO UPDATE SET
+      value = excluded.value,
+      updatedAt = excluded.updatedAt
+  `).run({
+    $key: INFINITY_SETTINGS_KEYS.enabled,
+    $value: booleanToSetting(settings.enabled),
+    $updatedAt: now,
+  });
 }

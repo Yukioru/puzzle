@@ -60,7 +60,9 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   const isLoaded = useImageLoaderManager(gameScreenRef);
 
   const gameIsActive = currentGameRecord.status === 'active';
-  const isEndurance = currentGameRecord.challengeMode;
+  const isEndurance = currentGameRecord.gameMode === 'endurance';
+  const isInfinity = currentGameRecord.gameMode === 'infinity';
+  const isEndless = currentGameRecord.challengeMode;
   const activeGameState = activeBuffer === 'primary'
     ? primaryGameState
     : secondaryGameState ?? primaryGameState;
@@ -83,7 +85,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   }, [activeGameState.palette, footerHeight, headerHeight]);
   const preparedBuffer = activeBuffer === 'primary' ? 'secondary' : 'primary';
   const preparedEnduranceRound = usePreparedEnduranceRound({
-    enabled: isEndurance && gameIsActive,
+    enabled: isEndless && gameIsActive,
     gameId: currentGameRecord.id,
     round: currentGameRecord.challengeRound,
   });
@@ -103,7 +105,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   }, [showGameInfo]);
 
   useEffect(() => {
-    if (!isEndurance || !preparedEnduranceRound.preparedGame) return;
+    if (!isEndless || !preparedEnduranceRound.preparedGame) return;
 
     if (preparedBuffer === 'primary') {
       setPrimaryGameState(preparedEnduranceRound.preparedGame);
@@ -111,7 +113,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
     }
 
     setSecondaryGameState(preparedEnduranceRound.preparedGame);
-  }, [isEndurance, preparedBuffer, preparedEnduranceRound.preparedGame]);
+  }, [isEndless, preparedBuffer, preparedEnduranceRound.preparedGame]);
 
   const handleGameStateChange = useCallback((gameState: IJigsawGame) => {
     currentGameStateRef.current = gameState;
@@ -120,7 +122,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
   const handleCompleteGame = useCallback((gameInfo: IJigsawGameCompleteInfo) => {
     if (!gameIsActive || finishGameRequestRef.current) return;
 
-    if (isEndurance) {
+    if (isEndless) {
       if (roundCompletionRequestRef.current) return;
 
       roundCompletionRequestRef.current = true;
@@ -135,7 +137,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
           return;
         }
 
-        if (result.roundResult === null) {
+        if (result.gameRecord.status !== 'active') {
           setCurrentGameRecord(result.gameRecord);
           setShowCompletionMessage(true);
           roundCompletionRequestRef.current = false;
@@ -187,7 +189,7 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
 
       setShowCompletionMessage(true);
     });
-  }, [gameIsActive, isEndurance, preparedBuffer, preparedEnduranceRound]);
+  }, [gameIsActive, isEndless, preparedBuffer, preparedEnduranceRound]);
 
   const handleEnduranceExpire = useCallback(() => {
     if (!gameIsActive || finishGameRequestRef.current) return;
@@ -305,6 +307,8 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
                     lastRoundResult={lastEnduranceRoundResult}
                     onExpire={handleEnduranceExpire}
                   />
+                ) : isInfinity ? (
+                  null
                 ) : (
                   <GameTimer game={currentGameRecord} />
                 )}
@@ -367,6 +371,12 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
                       Испытание завершено. Ваш рейтинг: <span className={styles.highlightGreen}>{getEnduranceRank(currentGameRecord.points ?? 0)}</span>
                     </div>
                   )
+                  : isInfinity
+                  ? (
+                    <div>
+                      Бесконечный режим завершен. Статистика этой игры не сохраняется.
+                    </div>
+                  )
                   : currentGameRecord.status === 'abandoned'
                   ? (
                     <div>
@@ -393,16 +403,18 @@ export default function GameScreen({ data, gameRecord }: GameScreenProps) {
                   </div>
                 </>
               )}
-              <div className={styles.completionStat}>
-                <span>Затраченное время</span>
-                <strong>
-                  <GameTimer game={currentGameRecord} variant="plain" />
-                </strong>
-              </div>
+              {!isInfinity && (
+                <div className={styles.completionStat}>
+                  <span>Затраченное время</span>
+                  <strong>
+                    <GameTimer game={currentGameRecord} variant="plain" />
+                  </strong>
+                </div>
+              )}
             </div>
           </GameCompleteModal>
         )}
-        {isEndurance ? (
+        {isEndless ? (
           <div className={styles.gameStage}>
             <div className={clsx(styles.gameLayer, {
               [styles.activeGameLayer]: activeBuffer === 'primary',

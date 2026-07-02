@@ -13,12 +13,14 @@ import {
   Difficulty,
   GameStatus,
   IJigsawGame,
+  StoredGameMode,
 } from "~/types";
 
 interface GameStatsRow {
   id: string;
   profileId: string;
   difficulty: Difficulty;
+  gameMode: StoredGameMode;
   challengeMode: 0 | 1;
   startedAt: number;
   finishedAt: number | null;
@@ -117,11 +119,10 @@ function createStatusRows(games: GameStatsRow[]): AdminStatsStatusRow[] {
 }
 
 function createModeRows(games: GameStatsRow[]): AdminStatsModeRow[] {
-  return [
-    ['classic', false],
-    ['endurance', true],
-  ].map(([mode, isEndurance]) => {
-    const modeGames = games.filter((game) => Boolean(game.challengeMode) === isEndurance);
+  const modes: Array<'classic' | 'endurance'> = ['classic', 'endurance'];
+
+  return modes.map((mode) => {
+    const modeGames = games.filter((game) => game.gameMode === mode);
     const finishedTimes = getFinishedTimes(modeGames);
     const pointValues = modeGames
       .map((game) => game.points)
@@ -137,7 +138,7 @@ function createModeRows(games: GameStatsRow[]): AdminStatsModeRow[] {
       longestTime: maxOrNull(finishedTimes),
       avgPoints: avg(pointValues),
     };
-  }) as AdminStatsModeRow[];
+  });
 }
 
 function createDifficultyRows(games: GameStatsRow[]): AdminStatsDifficultyRow[] {
@@ -188,7 +189,11 @@ function createDailyRows(games: GameStatsRow[], rounds: RoundStatsRow[]): AdminS
 
     row.total += 1;
     row[game.status] += 1;
-    row[game.challengeMode ? 'endurance' : 'classic'] += 1;
+    if (game.gameMode === 'endurance') {
+      row.endurance += 1;
+    } else {
+      row.classic += 1;
+    }
     row.points += game.points ?? 0;
     row.rounds += roundsByGame.get(game.id)?.length ?? 0;
 
@@ -235,7 +240,7 @@ function createProfileRows(games: GameStatsRow[], rounds: RoundStatsRow[]): Admi
 
     row.games += 1;
     row[game.status] += 1;
-    row.enduranceGames += game.challengeMode ? 1 : 0;
+    row.enduranceGames += game.gameMode === 'endurance' ? 1 : 0;
     row.rounds += roundsByGame.get(game.id)?.length ?? 0;
     row.points += game.points ?? 0;
     row.bestPoints = Math.max(row.bestPoints ?? 0, game.points ?? 0);
@@ -268,7 +273,7 @@ function createEnduranceGames(games: GameStatsRow[], rounds: RoundStatsRow[]): A
   });
 
   return games
-    .filter((game) => game.challengeMode)
+    .filter((game) => game.gameMode === 'endurance')
     .map((game) => {
       const gameRounds = roundsByGame.get(game.id) ?? [];
       const roundTimes = gameRounds.map((round) => round.roundTime);
@@ -375,7 +380,7 @@ function createRecentGames(games: GameStatsRow[], rounds: RoundStatsRow[]): Admi
       gameId: game.id,
       profileId: game.profileId,
       difficulty: game.difficulty,
-      mode: game.challengeMode ? 'endurance' : 'classic',
+      mode: game.gameMode === 'endurance' ? 'endurance' : 'classic',
       status: game.status,
       startedAt: game.startedAt,
       finishedAt: game.finishedAt,
@@ -392,6 +397,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       id,
       profileId,
       difficulty,
+      gameMode,
       challengeMode,
       startedAt,
       finishedAt,
@@ -402,6 +408,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       challengeTimeLeft,
       gameState
     FROM games
+    WHERE gameMode != 'infinity'
     ORDER BY startedAt ASC
   `).all() as GameStatsRow[];
 
@@ -425,7 +432,7 @@ export async function getAdminStats(): Promise<AdminStats> {
   const completedGames = games.filter((game) => game.status === 'completed');
   const abandonedGames = games.filter((game) => game.status === 'abandoned');
   const activeGames = games.filter((game) => game.status === 'active');
-  const enduranceGames = games.filter((game) => game.challengeMode);
+  const enduranceGames = games.filter((game) => game.gameMode === 'endurance');
   const totalPoints = games.reduce((sum, game) => sum + (game.points ?? 0), 0);
   const uniqueProfiles = new Set(games.map((game) => game.profileId)).size;
 

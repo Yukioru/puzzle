@@ -11,6 +11,7 @@ function createGamesTable(db: Database) {
       id TEXT PRIMARY KEY,
       profileId TEXT NOT NULL,
       difficulty TEXT NOT NULL CHECK (difficulty IN ('easy', 'medium', 'hard')),
+      gameMode TEXT NOT NULL DEFAULT 'classic' CHECK (gameMode IN ('classic', 'endurance', 'infinity')),
       challengeMode INTEGER NOT NULL CHECK (challengeMode IN (0, 1)),
       startedAt INTEGER NOT NULL DEFAULT 0 CHECK (startedAt >= 0),
       finishedAt INTEGER CHECK (finishedAt IS NULL OR finishedAt >= startedAt),
@@ -187,6 +188,28 @@ function ensureGamesChallengeColumns(db: Database) {
   }
 }
 
+function ensureGamesModeColumn(db: Database) {
+  const hadGameModeColumn = hasGamesColumn(db, 'gameMode');
+
+  if (!hadGameModeColumn) {
+    db.run(`
+      ALTER TABLE games
+      ADD COLUMN gameMode TEXT NOT NULL DEFAULT 'classic'
+      CHECK (gameMode IN ('classic', 'endurance', 'infinity'))
+    `);
+  }
+
+  if (!hadGameModeColumn) {
+    db.run(`
+      UPDATE games
+      SET gameMode = CASE
+        WHEN challengeMode = 1 THEN 'endurance'
+        ELSE 'classic'
+      END
+    `);
+  }
+}
+
 export function initializeDatabase(db: Database) {
   const gamesTableExists = tableExists(db, 'games');
 
@@ -200,5 +223,6 @@ export function initializeDatabase(db: Database) {
     ensureGamesTimerColumns(db);
     ensureGamesStateColumn(db);
     ensureGamesChallengeColumns(db);
+    ensureGamesModeColumn(db);
   }
 }

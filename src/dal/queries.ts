@@ -1,5 +1,5 @@
 import db from "~/db";
-import { Difficulty, DifficultyLeaderboardEntry, EnduranceLeaderboardEntry, GameStatus, IGameRecord, IJigsawGame } from "~/types";
+import { Difficulty, DifficultyLeaderboardEntry, EnduranceLeaderboardEntry, GameStatus, IGameRecord, IJigsawGame, StoredGameMode } from "~/types";
 import { shufflePieces } from "~/utils/shufflePieces";
 import { generateInitialPieces } from "~/utils/generateInitialPieces";
 import fs from 'node:fs';
@@ -22,6 +22,7 @@ interface GameRecordRow {
   id: string;
   profileId: string;
   difficulty: Difficulty;
+  gameMode: StoredGameMode;
   challengeMode: 0 | 1;
   startedAt: number;
   finishedAt: number | null;
@@ -161,7 +162,7 @@ export async function getEnduranceLeaderboard(limit = 25): Promise<EnduranceLead
       MAX(challengeRound - 1, 0) AS rounds,
       COALESCE(time, 0) AS time
     FROM games
-    WHERE challengeMode = 1
+    WHERE gameMode = 'endurance'
       AND status != 'active'
       AND COALESCE(points, 0) > 0
     ORDER BY points DESC, rounds DESC, time ASC
@@ -185,7 +186,7 @@ export async function getDifficultyLeaderboard(
       difficulty,
       time
     FROM games
-    WHERE challengeMode = 0
+    WHERE gameMode = 'classic'
       AND status = 'completed'
       AND difficulty = $difficulty
       AND time IS NOT NULL
@@ -212,18 +213,20 @@ export async function getDifficultyLeaderboards(limit = 10): Promise<Record<Diff
 }
 
 export async function createGameRecord(
-  game: Pick<IGameRecord, 'id' | 'profileId' | 'difficulty' | 'challengeMode'>
+  game: Pick<IGameRecord, 'id' | 'profileId' | 'difficulty' | 'gameMode' | 'challengeMode'>
 ) {
   const startedAt = Date.now();
   const enduranceSettings = getEnduranceSettings();
-  const challengeTimeLeft = game.challengeMode ? enduranceSettings.initialTime : null;
-  const challengeLastTickAt = game.challengeMode ? startedAt : null;
+  const isEndurance = game.gameMode === 'endurance';
+  const challengeTimeLeft = isEndurance ? enduranceSettings.initialTime : null;
+  const challengeLastTickAt = isEndurance ? startedAt : null;
 
   db.query(`
     INSERT INTO games (
       id,
       profileId,
       difficulty,
+      gameMode,
       challengeMode,
       startedAt,
       finishedAt,
@@ -239,6 +242,7 @@ export async function createGameRecord(
       $id,
       $profileId,
       $difficulty,
+      $gameMode,
       $challengeMode,
       $startedAt,
       NULL,
@@ -254,9 +258,10 @@ export async function createGameRecord(
     $id: game.id,
     $profileId: game.profileId,
     $difficulty: game.difficulty,
+    $gameMode: game.gameMode,
     $challengeMode: game.challengeMode ? 1 : 0,
     $startedAt: startedAt,
-    $points: game.challengeMode ? 0 : null,
+    $points: isEndurance ? 0 : null,
     $challengeTimeLeft: challengeTimeLeft,
     $challengeLastTickAt: challengeLastTickAt,
   });
@@ -268,6 +273,7 @@ export async function getGameRecordById(id: string): Promise<IGameRecord | null>
       id,
       profileId,
       difficulty,
+      gameMode,
       challengeMode,
       startedAt,
       finishedAt,
@@ -371,7 +377,7 @@ export async function finishGameRecord(
 
   const finishedAt = Date.now();
   const time = Math.max(0, finishedAt - game.startedAt);
-  const challengeTimeLeft = game.challengeMode
+  const challengeTimeLeft = game.gameMode === 'endurance'
     ? game.challengePausedAt
       ? game.challengeTimeLeft
       : Math.max(0, (game.challengeTimeLeft ?? 0) - (finishedAt - (game.challengeLastTickAt ?? game.startedAt)))
@@ -456,7 +462,7 @@ export async function prepareEnduranceNextRound(id: string) {
 export async function pauseEnduranceGame(id: string) {
   const game = await getGameRecordById(id);
 
-  if (!game || game.status !== 'active' || !game.challengeMode || game.challengePausedAt) {
+  if (!game || game.status !== 'active' || game.gameMode !== 'endurance' || game.challengePausedAt) {
     return game;
   }
 
@@ -482,7 +488,7 @@ export async function pauseEnduranceGame(id: string) {
 export async function resumeEnduranceGame(id: string) {
   const game = await getGameRecordById(id);
 
-  if (!game || game.status !== 'active' || !game.challengeMode || !game.challengePausedAt) {
+  if (!game || game.status !== 'active' || game.gameMode !== 'endurance' || !game.challengePausedAt) {
     return game;
   }
 
@@ -508,6 +514,47 @@ export async function completeEnduranceRound(
 
   if (!game || game.status !== 'active' || !game.challengeMode) {
     return null;
+  }
+
+  if (game.gameMode === 'infinity') {
+    const nextRound = game.challengeRound + 1;
+    const nextDifficulty = getEnduranceDifficulty(nextRound);
+    const preparedNextGameState = parseNextGameState(db.query(`
+      SELECT challengeNextGameState
+      FROM games
+      WHERE id = $id
+    `).get({ $id: id }) as NextGameStateRow | null);
+    const nextGameState = preparedNextGameState
+      ? await addMissingBoardPalette(preparedNextGameState)
+      : await getEnduranceNextGameState({
+        gameId: id,
+        currentGameState: gameState,
+        nextDifficulty,
+      });
+
+    db.query(`
+      UPDATE games
+      SET difficulty = $difficulty,
+        challengeRound = $challengeRound,
+        challengeNextGameState = NULL,
+        gameState = $gameState
+      WHERE id = $id AND status = 'active'
+    `).run({
+      $id: id,
+      $difficulty: nextDifficulty,
+      $challengeRound: nextRound,
+      $gameState: JSON.stringify(nextGameState),
+    });
+
+    const updatedGame = await getGameRecordById(id);
+
+    return updatedGame
+      ? {
+        gameRecord: updatedGame,
+        gameState: nextGameState,
+        roundResult: null,
+      }
+      : null;
   }
 
   const now = Date.now();

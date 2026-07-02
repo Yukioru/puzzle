@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getEnduranceSettings } from "~/dal/settings";
+import { getEnduranceSettings, getInfinitySettings } from "~/dal/settings";
 import AdminSettingsScreen from "~/screens/AdminSettingsScreen/AdminSettingsScreen";
 
 export const metadata: Metadata = {
@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
   const enduranceSettings = getEnduranceSettings();
+  const infinitySettings = getInfinitySettings();
 
-  return <AdminSettingsScreen enduranceSettings={enduranceSettings} />;
+  return <AdminSettingsScreen enduranceSettings={enduranceSettings} infinitySettings={infinitySettings} />;
 }

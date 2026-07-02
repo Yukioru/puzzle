@@ -1,8 +1,13 @@
 'use server';
 
 import { revalidatePath } from "next/cache";
-import type { EnduranceSettings } from "~/types";
+import type { EnduranceSettings, InfinitySettings } from "~/types";
 import { DEFAULT_ENDURANCE_SETTINGS } from "~/utils/endurance";
+
+interface GameSettingsInput {
+  endurance: EnduranceSettings;
+  infinity: InfinitySettings;
+}
 
 function toInteger(value: number, fallback: number, min: number) {
   if (!Number.isFinite(value)) return fallback;
@@ -27,11 +32,21 @@ function normalizeEnduranceSettings(settings: EnduranceSettings): EnduranceSetti
   };
 }
 
-export async function updateEnduranceSettingsAction(settings: EnduranceSettings) {
-  const { updateEnduranceSettings } = await import("~/dal/settings");
-  const normalizedSettings = normalizeEnduranceSettings(settings);
+function normalizeInfinitySettings(settings: InfinitySettings): InfinitySettings {
+  return {
+    enabled: Boolean(settings.enabled),
+  };
+}
 
-  updateEnduranceSettings(normalizedSettings);
+export async function updateGameSettingsAction(settings: GameSettingsInput) {
+  const { updateEnduranceSettings, updateInfinitySettings } = await import("~/dal/settings");
+  const normalizedSettings = {
+    endurance: normalizeEnduranceSettings(settings.endurance),
+    infinity: normalizeInfinitySettings(settings.infinity),
+  };
+
+  updateEnduranceSettings(normalizedSettings.endurance);
+  updateInfinitySettings(normalizedSettings.infinity);
   revalidatePath('/admin/settings');
   revalidatePath('/start');
 

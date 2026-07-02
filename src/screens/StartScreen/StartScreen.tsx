@@ -3,7 +3,7 @@
 import { use, useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { CSSProperties } from "react";
-import { FaArrowLeft, FaBolt } from "react-icons/fa6";
+import { FaArrowLeft, FaBolt, FaInfinity } from "react-icons/fa6";
 import clsx from "clsx";
 import { createGameAction } from "~/actions/createGame";
 import { Button } from "~/components/Button";
@@ -11,7 +11,7 @@ import { IconTextButton } from "~/components/IconTextButton";
 import { JigsawPiece } from "~/components/JigsawPiece";
 import { ProfileSelectModal } from "~/components/ProfileSelectModal";
 import { GlobalContext } from "~/contexts/GlobalContext";
-import { Difficulty, EnduranceSettings, GameMode } from "~/types";
+import { Difficulty, EnduranceSettings, GameMode, InfinitySettings } from "~/types";
 import { getDimensions } from "~/utils/getDimentions";
 
 import styles from "./StartScreen.module.css";
@@ -50,10 +50,28 @@ const gameModes: Array<{
       "Бесконечный режим с постоянно увеличивающейся сложностью.\nРейтинговая таблица для самых упорных игроков.",
     layout: "horizontal",
   },
+  {
+    id: "infinity",
+    title: "Бесконечность",
+    description:
+      "Свободный режим без таймера, очков и статистики.\nСобирайте мозаики одну за другой, пока не решите выйти.",
+    layout: "horizontal",
+  },
 ];
 
 function isDifficulty(mode: GameMode): mode is Difficulty {
-  return mode !== "challenge";
+  return mode !== "challenge" && mode !== "infinity";
+}
+
+function isModeAvailable(
+  mode: GameMode,
+  enduranceSettings: EnduranceSettings,
+  infinitySettings: InfinitySettings,
+) {
+  if (mode === "challenge") return enduranceSettings.enabled;
+  if (mode === "infinity") return infinitySettings.enabled;
+
+  return true;
 }
 
 const phantomPiecesByDifficulty: Record<
@@ -97,9 +115,10 @@ const phantomPiecesByDifficulty: Record<
 
 interface StartScreenProps {
   enduranceSettings: EnduranceSettings;
+  infinitySettings: InfinitySettings;
 }
 
-export default function StartScreen({ enduranceSettings }: StartScreenProps) {
+export default function StartScreen({ enduranceSettings, infinitySettings }: StartScreenProps) {
   const ctx = use(GlobalContext);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -195,11 +214,12 @@ export default function StartScreen({ enduranceSettings }: StartScreenProps) {
             })}
         </div>
 
-        {enduranceSettings.enabled &&
-          gameModes
-            .filter((mode) => mode.layout === "horizontal")
+        <div className={styles.extraModeGrid}>
+          {gameModes
+            .filter((mode) => mode.layout === "horizontal" && isModeAvailable(mode.id, enduranceSettings, infinitySettings))
             .map((mode) => {
               const isSelected = selectedMode === mode.id;
+              const icon = mode.id === "infinity" ? <FaInfinity /> : <FaBolt />;
 
               return (
                 <button
@@ -212,7 +232,7 @@ export default function StartScreen({ enduranceSettings }: StartScreenProps) {
                   onClick={() => setSelectedMode(mode.id)}
                 >
                   <span className={styles.cardIcon}>
-                    <FaBolt />
+                    {icon}
                   </span>
                   <span className={styles.challengeContent}>
                     <span className={styles.cardTitle}>{mode.title}</span>
@@ -223,6 +243,7 @@ export default function StartScreen({ enduranceSettings }: StartScreenProps) {
                 </button>
               );
             })}
+        </div>
       </div>
 
       <div className={styles.footer}>

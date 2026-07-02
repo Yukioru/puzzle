@@ -18,16 +18,22 @@ export async function createGameAction({ id, profileId, mode }: CreateGameInput)
     throw new Error('Profile is required');
   }
 
-  if (mode !== 'challenge' && !isDifficulty(mode)) {
+  if (mode !== 'challenge' && mode !== 'infinity' && !isDifficulty(mode)) {
     throw new Error('Unknown game mode');
   }
 
-  const challengeMode = mode === 'challenge';
-  const difficulty = challengeMode ? 'easy' : mode;
-  const { getEnduranceSettings } = await import("~/dal/settings");
+  const challengeMode = mode === 'challenge' || mode === 'infinity';
+  const difficulty: Difficulty = isDifficulty(mode) ? mode : 'easy';
+  const { getEnduranceSettings, getInfinitySettings } = await import("~/dal/settings");
+  const enduranceSettings = getEnduranceSettings();
+  const infinitySettings = getInfinitySettings();
 
-  if (challengeMode && !getEnduranceSettings().enabled) {
+  if (mode === 'challenge' && !enduranceSettings.enabled) {
     throw new Error('Challenge mode is disabled');
+  }
+
+  if (mode === 'infinity' && !infinitySettings.enabled) {
+    throw new Error('Infinity mode is disabled');
   }
 
   const { createGameRecord } = await import("~/dal/queries");
@@ -36,6 +42,7 @@ export async function createGameAction({ id, profileId, mode }: CreateGameInput)
     id,
     profileId,
     difficulty,
+    gameMode: mode === 'challenge' ? 'endurance' : mode === 'infinity' ? 'infinity' : 'classic',
     challengeMode,
   });
 
