@@ -148,6 +148,9 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - name: Download zip artifact
         uses: actions/download-artifact@v8.0.1
         with:
@@ -155,14 +158,19 @@ jobs:
           path: dist
 
       - name: Write release notes
+        env:
+          IMAGE_BASE: ${{ needs.prepare.outputs.image-base }}
+          TAG_LATEST: ${{ needs.prepare.outputs.tag-latest }}
+          TAG_TIME: ${{ needs.prepare.outputs.tag-time }}
+          ZIP_NAME: ${{ needs.prepare.outputs.zip-name }}
         run: |
           cat > release-notes.md <<EOF
           Docker image:
-          - \`${{ needs.prepare.outputs.image-base }}:${{ needs.prepare.outputs.tag-latest }}\`
-          - \`${{ needs.prepare.outputs.image-base }}:${{ needs.prepare.outputs.tag-time }}\`
+          - \`${IMAGE_BASE}:${TAG_LATEST}\`
+          - \`${IMAGE_BASE}:${TAG_TIME}\`
 
           Zip build:
-          - \`${{ needs.prepare.outputs.zip-name }}\`
+          - \`${ZIP_NAME}\`
 
           Commit:
           - \`${GITHUB_SHA}\`
@@ -171,15 +179,19 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NAME: ${{ needs.prepare.outputs.release-name }}
+          RELEASE_PRERELEASE: ${{ needs.prepare.outputs.release-prerelease }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.release-tag }}
+          ZIP_NAME: ${{ needs.prepare.outputs.zip-name }}
         run: |
           args=()
-          if [[ "${{ needs.prepare.outputs.release-prerelease }}" == "true" ]]; then
+          if [[ "${RELEASE_PRERELEASE}" == "true" ]]; then
             args+=(--prerelease)
           fi
 
-          gh release create "${{ needs.prepare.outputs.release-tag }}" \
-            "dist/${{ needs.prepare.outputs.zip-name }}" \
-            --title "${{ needs.prepare.outputs.release-name }}" \
+          gh release create "${RELEASE_TAG}" \
+            "dist/${ZIP_NAME}" \
+            --title "${RELEASE_NAME}" \
             --notes-file release-notes.md \
             --target "${GITHUB_SHA}" \
             "${args[@]}"

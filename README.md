@@ -6,11 +6,17 @@
 
 - Drag-and-drop сборка пазла на `@dnd-kit`.
 - Три обычные сложности: `easy`, `medium`, `hard`.
-- Endurance/Challenge режим: бесконечные раунды, таймер, очки, бонусы времени и leaderboard.
+- Challenge/Endurance режим: бесконечные раунды, таймер, очки, бонусы времени и leaderboard.
+- Infinity режим: свободная бесконечная игра без таймера, очков и статистики.
+- Leaderboards: классические таблицы по сложностям и рейтинговая таблица Challenge-режима.
+- Live-обновление лидербордов через Server-Sent Events.
+- Админ-панель со статистикой, настройками режимов и быстрым запуском Challenge/Infinity игр.
+- Адаптивный portrait layout для мобильных экранов.
 - Модалка правил с каруселью и изображениями из `src/assets/help`.
 - Автоподготовка игровых изображений: контуры, нарезанные фрагменты и цветовые палитры досок.
 - SQLite-хранилище через `bun:sqlite`.
 - Docker-сборки для local/development/production окружений.
+- CI/CD публикует Docker image, standalone zip build и GitHub Release/Pre-release.
 
 ## Быстрый Старт
 
@@ -117,6 +123,64 @@ cd build
 DATABASE_PATH=data/puzzle.sqlite bun server.js
 ```
 
+## Игровые Режимы
+
+На экране старта доступны обычные сложности:
+
+```text
+easy
+medium
+hard
+```
+
+Дополнительные режимы:
+
+- `challenge` - endurance-режим с таймером, очками, бонусами времени, milestone-бонусами и возрастающей сложностью.
+- `infinity` - свободная бесконечная игра без таймера, очков и записи в статистику.
+
+Доступность `challenge` и `infinity` управляется из админских настроек. Если режим выключен, он не показывается игрокам на экране выбора сложности.
+
+## Leaderboards
+
+На главном экране отображаются:
+
+- `Классика` - табы по сложностям `easy`, `medium`, `hard`; сортировка по лучшему времени.
+- `Испытание` - рейтинг endurance-игр по очкам, количеству раундов и времени.
+
+Данные лидербордов отдаются через:
+
+```text
+GET /api/leaderboards
+```
+
+Endpoint работает как SSE stream (`text/event-stream`), отправляет актуальный snapshot, keepalive-сообщения и обновления при изменении результатов или настроек endurance-режима.
+
+## Админка
+
+Админские страницы:
+
+```text
+/admin/stats
+/admin/settings
+```
+
+`/admin/stats` показывает:
+
+- ключевые метрики по играм;
+- распределение по статусам, сложностям и режимам;
+- дневную динамику;
+- статистику по профилям, доскам и endurance-раундам;
+- последние игры.
+
+`/admin/settings` позволяет:
+
+- включать и выключать Challenge/Endurance режим;
+- включать и выключать Infinity режим;
+- настраивать стартовое время, бонусы времени, milestone-бонусы;
+- настраивать базовые очки и target time по сложностям.
+
+В админском layout есть быстрый запуск Challenge и Infinity игр с выбором профиля.
+
 ## Ассеты
 
 Игровые доски лежат в:
@@ -175,6 +239,15 @@ puzzle.sqlite-shm
 
 - `games` - игровые сессии, статус, таймеры, сохранённое состояние пазла.
 - `game_rounds` - раунды endurance-режима и начисленные очки.
+- `app_settings` - настройки Challenge/Endurance и Infinity режимов.
+
+Поле `gameMode` различает:
+
+```text
+classic
+endurance
+infinity
+```
 
 ## Docker
 
@@ -214,28 +287,73 @@ docker compose -f docker/compose.production.yml up -d
 
 ## CI/CD
 
-GitHub Actions собирает и публикует Docker images в GHCR при push в ветки:
+GitHub Actions workflow `Build and Release` запускается при push в ветки:
 
 ```text
 dev
 prod
 ```
 
-Для сборки используется `docker/Dockerfile` и build arg:
+и при push любого git tag.
+
+Workflow состоит из четырёх jobs:
+
+- `prepare` - вычисляет Docker-теги, имя zip-файла и параметры релиза.
+- `docker-image` - собирает и публикует Docker image в GHCR.
+- `zip-build` - выполняет `bun run build:export`, пакует директорию `build` в zip и сохраняет artifact.
+- `release` - создаёт GitHub Release или Pre-release и прикрепляет zip build.
+
+`docker-image` и `zip-build` выполняются параллельно после `prepare`.
+
+Для Docker-сборки используется `docker/Dockerfile` и build arg:
 
 ```bash
 APP_ENV=development
 APP_ENV=production
 ```
 
-Итоговые теги:
+Docker image публикуется в GHCR:
+
+```text
+ghcr.io/<owner>/<repo>/hsr-puzzle
+```
+
+Для веток используются теги:
 
 ```text
 dev-latest
-prod-latest
 dev-YYYYMMDD-HHMMSS
+prod-latest
 prod-YYYYMMDD-HHMMSS
 ```
+
+Для tag build используется сам tag как Docker tag. Если tag указывает на commit из `prod`, дополнительно обновляется `prod-latest`; иначе используется `pre-latest`.
+
+Zip build называется так:
+
+```text
+hsr-puzzle-<ref>-<short-sha>.zip
+```
+
+Внутри zip находится exported standalone build из директории:
+
+```text
+build
+```
+
+Release-логика:
+
+- push в `dev` или `prod` создаёт GitHub Pre-release с Docker tags и zip build;
+- push git tag создаёт Pre-release, если tag не относится к `prod`;
+- push git tag на commit из `prod` создаёт полноценный GitHub Release.
+
+Автоматические pre-release tags имеют префикс:
+
+```text
+prerelease-
+```
+
+Workflow игнорирует такие tag events, чтобы не запускать повторный release pipeline от собственного служебного тега.
 
 ## Структура
 
@@ -273,8 +391,10 @@ docker/
 - Bun
 - SQLite через `bun:sqlite`
 - `@dnd-kit`
+- `@tanstack/react-form`
 - `react-modal`
 - `react-icons`
+- `recharts`
 - `sharp` для подготовки изображений
 - CSS Modules
 - Docker / Docker Compose
