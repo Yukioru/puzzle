@@ -101,7 +101,7 @@ export default function StartScreen() {
   const handleStartGame = useCallback((profileId: string) => {
     if (!selectedMode) return;
 
-    const id = crypto.randomUUID();
+    const id = `${Date.now()}${Math.random()}`;
     const gameUrl = `/game/${id}`;
 
     ctx.loadingScreen.toggle(true, { seed: gameUrl, progress: 20 });

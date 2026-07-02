@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import path from "node:path";
 import fs from "node:fs";
+import fsPromise from "node:fs/promises";
 
 import { getDimensions } from "~/utils/getDimentions";
 
@@ -82,7 +83,7 @@ export async function sliceImageBySize(
         buffer = await canvas.webp().toBuffer();
       }
       const pieceName = `${row + 1}-${col + 1}.webp`;
-      fs.writeFileSync(path.join(outputDir, pieceName), buffer);
+      await fsPromise.writeFile(path.join(outputDir, pieceName), buffer);
     }
   }
 }

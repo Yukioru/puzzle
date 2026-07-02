@@ -33,21 +33,6 @@
   position: relative;
 }
 
-.scrollbarTrack {
-  position: absolute;
-  top: 0.75rem;
-  right: 0;
-  bottom: 0.75rem;
-  width: 0.375rem;
-  background-color: rgba(255, 255, 255, 0.14);
-}
-
-.scrollbarThumb {
-  width: 0.375rem;
-  min-height: 2rem;
-  background-color: rgba(255, 255, 255, 0.58);
-}
-
 .list {
   margin: 0;
   padding: 0.75rem 0.75rem 1rem 0.25rem;

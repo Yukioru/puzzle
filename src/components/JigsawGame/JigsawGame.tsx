@@ -143,8 +143,7 @@ export default function JigsawGame({
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 180,
-        tolerance: 8,
+        distance: 4
       },
     })
   );
@@ -170,7 +169,7 @@ export default function JigsawGame({
       const piece = Math.floor(Math.min(pieceByWidth, pieceByHeight));
       
       if (Number.isFinite(piece) && piece > 0) {
-        base.style.setProperty('--piece-size', `${piece - 1}px`);
+        base.style.setProperty('--piece-size', `${piece - 3}px`);
       }
     };
 

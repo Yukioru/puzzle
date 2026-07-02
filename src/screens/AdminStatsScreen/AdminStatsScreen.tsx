@@ -1,7 +1,7 @@
 'use client';
 
-import { use, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { use, useCallback, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Bar,
   BarChart,
@@ -22,6 +22,8 @@ import { GlobalContext } from '~/contexts/GlobalContext';
 import { AdminStats, GameStatus } from "~/types";
 
 import styles from './AdminStatsScreen.module.css';
+import { IconTextButton } from '~/components/IconTextButton';
+import { FaArrowLeft } from 'react-icons/fa6';
 
 interface AdminStatsScreenProps {
   stats: AdminStats;
@@ -142,6 +144,12 @@ function ChartTooltip({ active, payload, label }: {
 }
 
 export default function AdminStatsScreen({ stats }: AdminStatsScreenProps) {
+  const router = useRouter();
+
+  const handleBack = useCallback(() => {
+    router.push('/');
+  }, [router]);
+
   const dailyData = stats.dailyRows.map((row) => ({
     ...row,
     label: new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: '2-digit' }).format(new Date(row.date)),
@@ -168,7 +176,14 @@ export default function AdminStatsScreen({ stats }: AdminStatsScreenProps) {
       <header className={styles.header}>
         <div>
           <div className={styles.eyebrow}>Admin</div>
-          <h1>Статистика игр</h1>
+          <div className={styles.headerLine}>
+            <IconTextButton
+              className={styles.backButton}
+              icon={<FaArrowLeft />}
+              onClick={handleBack}
+            />
+            <h1>Статистика игр</h1>
+          </div>
         </div>
         <div className={styles.generatedAt}>
           Обновлено {formatDate(stats.generatedAt)}

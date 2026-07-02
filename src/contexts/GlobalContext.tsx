@@ -7,6 +7,7 @@ import {
   PropsWithChildren,
   RefObject,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState
@@ -41,6 +42,11 @@ export function GlobalContextProvider({ children, ...props }: PropsWithChildren<
   const pathname = usePathname();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const rootRef = useRef<HTMLElement | null>(null);
+  const isAdminRoute = pathname.startsWith("/admin");
+
+  useEffect(() => {
+    document.body.classList.toggle("no-overflow", !isAdminRoute);
+  }, [isAdminRoute]);
 
   const resetLoadingScreenState = useCallback(() => {
     return {

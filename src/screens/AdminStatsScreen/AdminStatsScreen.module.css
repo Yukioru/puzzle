@@ -20,6 +20,12 @@
   gap: 1rem;
 }
 
+.headerLine {
+  display: flex;
+  align-items: center;
+  margin-inline-start: -1rem;
+}
+
 .eyebrow {
   margin-bottom: 0.35rem;
   color: #face96;

@@ -41,12 +41,6 @@ export function EnduranceLeaderboard({ entries }: EnduranceLeaderboardProps) {
           autoHeightMax="min(44vh, 27rem)"
           renderThumbHorizontal={() => <div />}
           renderTrackHorizontal={() => <div />}
-          renderTrackVertical={() => (
-            <div className={styles.scrollbarTrack} />
-          )}
-          renderThumbVertical={() => (
-            <div className={styles.scrollbarThumb} />
-          )}
         >
           {decoratedEntries.length > 0 ? (
             <ol className={styles.list}>

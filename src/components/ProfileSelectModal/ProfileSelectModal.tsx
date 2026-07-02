@@ -8,6 +8,7 @@ import { IoClose } from "react-icons/io5";
 import { AccentIconFrame } from "~/components/AccentIconFrame";
 import { ProfileModalLayout } from "~/components/ProfileModalLayout";
 import { PROFILES } from "~/constants";
+import { shuffleArray } from "~/utils/shuffleArray";
 import { Button } from "../Button";
 
 import styles from "./ProfileSelectModal.module.css";
@@ -27,6 +28,10 @@ function getProfiles() {
   return PROFILES.filter((p) => p.id !== "default");
 }
 
+function getRandomizedProfiles() {
+  return shuffleArray(getProfiles());
+}
+
 export function ProfileSelectModal({
   children,
   defaultOpen = false,
@@ -35,6 +40,12 @@ export function ProfileSelectModal({
 }: PropsWithChildren<ProfileSelectModalProps>) {
   const [isOpenModal, setIsOpenModal] = useState(defaultOpen);
   const [selectedProfile, selectProfile] = useState(resetProfileSelection());
+  const [profiles, setProfiles] = useState(getRandomizedProfiles);
+
+  const handleOpen = useCallback(() => {
+    setProfiles(getRandomizedProfiles());
+    setIsOpenModal(true);
+  }, []);
 
   const handleClose = useCallback(() => {
     setIsOpenModal(false);
@@ -59,7 +70,7 @@ export function ProfileSelectModal({
         className={styles.trigger}
         onClick={() => {
           if (!disabled) {
-            setIsOpenModal(true);
+            handleOpen();
           }
         }}
       >
@@ -99,7 +110,7 @@ export function ProfileSelectModal({
         )}
       >
         <div className={styles.profiles}>
-          {getProfiles().map((profile) => {
+          {profiles.map((profile) => {
             const isSelected = profile.id === selectedProfile.id;
             return (
               <div

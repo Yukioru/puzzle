@@ -66,7 +66,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<PropsWithChildren>) {
   return (
     <html lang="ru" className={honkai.variable}>
-      <body>
+      <body className="no-overflow">
         <GlobalContextProvider className={styles.base}>
           {children}
         </GlobalContextProvider>
