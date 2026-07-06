@@ -5,6 +5,7 @@ import penaconyReality from '~/assets/loadings/loading-penacony-reality.webp';
 import penaconyDreamscape from '~/assets/loadings/loading-penacony-dreamscape.webp';
 import amphoreusDawn from '~/assets/loadings/loading-amphoreus-dawn.webp';
 import amphoreusEvernight from '~/assets/loadings/loading-amphoreus-evernight.webp';
+import factionsJson from '../public/factions.json';
 
 import abundance from '~/assets/paths/abundance.webp';
 import destruction from '~/assets/paths/destruction.webp';
@@ -116,6 +117,35 @@ import yanqing from '~/assets/profiles/yanqing.webp';
 import yaoGuang from '~/assets/profiles/yao-guang.webp';
 import yukong from '~/assets/profiles/yukong.webp';
 import yunli from '~/assets/profiles/yunli.webp';
+
+interface FactionRow {
+  profiles?: string[];
+}
+
+export type FactionId = keyof typeof factionsJson;
+
+const FACTION_IDS_BY_PROFILE_ID = Object.entries(factionsJson as Record<string, FactionRow>)
+  .reduce((acc, [factionId, faction]) => {
+    for (const profileId of faction.profiles ?? []) {
+      acc.set(profileId, [
+        ...(acc.get(profileId) ?? []),
+        factionId,
+      ]);
+    }
+
+    return acc;
+  }, new Map<string, string[]>());
+
+function getProfileFactions(profileId: string) {
+  return [...(FACTION_IDS_BY_PROFILE_ID.get(profileId) ?? [])];
+}
+
+function withFactions<T extends { id: string }>(profile: T) {
+  return {
+    ...profile,
+    factions: getProfileFactions(profile.id),
+  };
+}
 
 
 export const LOADING_IMAGES = [
@@ -241,4 +271,4 @@ export const PROFILES = [
   { id: 'yao-guang', title: 'Яо Гуан', image: yaoGuang },
   { id: 'yukong', title: 'Юйкун', image: yukong },
   { id: 'yunli', title: 'Юньли', image: yunli },
-];
+].map(withFactions);

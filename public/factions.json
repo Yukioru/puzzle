@@ -1,0 +1,496 @@
+{
+  "aedes-elysiae": {
+    "title": "Элизия Эйдес",
+    "profiles": [
+      "cyrene",
+      "phainon"
+    ]
+  },
+  "alchemy-commission": {
+    "title": "Комиссия по алхимии",
+    "profiles": [
+      "jiaoqiu",
+      "lingsha"
+    ]
+  },
+  "amphoreus": {
+    "title": "Амфореус",
+    "profiles": [
+      "aglaea",
+      "anaxa",
+      "castorice",
+      "cerydra",
+      "cipher",
+      "cyrene",
+      "dan_heng_permansor-terrae",
+      "evernight",
+      "hyacine",
+      "hysilens",
+      "mydei",
+      "phainon",
+      "tribbie"
+    ]
+  },
+  "annihilation-gang": {
+    "title": "Банда уничтожения",
+    "profiles": [
+      "the-dahlia"
+    ]
+  },
+  "another-world": {
+    "title": "Иной мир",
+    "profiles": [
+      "gilgamesh",
+      "saber",
+      "rin-tohsaka",
+      "archer"
+    ]
+  },
+  "arbiter-general": {
+    "title": "Генерал-арбитр",
+    "profiles": [
+      "jing-yuan",
+      "yao-guang"
+    ]
+  },
+  "astral-express": {
+    "title": "Звёздный экспресс",
+    "profiles": [
+      "caelus_destruction",
+      "caelus_harmony",
+      "caelus_preservation",
+      "caelus_remembrance",
+      "dan_heng_permansor-terrae",
+      "dan-heng",
+      "dan-heng_imbibitor-lunae",
+      "himeko",
+      "himeko-nova",
+      "march-7th",
+      "march-7th_hunt",
+      "stelle_destruction",
+      "stelle_harmony",
+      "stelle_preservation",
+      "stelle_remembrance",
+      "sunday",
+      "welt"
+    ]
+  },
+  "belobog": {
+    "title": "Белобог",
+    "profiles": [
+      "bronya",
+      "clara",
+      "gepard",
+      "hook",
+      "luka",
+      "lynx",
+      "natasha",
+      "pela",
+      "sampo",
+      "seele",
+      "serval"
+    ]
+  },
+  "chrysos-heirs": {
+    "title": "Златиусы",
+    "profiles": [
+      "aglaea",
+      "anaxa",
+      "caelus_destruction",
+      "caelus_harmony",
+      "caelus_preservation",
+      "caelus_remembrance",
+      "castorice",
+      "cerydra",
+      "cipher",
+      "cyrene",
+      "dan_heng_permansor-terrae",
+      "evernight",
+      "hyacine",
+      "hysilens",
+      "mydei",
+      "phainon",
+      "stelle_destruction",
+      "stelle_harmony",
+      "stelle_preservation",
+      "stelle_remembrance",
+      "tribbie"
+    ]
+  },
+  "demigods": {
+    "title": "Полубоги",
+    "profiles": [
+      "aglaea",
+      "anaxa",
+      "caelus_destruction",
+      "caelus_harmony",
+      "caelus_preservation",
+      "caelus_remembrance",
+      "castorice",
+      "cerydra",
+      "cipher",
+      "dan_heng_permansor-terrae",
+      "evernight",
+      "hyacine",
+      "hysilens",
+      "mydei",
+      "phainon",
+      "stelle_destruction",
+      "stelle_harmony",
+      "stelle_preservation",
+      "stelle_remembrance",
+      "tribbie"
+    ]
+  },
+  "elixir-seekers": {
+    "title": "Искатели эликсира",
+    "profiles": [
+      "evanescia"
+    ]
+  },
+  "galaxy-rangers": {
+    "title": "Галактические рейнджеры",
+    "profiles": [
+      "acheron",
+      "ashveil",
+      "boothill",
+      "rappa"
+    ]
+  },
+  "garden-of-recollection": {
+    "title": "Сад воспоминаний",
+    "profiles": [
+      "black-swan",
+      "the-dahlia"
+    ]
+  },
+  "genius-society": {
+    "title": "Общество гениев",
+    "profiles": [
+      "herta",
+      "ruan-mei",
+      "the-herta"
+    ]
+  },
+  "glamoths-iron-cavalry-regiment": {
+    "title": "Железная кавалерия Глатирамера",
+    "profiles": [
+      "firefly"
+    ]
+  },
+  "herta-space-station": {
+    "title": "Космическая станция «Герта»",
+    "profiles": [
+      "arlan",
+      "asta",
+      "herta",
+      "ruan-mei",
+      "the-herta"
+    ]
+  },
+  "high-cloud-quintet": {
+    "title": "Заоблачный квинтет",
+    "profiles": [
+      "blade",
+      "blade-mortenax",
+      "jingliu"
+    ]
+  },
+  "history-fictionologists": {
+    "title": "Фикциологи истории",
+    "profiles": [
+      "gallagher"
+    ]
+  },
+  "intelligentsia-guild": {
+    "title": "Гильдия эрудитов",
+    "profiles": [
+      "dr-ratio"
+    ]
+  },
+  "interastral-peace-corporation": {
+    "title": "Корпорация межзвёздного мира",
+    "profiles": [
+      "aventurine",
+      "jade",
+      "topaz"
+    ]
+  },
+  "janusopolis": {
+    "title": "Янусополис",
+    "profiles": [
+      "cyrene",
+      "tribbie"
+    ]
+  },
+  "landau-family": {
+    "title": "Семья Ландау",
+    "profiles": [
+      "gepard",
+      "lynx",
+      "serval"
+    ]
+  },
+  "masked-fools": {
+    "title": "Недотёпы в масках",
+    "profiles": [
+      "aventurine",
+      "sampo",
+      "sparkle",
+      "sparxie"
+    ]
+  },
+  "oak-family": {
+    "title": "Клан Дубов",
+    "profiles": [
+      "robin",
+      "sunday"
+    ]
+  },
+  "okhema": {
+    "title": "Охема",
+    "profiles": [
+      "aglaea",
+      "castorice",
+      "cerydra",
+      "cipher",
+      "mydei",
+      "phainon",
+      "tribbie"
+    ]
+  },
+  "penacony": {
+    "title": "Пенакония",
+    "profiles": [
+      "gallagher",
+      "misha",
+      "robin",
+      "sunday"
+    ]
+  },
+  "planarcadia": {
+    "title": "Двумерния",
+    "profiles": [
+      "ashveil",
+      "blade-mortenax",
+      "evanescia",
+      "silver-wolf-lv999",
+      "sparxie"
+    ]
+  },
+  "pure-children-of-anasrava": {
+    "title": "Чистые дети неомрачённых",
+    "profiles": [
+      "cyrene",
+      "evernight",
+      "march-7th",
+      "march-7th_hunt"
+    ]
+  },
+  "self-annihilator": {
+    "title": "Самоуничтожители",
+    "profiles": [
+      "acheron"
+    ]
+  },
+  "silvermane-guards": {
+    "title": "Среброгривые Стражи",
+    "profiles": [
+      "bronya",
+      "gepard",
+      "pela",
+      "serval"
+    ]
+  },
+  "six-charioteers": {
+    "title": "Шесть Колесничих",
+    "profiles": [
+      "blade",
+      "blade-mortenax",
+      "feixiao",
+      "fu-xuan",
+      "jing-yuan",
+      "lingsha",
+      "yao-guang",
+      "yukong"
+    ]
+  },
+  "stellaron-hunters": {
+    "title": "Охотники за Стелларонами",
+    "profiles": [
+      "blade",
+      "blade-mortenax",
+      "caelus_destruction",
+      "caelus_harmony",
+      "caelus_preservation",
+      "caelus_remembrance",
+      "firefly",
+      "kafka",
+      "silver-wolf",
+      "silver-wolf-lv999",
+      "stelle_destruction",
+      "stelle_harmony",
+      "stelle_preservation",
+      "stelle_remembrance"
+    ]
+  },
+  "strategic-investment-department": {
+    "title": "Отдел стратегических инвестиций",
+    "profiles": [
+      "aventurine",
+      "jade",
+      "topaz"
+    ]
+  },
+  "ten-stonehearts": {
+    "title": "Десять каменных сердец",
+    "profiles": [
+      "aventurine",
+      "jade",
+      "topaz"
+    ]
+  },
+  "the-cremators": {
+    "title": "Крематоры",
+    "profiles": [
+      "the-dahlia"
+    ]
+  },
+  "the-family": {
+    "title": "Семья",
+    "profiles": [
+      "robin",
+      "sunday"
+    ]
+  },
+  "the-knights-of-beauty": {
+    "title": "Рыцари Красоты",
+    "profiles": [
+      "argenti"
+    ]
+  },
+  "the-nameless": {
+    "title": "Безымянные",
+    "profiles": [
+      "caelus_destruction",
+      "caelus_harmony",
+      "caelus_preservation",
+      "caelus_remembrance",
+      "dan_heng_permansor-terrae",
+      "dan-heng",
+      "dan-heng_imbibitor-lunae",
+      "himeko",
+      "himeko-nova",
+      "march-7th",
+      "march-7th_hunt",
+      "misha",
+      "stelle_destruction",
+      "stelle_harmony",
+      "stelle_preservation",
+      "stelle_remembrance",
+      "welt"
+    ]
+  },
+  "the-xianzhou-alliance": {
+    "title": "Альянс Сяньчжоу",
+    "profiles": [
+      "bailu",
+      "dan-heng_imbibitor-lunae",
+      "feixiao",
+      "fu-xuan",
+      "fugue",
+      "guinaifen",
+      "hanya",
+      "huohuo",
+      "jiaoqiu",
+      "jing-yuan",
+      "jingliu",
+      "lingsha",
+      "luocha",
+      "moze",
+      "qingque",
+      "sushang",
+      "tingyun",
+      "xueyi",
+      "yanqing",
+      "yao-guang",
+      "yukong",
+      "yunli"
+    ]
+  },
+  "the-xianzhou-luofu": {
+    "title": "Лофу Сяньчжоу",
+    "profiles": [
+      "bailu",
+      "blade",
+      "blade-mortenax",
+      "dan-heng_imbibitor-lunae",
+      "fu-xuan",
+      "fugue",
+      "guinaifen",
+      "hanya",
+      "huohuo",
+      "jing-yuan",
+      "jingliu",
+      "lingsha",
+      "luocha",
+      "qingque",
+      "sushang",
+      "tingyun",
+      "xueyi",
+      "yanqing",
+      "yukong"
+    ]
+  },
+  "the-xianzhou-yaoqing": {
+    "title": "Яоцин Сяньчжоу",
+    "profiles": [
+      "feixiao",
+      "jiaoqiu",
+      "moze"
+    ]
+  },
+  "the-xianzhou-yuque": {
+    "title": "Юйцюэ Сяньчжоу",
+    "profiles": [
+      "fu-xuan",
+      "luocha",
+      "yao-guang"
+    ]
+  },
+  "the-xianzhou-zhuming": {
+    "title": "Чжумин Сяньчжоу",
+    "profiles": [
+      "blade",
+      "blade-mortenax",
+      "yunli"
+    ]
+  },
+  "titan": {
+    "title": "Титан",
+    "profiles": [
+      "aglaea"
+    ]
+  },
+  "underworld": {
+    "title": "Подземье",
+    "profiles": [
+      "hook",
+      "luka",
+      "natasha"
+    ]
+  },
+  "who-you-gonna-call": {
+    "title": "Охотники за привидениями",
+    "profiles": [
+      "caelus_destruction",
+      "caelus_harmony",
+      "caelus_preservation",
+      "caelus_remembrance",
+      "stelle_destruction",
+      "stelle_harmony",
+      "stelle_preservation",
+      "stelle_remembrance"
+    ]
+  }
+}

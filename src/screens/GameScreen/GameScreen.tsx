@@ -347,6 +347,7 @@ export default function GameScreen({ data, enduranceSettings, gameRecord }: Game
           <GameCompleteModal
             isOpen={showCompletionMessage}
             profileId={currentGameRecord.profileId}
+            showWinningMessage={currentGameRecord.status === 'completed'}
             onRequestClose={() => setShowCompletionMessage(false)}
             footer={(
               <>
